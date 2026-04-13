@@ -10,6 +10,8 @@
  * - Version field exists from day one
  */
 
+import type { ClaudeSettings } from '../types/index.js';
+
 /**
  * Current config schema version.
  *
@@ -21,13 +23,17 @@ export const CONFIG_VERSION = 1;
 /**
  * Default config structure.
  *
- * Includes version field and empty config structure.
- * Will be extended by later phases as features are added.
+ * Complete default config matching ClaudeSettings schema.
+ * Empty values for optional fields.
  */
-export const DEFAULT_CONFIG = {
+export const DEFAULT_CONFIG: ClaudeSettings = {
   version: CONFIG_VERSION,
-  // Empty config - will be extended by later phases
-} as const;
+  env: {},
+  model: undefined,
+  mcpServers: {},
+  permissions: [],
+  hooks: [],
+};
 
 /**
  * Check if config has a version field.
