@@ -109,7 +109,14 @@
 
 **Duration Estimate:** 1-2 weeks
 
-**Plans:** TBD
+**Plans:** 5 plans in 2 waves
+
+**Plans:**
+- [ ] 03-01-PLAN.md — ConfigRepository (readConfig/writeConfig/configExists functions)
+- [ ] 03-02-PLAN.md — TemplateStore (templates.json CRUD, TemplateStore class)
+- [ ] 03-03-PLAN.md — ProjectIndex (projects.json, ProjectEntry, pathIndex)
+- [ ] 03-04-PLAN.md — FileWatcher (chokidar, debounce, global/project watch)
+- [ ] 03-05-PLAN.md — AppState + Barrel Export (conf package, index.ts)
 
 **Delivers:**
 - ConfigRepository 实现（read/write/exists/backup）
@@ -119,6 +126,11 @@
 - 状态管理框架（store setup）
 
 **Requirements Addressed:**
+- DATA-01: ConfigRepository 封装
+- DATA-02: TemplateStore 实现
+- DATA-03: ProjectIndex 实现
+- DATA-04: FileWatcher 实现
+- DATA-05: AppState 实现
 - R3: Error Recovery (graceful handling of file I/O errors)
 - M4: Module Separation (data layer independent)
 
@@ -318,7 +330,7 @@
 |-------|------|----------|--------------|-------|
 | 1 | Foundation & Safety | 1-2 weeks | None | 7 |
 | 2 | Types & Validation | 1 week | Phase 1 | 5 |
-| 3 | Data Layer | 1-2 weeks | Phase 1, 2 | TBD |
+| 3 | Data Layer | 1-2 weeks | Phase 1, 2 | 5 |
 | 4 | Services Layer | 2-3 weeks | Phase 2, 3 | TBD |
 | 5 | CLI Interface | 1 week | Phase 4 | TBD |
 | 6 | Core TUI | 2-3 weeks | Phase 4, 5 | TBD |
@@ -500,4 +512,5 @@ This roadmap evolves at:
 *Created: 2026-04-13*  
 *Based on: Research Summary (HIGH confidence)*  
 *Phase 1 plans added: 2026-04-13*  
-*Phase 2 plans added: 2026-04-13*
+*Phase 2 plans added: 2026-04-13*  
+*Phase 3 plans added: 2026-04-13*
