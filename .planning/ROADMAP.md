@@ -115,8 +115,8 @@
 - [x] 03-01-PLAN.md — ConfigRepository (readConfig/writeConfig/configExists functions)
 - [x] 03-02-PLAN.md — TemplateStore (templates.json CRUD, TemplateStore class)
 - [x] 03-03-PLAN.md — ProjectIndex (projects.json, ProjectEntry, pathIndex)
-- [ ] 03-04-PLAN.md — FileWatcher (chokidar, debounce, global/project watch)
-- [ ] 03-05-PLAN.md — AppState + Barrel Export (conf package, index.ts)
+- [x] 03-04-PLAN.md — FileWatcher (chokidar, debounce, global/project watch)
+- [x] 03-05-PLAN.md — AppState + Barrel Export (conf package, index.ts)
 
 **Delivers:**
 - ConfigRepository 实现（read/write/exists/backup）
