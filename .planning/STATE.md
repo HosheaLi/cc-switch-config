@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 current_phase: 04
-current_plan: 05
+current_plan: 06
 status: executing
-last_updated: "2026-04-13T16:01:28.163Z"
+last_updated: "2026-04-13T16:10:30.000Z"
 progress:
   total_phases: 8
   completed_phases: 3
   total_plans: 23
-  completed_plans: 21
-  percent: 91
+  completed_plans: 22
+  percent: 96
 ---
 
 # Project State
@@ -24,20 +24,20 @@ progress:
 ## Position
 
 **Current Phase:** 04
-**Current Plan:** 05
-**Current Status:** Plan 04 Complete  
-**Next Action:** `/gsd:execute-plan 04-05`
+**Current Plan:** 06
+**Current Status:** Plan 05 Complete  
+**Next Action:** `/gsd:execute-plan 04-06`
 
 ---
 
 ## Phase Progress
 
-### Phase 3: Data Layer
+### Phase 4: Services Layer
 
 **Status:** Executing Phase 04
-**Plans:** 5/5
+**Plans:** 5/6
 
-**Progress:** [█████████░] 91%
+**Progress:** [██████████] 96%
 
 ---
 
@@ -57,16 +57,18 @@ progress:
 - [Phase 04]: Native fetch with AbortSignal.timeout for connectivity testing
 - [Phase 04]: D-03 verified: TemplateService applyTemplate uses deepMergeConfig to preserve non-template fields
 - [Phase 04]: ConfigService: ValidationError passed through, not wrapped in ServiceError
+- [Phase 04]: D-05 verified: AppState.scanDirectories stores user-configured scan roots
 
 ## Recent Activity
 
 | Date | Action | Result |
 |------|--------|--------|
+| 2026-04-13 | Plan 04-03 complete | ProjectService with directory scanning + bug fix (48 tests) |
+| 2026-04-13 | Plan 04-05 complete | ProviderService connectivity testing |
 | 2026-04-13 | Plan 04-04 complete | TemplateService CRUD + applyTemplate (23 tests) |
+| 2026-04-13 | Plan 04-02 complete | ConfigService for Profile CRUD operations |
 | 2026-04-13 | Plan 04-01 complete | ServiceError + Wave 0 stubs (79 tests) |
-| 2026-04-13 | Phase 04 context | Services Layer decisions captured |
-| 2026-04-13 | Phase 03 complete | 5 plans, 334 tests |
 
 ---
 
-*State updated: 2026-04-14 after Plan 04-04 completion*
+*State updated: 2026-04-13 after Plan 04-03 completion*
