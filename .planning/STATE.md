@@ -5,8 +5,8 @@ milestone_name: milestone
 current_phase: 2
 current_plan: Not started
 status: planning
-stopped_at: Plan 02-01 complete
-last_updated: "2026-04-13T12:40:27.576Z"
+stopped_at: Completed 02-05-PLAN.md
+last_updated: "2026-04-13T12:50:53.502Z"
 progress:
   total_phases: 8
   completed_phases: 1
@@ -58,7 +58,7 @@ progress:
 
 **Status:** Executing
 **Plans Created:** 5
-**Plans Completed:** 2
+**Plans Completed:** 1
 
 **Plan Status:**
 | Plan | Status | Wave |
@@ -66,10 +66,10 @@ progress:
 | 02-01 ClaudeSettingsSchema | Completed | 1 |
 | 02-02 Validation Utilities | Not started | 2 |
 | 02-03 Deep Merge Algorithm | Not started | 3 |
-| 02-04 API Provider Types | Completed | 4 |
+| 02-04 API Provider Types | Not started | 4 |
 | 02-05 Barrel Export | Not started | 5 |
 
-**Progress:** [████░░░░░░] 40%
+**Progress:** [██░░░░░░░░] 20%
 
 ---
 
@@ -85,7 +85,7 @@ progress:
 | 01-06 Config Versioning & Migration | 3 min | 1 | 3 | 2026-04-13 |
 | 01-07 Token Security | 2 min | 1 | 2 | 2026-04-13 |
 | 02-01 ClaudeSettingsSchema | 3 min | 2 | 2 | 2026-04-13 |
-| 02-04 API Provider Types | 2 min | 2 | 2 | 2026-04-13 |
+| Phase 02-types-validation P05 | 2 | 3 tasks | 3 files |
 
 ## Decisions
 
@@ -112,10 +112,9 @@ progress:
 - [Phase 02-types-validation]: EnvConfigSchema uses .passthrough() — allows arbitrary environment variables beyond known keys
 - [Phase 02-types-validation]: PermissionRuleSchema uses .refine() — requires at least one of allow/deny fields
 - [Phase 02-types-validation]: All types derived via z.infer<> — Zod schema as single source of truth (per D-01)
-- [Phase 02-types-validation Plan 04]: AuthType enum covers 'token' (env token), 'header' (auth header), 'custom' (flexible) — common auth patterns
-- [Phase 02-types-validation Plan 04]: ApiProviderConfig.baseUrl validated as URL format — catches invalid URLs early
-- [Phase 02-types-validation Plan 04]: TemplateConfig.name is unique identifier — used as key in TemplateStore.templates
-- [Phase 02-types-validation Plan 04]: Nested schema validation in TemplateConfig — provider validated recursively
+- [Phase 02-types-validation]: Barrel export pattern: all types exported from single index.ts entry point (per D-08)
+- [Phase 02-types-validation]: DEFAULT_CONFIG typed as ClaudeSettings for compile-time safety
+- [Phase 02-types-validation]: ESM .js extension required in barrel imports for NodeNext resolution
 
 ### Pending Decisions
 
@@ -133,7 +132,6 @@ progress:
 
 | Date | Action | Result |
 |------|--------|--------|
-| 2026-04-13 | Plan 02-04 executed | ApiProviderConfig/TemplateConfig schemas implemented, AuthType enum, 43 tests, 185 total |
 | 2026-04-13 | Plan 02-01 executed | ClaudeSettingsSchema implemented, strict validation, 37 tests |
 | 2026-04-13 | Plan 01-07 executed | Token security implemented, git tracking check, token masking |
 | 2026-04-13 | Phase 01 completed | All 7 plans executed, 105 tests passing |
@@ -161,10 +159,10 @@ progress:
 
 ## Session Info
 
-**Last Session:** 2026-04-13T12:39:46Z
-**Stopped At:** Plan 02-04 complete
-**Resume From:** Plan 02-05 (next plan)
+**Last Session:** 2026-04-13T12:50:53.499Z
+**Stopped At:** Completed 02-05-PLAN.md
+**Resume From:** Plan 02-02 (next plan)
 
 ---
 
-*State updated: 2026-04-13 after Plan 02-04 execution*
+*State updated: 2026-04-13 after Plan 02-01 execution*

@@ -70,14 +70,14 @@
 
 **Duration Estimate:** 1 week
 
-**Plans:** 2/5 plans executed
+**Plans:** 5 plans in 3 waves
 
 **Plans:**
 - [x] 02-01-PLAN.md — Core Config Schemas (ClaudeSettingsSchema, EnvConfig, McpServerConfig, PermissionRule, HookConfig)
 - [ ] 02-02-PLAN.md — Validation Utilities (ValidationError class, validateConfig, prettifyError integration)
 - [ ] 02-03-PLAN.md — Merge Algorithm (deepMergeConfig, ConfigLayer type, three-layer merge)
-- [x] 02-04-PLAN.md — Provider Types (ApiProviderConfig, TemplateConfig, AuthType enum)
-- [ ] 02-05-PLAN.md — Barrel Export & Integration (index.ts, update DEFAULT_CONFIG)
+- [ ] 02-04-PLAN.md — Provider Types (ApiProviderConfig, TemplateConfig, AuthType enum)
+- [x] 02-05-PLAN.md — Barrel Export & Integration (index.ts, update DEFAULT_CONFIG)
 
 **Delivers:**
 - TypeScript 类型定义（从 Zod schema 推断）
@@ -317,7 +317,7 @@
 | Phase | Goal | Duration | Dependencies | Plans |
 |-------|------|----------|--------------|-------|
 | 1 | Foundation & Safety | 1-2 weeks | None | 7 |
-| 2 | Types & Validation | 2/5 | In Progress|  |
+| 2 | Types & Validation | 1 week | Phase 1 | 5 |
 | 3 | Data Layer | 1-2 weeks | Phase 1, 2 | TBD |
 | 4 | Services Layer | 2-3 weeks | Phase 2, 3 | TBD |
 | 5 | CLI Interface | 1 week | Phase 4 | TBD |
