@@ -160,12 +160,12 @@ CCAPISwitch 是一个 CLI/TUI 工具，用于管理 Claude Code 的项目级 API
 
 ### Phase 1 Success (Foundation)
 
-- [ ] **Atomic writes verified**: Kill -9 during write, config remains valid
-- [ ] **Backup system works**: Every modification creates timestamped backup
-- [ ] **JSON errors helpful**: Malformed JSON shows line number and context
-- [ ] **Cross-platform paths**: Works on macOS, Linux, Windows
-- [ ] **Config migration works**: v0 config loads and migrates correctly
-- [ ] **Token security enforced**: No tokens in git-tracked files
+- [x] **Atomic writes verified**: Kill -9 during write, config remains valid
+- [x] **Backup system works**: Every modification creates timestamped backup
+- [x] **JSON errors helpful**: Malformed JSON shows line number and context
+- [x] **Cross-platform paths**: Works on macOS, Linux, Windows
+- [x] **Config migration works**: v0 config loads and migrates correctly
+- [x] **Token security enforced**: No tokens in git-tracked files
 
 ### Phase 2 Success (Core TUI)
 
