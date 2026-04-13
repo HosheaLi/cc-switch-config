@@ -112,7 +112,7 @@
 **Plans:** 5 plans in 2 waves
 
 **Plans:**
-- [ ] 03-01-PLAN.md — ConfigRepository (readConfig/writeConfig/configExists functions)
+- [x] 03-01-PLAN.md — ConfigRepository (readConfig/writeConfig/configExists functions)
 - [ ] 03-02-PLAN.md — TemplateStore (templates.json CRUD, TemplateStore class)
 - [ ] 03-03-PLAN.md — ProjectIndex (projects.json, ProjectEntry, pathIndex)
 - [ ] 03-04-PLAN.md — FileWatcher (chokidar, debounce, global/project watch)
