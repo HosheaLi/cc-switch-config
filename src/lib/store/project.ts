@@ -52,13 +52,16 @@ export interface ProjectIndexData {
 }
 
 /**
- * Default empty data structure.
+ * Create default empty data structure.
+ * Returns a fresh object each time to avoid shared state between instances.
  */
-const DEFAULT_DATA: ProjectIndexData = {
-  version: 1,
-  projects: {},
-  pathIndex: {},
-};
+function createDefaultData(): ProjectIndexData {
+  return {
+    version: 1,
+    projects: {},
+    pathIndex: {},
+  };
+}
 
 /**
  * ProjectIndex class for managing registered projects.
@@ -96,7 +99,7 @@ export class ProjectIndex {
     }
 
     const loaded = await readJSON<ProjectIndexData>(this.filePath);
-    this.data = loaded ?? DEFAULT_DATA;
+    this.data = loaded ?? createDefaultData();
     return this.data;
   }
 
