@@ -12,6 +12,11 @@ import {
   McpServerConfigSchema,
   PermissionRuleSchema,
   HookConfigSchema,
+  type ClaudeSettings,
+  type EnvConfig,
+  type McpServerConfig,
+  type PermissionRule,
+  type HookConfig,
 } from './config.js';
 
 describe('ClaudeSettingsSchema', () => {
@@ -288,5 +293,81 @@ describe('EnvConfigSchema', () => {
       });
       expect(result.success).toBe(false);
     });
+  });
+});
+
+describe('type inference', () => {
+  it('ClaudeSettings type matches schema output', () => {
+    const config = {
+      version: 1,
+      env: { ANTHROPIC_MODEL: 'claude-3' },
+      model: 'claude-3-5-sonnet',
+      mcpServers: {
+        'my-server': { command: 'node' },
+      },
+      permissions: [{ allow: 'Read(*)' }],
+      hooks: [{ match: 'PreToolUse', run: 'echo' }],
+    };
+
+    const result = ClaudeSettingsSchema.safeParse(config);
+    expect(result.success).toBe(true);
+
+    if (result.success) {
+      // Type inference check - TypeScript validates this at compile time
+      const typed: ClaudeSettings = result.data;
+      expect(typed.version).toBe(1);
+      expect(typed.env?.ANTHROPIC_MODEL).toBe('claude-3');
+      expect(typed.model).toBe('claude-3-5-sonnet');
+    }
+  });
+
+  it('McpServerConfig type matches schema output', () => {
+    const server = { command: 'node', args: ['server.js'], disabled: true };
+    const result = McpServerConfigSchema.safeParse(server);
+    expect(result.success).toBe(true);
+
+    if (result.success) {
+      const typed: McpServerConfig = result.data;
+      expect(typed.command).toBe('node');
+      expect(typed.args).toEqual(['server.js']);
+      expect(typed.disabled).toBe(true);
+    }
+  });
+
+  it('PermissionRule type matches schema output', () => {
+    const rule = { allow: 'Read(*)', deny: 'Write(secrets)' };
+    const result = PermissionRuleSchema.safeParse(rule);
+    expect(result.success).toBe(true);
+
+    if (result.success) {
+      const typed: PermissionRule = result.data;
+      expect(typed.allow).toBe('Read(*)');
+      expect(typed.deny).toBe('Write(secrets)');
+    }
+  });
+
+  it('HookConfig type matches schema output', () => {
+    const hook = { match: 'PreToolUse', run: 'echo', timeout: 5000 };
+    const result = HookConfigSchema.safeParse(hook);
+    expect(result.success).toBe(true);
+
+    if (result.success) {
+      const typed: HookConfig = result.data;
+      expect(typed.match).toBe('PreToolUse');
+      expect(typed.run).toBe('echo');
+      expect(typed.timeout).toBe(5000);
+    }
+  });
+
+  it('EnvConfig type matches schema output', () => {
+    const env = { ANTHROPIC_MODEL: 'claude-3', CUSTOM_VAR: 'value' };
+    const result = EnvConfigSchema.safeParse(env);
+    expect(result.success).toBe(true);
+
+    if (result.success) {
+      const typed: EnvConfig = result.data;
+      expect(typed.ANTHROPIC_MODEL).toBe('claude-3');
+      expect(typed.CUSTOM_VAR).toBe('value');
+    }
   });
 });
