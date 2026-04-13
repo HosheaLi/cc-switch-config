@@ -5,14 +5,14 @@ milestone_name: milestone
 current_phase: 01-foundation-safety
 current_plan: 01-05
 status: executing
-stopped_at: Completed 01-04-PLAN.md
-last_updated: "2026-04-13T10:09:02.983Z"
+stopped_at: Completed 01-05-PLAN.md
+last_updated: "2026-04-13T10:14:30.933Z"
 progress:
   total_phases: 8
   completed_phases: 0
   total_plans: 7
-  completed_plans: 4
-  percent: 57
+  completed_plans: 5
+  percent: 71
 ---
 
 # Project State
@@ -37,7 +37,7 @@ progress:
 
 **Status:** In Progress  
 **Plans Created:** 7  
-**Plans Completed:** 4
+**Plans Completed:** 5
 
 **Plan Status:**
 | Plan | Status | Wave |
@@ -46,11 +46,11 @@ progress:
 | 01-02 Cross-Platform Paths | Completed | 2 |
 | 01-03 Atomic File Operations | Completed | 3 |
 | 01-04 Backup System | Completed | 4 |
-| 01-05 JSON Error Enhancement | Not Started | 5 |
+| 01-05 JSON Error Enhancement | Completed | 5 |
 | 01-06 Config Versioning & Migration | Not Started | 6 |
 | 01-07 Token Security | Not Started | 7 |
 
-**Progress:** [██████░░░░] 57%
+**Progress:** [███████░░░] 71%
 
 ---
 
@@ -62,6 +62,7 @@ progress:
 | 01-02 Cross-Platform Paths | 3 min | 1 | 4 | 2026-04-13 |
 | 01-03 Atomic File Operations | 5 min | 1 | 2 | 2026-04-13 |
 | 01-04 Backup System | 3 min | 1 | 2 | 2026-04-13 |
+| 01-05 JSON Error Enhancement | 3 min | 1 | 2 | 2026-04-13 |
 
 ## Decisions
 
@@ -75,6 +76,9 @@ progress:
 - [Phase 01-foundation-safety]: ISO timestamp format with special chars replaced for valid backup filenames
 - [Phase 01-foundation-safety]: Backup directory .backups local to each config file
 - [Phase 01-foundation-safety]: Atomic restore using write-rename pattern for crash safety
+- [Phase 01-foundation-safety]: Separate json-error.ts module for raw JSON content parsing (distinct from json.ts file-based operations)
+- [Phase 01-foundation-safety]: EnhancedJSONError class stores structured context for programmatic access
+- [Phase 01-foundation-safety]: Caret pointer aligned using column-1 spaces before caret character
 
 ### Pending Decisions
 
@@ -92,6 +96,7 @@ progress:
 
 | Date | Action | Result |
 |------|--------|--------|
+| 2026-04-13 | Plan 01-05 executed | JSON error enhancement implemented, line/column context, caret pointer |
 | 2026-04-13 | Plan 01-04 executed | Backup system implemented, timestamped backups, atomic restore |
 | 2026-04-13 | Plan 01-03 executed | Atomic file operations implemented, write-rename pattern, enhanced JSON errors |
 | 2026-04-13 | Plan 01-02 executed | Cross-platform path resolution implemented, env-paths integration |
@@ -114,10 +119,10 @@ progress:
 
 ## Session Info
 
-**Last Session:** 2026-04-13T10:09:02.981Z
-**Stopped At:** Completed 01-04-PLAN.md
-**Resume From:** 01-05-PLAN.md
+**Last Session:** 2026-04-13T10:14:30.931Z
+**Stopped At:** Completed 01-05-PLAN.md
+**Resume From:** 01-06-PLAN.md
 
 ---
 
-*State updated: 2026-04-13 after Plan 01-04 execution*
+*State updated: 2026-04-13 after Plan 01-05 execution*
