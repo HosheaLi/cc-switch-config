@@ -73,7 +73,7 @@
 **Plans:** 5 plans in 3 waves
 
 **Plans:**
-- [ ] 02-01-PLAN.md — Core Config Schemas (ClaudeSettingsSchema, EnvConfig, McpServerConfig, PermissionRule, HookConfig)
+- [x] 02-01-PLAN.md — Core Config Schemas (ClaudeSettingsSchema, EnvConfig, McpServerConfig, PermissionRule, HookConfig)
 - [ ] 02-02-PLAN.md — Validation Utilities (ValidationError class, validateConfig, prettifyError integration)
 - [ ] 02-03-PLAN.md — Merge Algorithm (deepMergeConfig, ConfigLayer type, three-layer merge)
 - [ ] 02-04-PLAN.md — Provider Types (ApiProviderConfig, TemplateConfig, AuthType enum)
