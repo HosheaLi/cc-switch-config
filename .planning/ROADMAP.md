@@ -154,28 +154,40 @@
 
 **Duration Estimate:** 2-3 weeks
 
-**Plans:** TBD
+**Plans:** 6 plans in 3 waves
+
+**Plans:**
+- [ ] 04-01-PLAN.md — Wave 0 Foundation (ServiceError + Test Stubs)
+- [ ] 04-02-PLAN.md — ConfigService (config CRUD, merge, apply)
+- [ ] 04-03-PLAN.md — ProjectService (scan, register, list, AppState extension)
+- [ ] 04-04-PLAN.md — TemplateService (template CRUD, apply to project)
+- [ ] 04-05-PLAN.md — ProviderService (connectivity test via HEAD)
+- [ ] 04-06-PLAN.md — Barrel Export + M4 Verification
 
 **Delivers:**
 - ConfigService（config read/write/merge/validate）
 - ProjectService（project indexing, detection, CRUD）
 - TemplateService（template CRUD, apply to project）
 - ProviderService（provider defaults, connectivity test）
+- ServiceError class（error handling pattern）
+- services/index.ts（barrel export）
 
 **Requirements Addressed:**
-- F1: Profile CRUD Operations (create/list/switch/delete)
-- F7: Custom Provider Templates (template management)
-- F4: List All Projects (project status display)
-- M4: Module Separation (services independent of UI)
+- F1: Profile CRUD Operations (create/list/switch/delete) — Plans 02, 04
+- F7: Custom Provider Templates (template management) — Plan 04
+- F4: List All Projects (project status display) — Plan 03
+- M4: Module Separation (services independent of UI) — Plans 01, 06
+- D-06: Provider Connectivity Test — Plan 05
 
 **Dependencies:**
 - Phase 2 (types, schemas)
 - Phase 3 (data layer repositories)
 
 **Verification:**
-- Service test: all services have ≥80% test coverage
+- Service test: all services have >=80% test coverage
 - Integration test: services combine to complete workflows
 - Mock test: services work with mocked repositories
+- M4 verification: no UI imports in services
 
 **Research Notes:** Standard patterns — service layer encapsulation, dependency injection.
 
@@ -306,7 +318,7 @@
 - U2: Undo Support (ability to undo modifications)
 - U5: Confirmation Prompts (destructive actions require confirmation)
 - N3: Scalable Scanning (<5s for 100 projects)
-- M1: Test Coverage (≥80% for core modules)
+- M1: Test Coverage (>=80% for core modules)
 
 **Dependencies:**
 - Phase 2 (validation)
@@ -317,7 +329,7 @@
 - Diff test: diff shown before every modification
 - Undo test: undo works for all modification types
 - Confirmation test: destructive actions require explicit approval
-- Coverage test: ≥80% coverage for services, lib, store
+- Coverage test: >=80% coverage for services, lib, store
 - Performance test: benchmarks meet targets
 
 **Research Notes:** May need API validation research — patterns vary by provider.
@@ -331,7 +343,7 @@
 | 1 | Foundation & Safety | 1-2 weeks | None | 7 |
 | 2 | Types & Validation | 1 week | Phase 1 | 5 |
 | 3 | Data Layer | 1-2 weeks | Phase 1, 2 | 5 |
-| 4 | Services Layer | 2-3 weeks | Phase 2, 3 | TBD |
+| 4 | Services Layer | 2-3 weeks | Phase 2, 3 | 6 |
 | 5 | CLI Interface | 1 week | Phase 4 | TBD |
 | 6 | Core TUI | 2-3 weeks | Phase 4, 5 | TBD |
 | 7 | Project Management | 1-2 weeks | Phase 3, 4, 6 | TBD |
@@ -388,7 +400,7 @@ Phase 8 (Quality)
 - [ ] CLI commands work (list, switch, current)
 - [ ] TUI responsive and navigable
 - [ ] Config preview shows changes
-- [ ] Services have ≥80% test coverage
+- [ ] Services have >=80% test coverage
 - [ ] First user can complete basic workflow
 
 **Deliverable:** Functional CLI/TUI tool with core features
@@ -424,7 +436,6 @@ Phases needing additional research during planning:
 
 | Phase | Research Topic | Confidence | Action |
 |-------|----------------|------------|--------|
-| Phase 4 | Provider connectivity test patterns | LOW | Research common validation endpoints during planning |
 | Phase 8 | API validation patterns by provider | LOW | May need provider-specific implementations |
 
 Phases with standard patterns (no research needed):
@@ -483,7 +494,7 @@ Phases with standard patterns (no research needed):
 
 | Metric | Target | Verification Method |
 |--------|--------|---------------------|
-| Test Coverage | ≥80% core modules | vitest coverage report |
+| Test Coverage | >=80% core modules | vitest coverage report |
 | Cold Start Time | <1 second | Benchmark test |
 | Switch Operation | <100ms | Performance test |
 | TUI Render | <50ms | Ink performance profiling |
@@ -513,4 +524,5 @@ This roadmap evolves at:
 *Based on: Research Summary (HIGH confidence)*  
 *Phase 1 plans added: 2026-04-13*  
 *Phase 2 plans added: 2026-04-13*  
-*Phase 3 plans added: 2026-04-13*
+*Phase 3 plans added: 2026-04-13*  
+*Phase 4 plans added: 2026-04-13*
