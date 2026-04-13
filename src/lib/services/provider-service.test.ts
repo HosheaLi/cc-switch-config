@@ -55,7 +55,7 @@ describe('ProviderService', () => {
     // Test 4: testConnectivity returns reachable=false for invalid URL format
     it('testConnectivity returns reachable=false for invalid URL format', async () => {
       // Invalid URL format should throw ServiceError
-      expect(() => service.testConnectivity('not-a-valid-url')).toThrow(ServiceError);
+      await expect(service.testConnectivity('not-a-valid-url')).rejects.toThrow(ServiceError);
     });
 
     // Test 5: testConnectivity returns reachable=false for DNS failure
@@ -89,9 +89,9 @@ describe('ProviderService', () => {
 
     // Test 8: ServiceError thrown on invalid baseUrl
     it('ServiceError thrown on invalid baseUrl', async () => {
-      expect(() => service.testConnectivity('')).toThrow(ServiceError);
-      expect(() => service.testConnectivity('invalid-url')).toThrow(ServiceError);
-      expect(() => service.testConnectivity('http://')).toThrow(ServiceError);
+      await expect(service.testConnectivity('')).rejects.toThrow(ServiceError);
+      await expect(service.testConnectivity('invalid-url')).rejects.toThrow(ServiceError);
+      await expect(service.testConnectivity('http://')).rejects.toThrow(ServiceError);
     });
   });
 
