@@ -1,0 +1,30 @@
+/**
+ * Services Layer - Barrel Export
+ *
+ * Per D-07: Unified export from single entry point.
+ * Per M4: Services are independent of UI/TUI.
+ *
+ * Import examples:
+ * - import { ConfigService, ServiceError } from './lib/services/index.js';
+ * - import { ProjectService, ScanResult } from './lib/services/index.js';
+ * - import { TemplateService } from './lib/services/index.js';
+ * - import { ProviderService, ConnectivityResult } from './lib/services/index.js';
+ */
+
+// Service classes
+export { ConfigService } from './config-service.js';
+export { ProjectService } from './project-service.js';
+export { TemplateService } from './template-service.js';
+export { ProviderService } from './provider-service.js';
+
+// Service error handling
+export { ServiceError } from './types.js';
+
+// Service-specific types
+export type { ConnectivityResult } from './provider-service.js';
+export type { ScanResult } from './project-service.js';
+
+// Re-export types that services use (convenience for callers)
+export type { ClaudeSettings } from '../types/config.js';
+export type { TemplateConfig } from '../types/provider.js';
+export type { ProjectEntry } from '../store/project.js';
