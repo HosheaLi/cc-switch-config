@@ -1,0 +1,30 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# Test coverage
+coverage/
+
+# IDE
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Environment files (local config)
+.env
+.env.local
+
+# Logs
+*.log
+npm-debug.log*
+
+# Backup directory (never commit backups)
+.backups/
+
+# Claude Code local settings (tokens!)
+.claude/settings.local.json
