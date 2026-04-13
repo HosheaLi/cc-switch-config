@@ -4,9 +4,9 @@ milestone: v1.0
 milestone_name: milestone
 current_phase: 04
 current_plan: Not started
-status: complete
-stopped_at: Phase 03 completed
-last_updated: "2026-04-13T14:56:00Z"
+status: context_gathered
+stopped_at: Phase 04 context gathered
+last_updated: "2026-04-13T15:20:00Z"
 progress:
   total_phases: 8
   completed_phases: 3
@@ -26,47 +26,17 @@ progress:
 
 **Current Phase:** 04
 **Current Plan:** Not started
-**Current Status:** Phase 03 Complete  
-**Next Action:** `/gsd:plan-phase 04` or `/gsd:verify-work 03`
+**Current Status:** Context Gathered  
+**Next Action:** `/gsd:plan-phase 04`
 
 ---
 
 ## Phase Progress
 
-### Phase 1: Foundation & Safety
-
-**Status:** Complete
-**Plans Created:** 7  
-**Plans Completed:** 7
-
-**Progress:** [██████████] 100%
-
----
-
-### Phase 2: Types & Validation
-
-**Status:** Complete
-**Plans Created:** 5
-**Plans Completed:** 5
-
-**Progress:** [██████████] 100%
-
----
-
 ### Phase 3: Data Layer
 
 **Status:** Complete
-**Plans Created:** 5
-**Plans Completed:** 5
-
-**Plan Status:**
-| Plan | Status | Wave |
-|------|--------|------|
-| 03-01 ConfigRepository | Completed | 1 |
-| 03-02 TemplateStore | Completed | 1 |
-| 03-03 ProjectIndex | Completed | 1 |
-| 03-04 FileWatcher | Completed | 2 |
-| 03-05 AppState + Barrel | Completed | 2 |
+**Plans:** 5/5
 
 **Progress:** [██████████] 100%
 
@@ -74,23 +44,15 @@ progress:
 
 ## Decisions
 
-### Locked Decisions
+### Locked Decisions (Phase 04 Context)
 
-- [Phase 01]: env-paths for XDG-compliant paths
-- [Phase 01]: Return null for ENOENT (graceful)
-- [Phase 01]: Enhanced JSON errors with line/column context
-- [Phase 01]: CONFIG_VERSION starts at 1, v0 for missing
-- [Phase 01]: Token masking shows last 4 characters
-- [Phase 02]: ClaudeSettingsSchema uses .strict()
-- [Phase 02]: All types derived via z.infer<>
-- [Phase 02]: ESM .js extension in barrel imports
-- [Phase 03]: ConfigRepository validation before read/write
-- [Phase 03]: TemplateStore lazy loading pattern
-- [Phase 03]: ProjectIndex uses UUID for stable IDs
-- [Phase 03]: pathIndex for fast lookup
-- [Phase 03]: FileWatcher with chokidar, 200ms debounce
-- [Phase 03]: AppState using conf package
-- [Phase 03]: recentProjects capped at 10
+- **D-01:** Services 作为类 + 构造函数注入
+- **D-02:** Services 抛出 Error 错误处理
+- **D-03:** 模板应用使用 Deep Merge
+- **D-04:** 项目检测：自动扫描 + 手动确认
+- **D-05:** 扫描目录：用户配置根目录
+- **D-06:** Provider 测试：基础连通性
+- **D-07:** Barrel Export Services
 
 ---
 
@@ -98,10 +60,9 @@ progress:
 
 | Date | Action | Result |
 |------|--------|--------|
-| 2026-04-13 | Phase 03 completed | 5 plans, 334 tests, Data Layer complete |
-| 2026-04-13 | Wave 2 complete | FileWatcher, AppState, Barrel Export |
-| 2026-04-13 | Wave 1 complete | ConfigRepository, TemplateStore, ProjectIndex |
+| 2026-04-13 | Phase 04 context | Services Layer decisions captured |
+| 2026-04-13 | Phase 03 complete | 5 plans, 334 tests |
 
 ---
 
-*State updated: 2026-04-13 after Phase 03 completion*
+*State updated: 2026-04-13 after Phase 04 context gathering*
