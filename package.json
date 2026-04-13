@@ -1,0 +1,55 @@
+{
+  "name": "cc-config-switch",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "CLI/TUI tool for managing Claude Code project-level API provider configurations",
+  "author": "HosheaLi",
+  "license": "MIT",
+  "bin": {
+    "cc-config": "./dist/index.js"
+  },
+  "exports": {
+    ".": "./dist/index.js"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "engines": {
+    "node": ">=18.17"
+  },
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsup",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "lint": "tsc --noEmit",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "ink": "7.0.0",
+    "react": "19.2.5",
+    "commander": "14.0.3",
+    "zod": "4.3.6",
+    "conf": "15.1.0",
+    "fs-extra": "11.3.4",
+    "execa": "9.6.1",
+    "env-paths": "4.0.0",
+    "chalk": "5.6.2"
+  },
+  "devDependencies": {
+    "typescript": "6.0.2",
+    "tsup": "8.5.1",
+    "vitest": "3.2.4",
+    "@types/node": "22.15.21",
+    "@types/react": "19.2.0",
+    "@types/fs-extra": "11.0.4",
+    "tsx": "4.19.4"
+  },
+  "keywords": [
+    "claude-code",
+    "cli",
+    "tui",
+    "config-management",
+    "api-provider"
+  ]
+}
