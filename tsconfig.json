@@ -16,6 +16,7 @@
     "sourceMap": true,
     "noEmit": false,
     "allowSyntheticDefaultImports": true,
+    "ignoreDeprecations": "6.0",
     "types": ["node"]
   },
   "include": ["src/**/*"],
