@@ -118,3 +118,12 @@ None - no external service configuration required.
 ---
 *Phase: 01-foundation-safety*
 *Completed: 2026-04-13*
+
+## Self-Check: PASSED
+
+- [x] version.ts exists at src/lib/config/version.ts
+- [x] migration.ts exists at src/lib/config/migration.ts
+- [x] version.test.ts exists at src/lib/config/version.test.ts
+- [x] SUMMARY.md exists at .planning/phases/01-foundation-safety/01-06-SUMMARY.md
+- [x] Commit a0ae548 exists in git log
+- [x] All 88 tests pass
