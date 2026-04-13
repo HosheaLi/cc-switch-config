@@ -32,6 +32,8 @@ export interface AppStateData {
   };
   /** Recent projects list (max 10 entries, most recent first) */
   recentProjects: string[];
+  /** D-05: User-configured scan directories for project discovery */
+  scanDirectories: string[];
 }
 
 /**
@@ -46,6 +48,7 @@ const DEFAULT_STATE: AppStateData = {
     showPreview: true,
   },
   recentProjects: [],
+  scanDirectories: [],
 };
 
 /**

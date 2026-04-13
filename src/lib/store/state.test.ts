@@ -177,4 +177,32 @@ describe('AppState', () => {
       expect(appState.get('lastUsedTemplate')).toBe('anthropic-claude');
     });
   });
+
+  describe('scanDirectories', () => {
+    it('should default to empty array', () => {
+      const dirs = appState.get('scanDirectories');
+      expect(dirs).toEqual([]);
+    });
+
+    it('should store and retrieve scan directories', () => {
+      appState.set('scanDirectories', ['~/code', '~/projects']);
+      const dirs = appState.get('scanDirectories');
+      expect(dirs).toEqual(['~/code', '~/projects']);
+    });
+
+    it('should allow adding directories to the list', () => {
+      appState.set('scanDirectories', ['~/code']);
+      appState.set('scanDirectories', [...appState.get('scanDirectories'), '~/projects']);
+      expect(appState.get('scanDirectories')).toEqual(['~/code', '~/projects']);
+    });
+
+    it('should persist scan directories across instances', () => {
+      appState.set('scanDirectories', ['~/work', '~/personal']);
+
+      const newInstance = new AppState(TEST_PROJECT_NAME);
+      expect(newInstance.get('scanDirectories')).toEqual(['~/work', '~/personal']);
+
+      newInstance.clear();
+    });
+  });
 });
