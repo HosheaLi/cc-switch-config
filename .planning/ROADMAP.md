@@ -159,10 +159,10 @@
 **Plans:**
 - [x] 04-01-PLAN.md — Wave 0 Foundation (ServiceError + Test Stubs)
 - [x] 04-02-PLAN.md — ConfigService (config CRUD, merge, apply)
-- [ ] 04-03-PLAN.md — ProjectService (scan, register, list, AppState extension)
+- [x] 04-03-PLAN.md — ProjectService (scan, register, list, AppState extension)
 - [x] 04-04-PLAN.md — TemplateService (template CRUD, apply to project)
 - [x] 04-05-PLAN.md — ProviderService (connectivity test via HEAD)
-- [ ] 04-06-PLAN.md — Barrel Export + M4 Verification
+- [x] 04-06-PLAN.md — Barrel Export + M4 Verification
 
 **Delivers:**
 - ConfigService（config read/write/merge/validate）
