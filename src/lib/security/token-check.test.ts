@@ -38,7 +38,7 @@ describe('token-check', () => {
 
   describe('maskToken', () => {
     it('shows only last 4 characters for normal tokens', () => {
-      expect(maskToken('sk-ant-api03-abc123xyz')).toBe('...xyz');
+      expect(maskToken('sk-ant-api03-abc123xyz')).toBe('...3xyz');
     });
 
     it('handles short tokens (< 4 chars)', () => {
