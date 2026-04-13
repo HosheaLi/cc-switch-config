@@ -2,7 +2,9 @@
  * ConfigService Tests
  *
  * Tests for configuration management service.
- * Wave 0 stubs - will be implemented in Wave 1.
+ * Per D-01: Services as classes + constructor injection.
+ * Per D-02: Services throw Error, caller handles.
+ * Per D-03: Template uses deep merge.
  *
  * Per F1: ConfigService handles config read/write, merge, validation, and application.
  */
@@ -11,45 +13,272 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import fs from 'fs-extra';
 import path from 'path';
 import os from 'os';
+import { ConfigService } from './config-service.js';
+import { readConfig, writeConfig } from '../store/config.js';
+import { ServiceError } from './types.js';
+import type { ClaudeSettings } from '../types/config.js';
+import type { TemplateConfig } from '../types/provider.js';
 
 describe('ConfigService', () => {
   let tempDir: string;
+  let configPath: string;
+  let service: ConfigService;
 
   beforeEach(async () => {
     tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'config-service-test-'));
+    configPath = path.join(tempDir, '.claude', 'settings.json');
+    await fs.ensureDir(path.dirname(configPath));
+
+    // Per D-01: Constructor injection with actual readConfig/writeConfig
+    service = new ConfigService(readConfig, writeConfig);
   });
 
   afterEach(async () => {
     await fs.remove(tempDir);
   });
 
-  describe('readConfig', () => {
-    it.todo('readConfig loads project config');
-    it.todo('readConfig returns null for non-existent config');
-    it.todo('readConfig validates loaded config');
+  describe('readProjectConfig', () => {
+    it('should return config from valid path', async () => {
+      const config: ClaudeSettings = {
+        version: 1,
+        model: 'claude-3-5-sonnet-20241022',
+        env: {
+          ANTHROPIC_MODEL: 'claude-3-5-sonnet-20241022',
+        },
+      };
+      await writeConfig(configPath, config);
+
+      const result = await service.readProjectConfig(tempDir);
+
+      expect(result).not.toBeNull();
+      expect(result?.model).toBe('claude-3-5-sonnet-20241022');
+      expect(result?.version).toBe(1);
+    });
+
+    it('should return null for non-existent config', async () => {
+      const result = await service.readProjectConfig(tempDir);
+
+      expect(result).toBeNull();
+    });
+
+    it('should throw ServiceError on read failure', async () => {
+      // Create a mock readConfig that throws
+      const mockReadConfig = async () => {
+        throw new Error('Permission denied');
+      };
+      const mockService = new ConfigService(mockReadConfig, writeConfig);
+
+      try {
+        await mockService.readProjectConfig(tempDir);
+        expect.fail('Should have thrown ServiceError');
+      } catch (error) {
+        expect(error).toBeInstanceOf(ServiceError);
+        expect((error as ServiceError).code).toBe('CONFIG_READ_FAILED');
+      }
+    });
   });
 
-  describe('writeConfig', () => {
-    it.todo('writeConfig saves config with validation');
-    it.todo('writeConfig creates backup before overwrite');
-    it.todo('writeConfig rejects invalid config');
+  describe('writeProjectConfig', () => {
+    it('should save validated config', async () => {
+      const config: ClaudeSettings = {
+        version: 1,
+        model: 'claude-3-5-sonnet-20241022',
+      };
+
+      await service.writeProjectConfig(tempDir, config);
+
+      // Verify config was written
+      const result = await readConfig(configPath);
+      expect(result).not.toBeNull();
+      expect(result?.model).toBe('claude-3-5-sonnet-20241022');
+    });
+
+    it('should throw ValidationError on invalid config', async () => {
+      const invalidConfig = {
+        modle: 'claude-3', // typo - should be 'model'
+      } as unknown as ClaudeSettings;
+
+      try {
+        await service.writeProjectConfig(tempDir, invalidConfig);
+        expect.fail('Should have thrown ValidationError');
+      } catch (error) {
+        expect(error).toBeInstanceOf(Error);
+        expect((error as Error).name).toBe('ValidationError');
+      }
+    });
+
+    it('should throw ServiceError on write failure', async () => {
+      // Create a mock writeConfig that throws
+      const mockWriteConfig = async () => {
+        throw new Error('Disk full');
+      };
+      const mockService = new ConfigService(readConfig, mockWriteConfig);
+
+      const config: ClaudeSettings = { version: 1 };
+
+      try {
+        await mockService.writeProjectConfig(tempDir, config);
+        expect.fail('Should have thrown ServiceError');
+      } catch (error) {
+        expect(error).toBeInstanceOf(ServiceError);
+        expect((error as ServiceError).code).toBe('CONFIG_WRITE_FAILED');
+      }
+    });
+
+    it('should create backup before overwrite', async () => {
+      // Create initial config
+      const initialConfig: ClaudeSettings = { version: 1, model: 'claude-3' };
+      await writeConfig(configPath, initialConfig);
+
+      // Write new config
+      const newConfig: ClaudeSettings = { version: 2, model: 'claude-4' };
+      await service.writeProjectConfig(tempDir, newConfig);
+
+      // Check backup was created in .claude/.backups (same directory as config)
+      const backupDir = path.join(tempDir, '.claude', '.backups');
+      const backupExists = await fs.pathExists(backupDir);
+      expect(backupExists).toBe(true);
+
+      // List backup files
+      const backups = await fs.readdir(backupDir);
+      expect(backups.length).toBeGreaterThan(0);
+    });
   });
 
-  describe('mergeConfigs', () => {
-    it.todo('mergeConfigs combines project and template');
-    it.todo('mergeConfigs preserves project-specific fields');
-    it.todo('mergeConfigs handles nested object merge');
+  describe('mergeTemplateWithConfig', () => {
+    it('should merge template with existing config (D-03)', async () => {
+      // Create existing config
+      const existingConfig: ClaudeSettings = {
+        version: 1,
+        model: 'claude-3',
+        env: {
+          ANTHROPIC_MODEL: 'claude-3',
+        },
+        permissions: [{ allow: 'Bash' }],
+      };
+      await writeConfig(configPath, existingConfig);
+
+      // Template with provider config
+      const template: TemplateConfig = {
+        name: 'test-template',
+        description: 'Test template',
+        provider: {
+          name: 'Test Provider',
+          baseUrl: 'https://api.test.com',
+          authType: 'token',
+          env: {
+            ANTHROPIC_MODEL: 'claude-4',
+            ANTHROPIC_BASE_URL: 'https://api.test.com',
+          },
+        },
+      };
+
+      const merged = await service.mergeTemplateWithConfig(tempDir, template);
+
+      // Per D-03: Deep merge - env should be merged, not replaced
+      expect(merged.env?.ANTHROPIC_MODEL).toBe('claude-4');
+      expect(merged.env?.ANTHROPIC_BASE_URL).toBe('https://api.test.com');
+      // Existing fields should remain
+      expect(merged.permissions?.length).toBe(1);
+    });
+
+    it('should return merged config for non-existent project', async () => {
+      const template: TemplateConfig = {
+        name: 'test-template',
+        description: 'Test template',
+        provider: {
+          name: 'Test Provider',
+          baseUrl: 'https://api.test.com',
+          authType: 'token',
+          env: {
+            ANTHROPIC_MODEL: 'claude-4',
+          },
+        },
+      };
+
+      const merged = await service.mergeTemplateWithConfig(tempDir, template);
+
+      // Non-existent config treated as empty base
+      expect(merged.env?.ANTHROPIC_MODEL).toBe('claude-4');
+    });
   });
 
-  describe('validateConfig', () => {
-    it.todo('validateConfig checks schema');
-    it.todo('validateConfig collects all errors');
-    it.todo('validateConfig returns validation result');
+  describe('applyTemplate', () => {
+    it('should apply template to project config', async () => {
+      // Create existing config
+      const existingConfig: ClaudeSettings = {
+        version: 1,
+        model: 'claude-3',
+        permissions: [{ allow: 'Read' }],
+      };
+      await writeConfig(configPath, existingConfig);
+
+      // Template to apply
+      const template: TemplateConfig = {
+        name: 'test-template',
+        provider: {
+          name: 'Test Provider',
+          baseUrl: 'https://api.test.com',
+          authType: 'token',
+          env: {
+            ANTHROPIC_MODEL: 'claude-4',
+          },
+        },
+      };
+
+      await service.applyTemplate(tempDir, template);
+
+      // Verify merged config was written
+      const result = await readConfig(configPath);
+      expect(result).not.toBeNull();
+      expect(result?.env?.ANTHROPIC_MODEL).toBe('claude-4');
+      // Existing permissions preserved
+      expect(result?.permissions?.length).toBe(1);
+    });
+
+    it('should create backup before applying template', async () => {
+      // Create initial config
+      const initialConfig: ClaudeSettings = { version: 1 };
+      await writeConfig(configPath, initialConfig);
+
+      const template: TemplateConfig = {
+        name: 'test-template',
+        provider: {
+          name: 'Test Provider',
+          baseUrl: 'https://api.test.com',
+          authType: 'token',
+          env: { ANTHROPIC_MODEL: 'claude-4' },
+        },
+      };
+
+      await service.applyTemplate(tempDir, template);
+
+      // Check backup was created in .claude/.backups (same directory as config)
+      const backupDir = path.join(tempDir, '.claude', '.backups');
+      const backupExists = await fs.pathExists(backupDir);
+      expect(backupExists).toBe(true);
+    });
   });
 
-  describe('applyConfig', () => {
-    it.todo('applyConfig writes merged config to project');
-    it.todo('applyConfig handles template application');
-    it.todo('applyConfig creates backup of existing config');
+  describe('constructor injection', () => {
+    it('should accept readConfig and writeConfig functions (D-01)', async () => {
+      // Create service with mock functions
+      const mockRead = async () => null;
+      const mockWrite = async () => {};
+      const mockService = new ConfigService(mockRead, mockWrite);
+
+      // Service should be instantiated successfully
+      expect(mockService).toBeDefined();
+      expect(mockService.readProjectConfig).toBeDefined();
+      expect(mockService.writeProjectConfig).toBeDefined();
+    });
+
+    it('should work with real readConfig/writeConfig', async () => {
+      const config: ClaudeSettings = { version: 1, model: 'claude-3' };
+      await service.writeProjectConfig(tempDir, config);
+
+      const result = await service.readProjectConfig(tempDir);
+      expect(result?.model).toBe('claude-3');
+    });
   });
 });
