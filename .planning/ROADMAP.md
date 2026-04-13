@@ -21,6 +21,17 @@
 
 **Duration Estimate:** 1-2 weeks
 
+**Plans:** 7 plans in 7 waves
+
+**Plans:**
+- [ ] 01-01-PLAN.md — Project Setup (package.json, tsconfig, build, test configs)
+- [ ] 01-02-PLAN.md — Cross-Platform Paths (env-paths, XDG directories)
+- [ ] 01-03-PLAN.md — Atomic File Operations (write-rename pattern)
+- [ ] 01-04-PLAN.md — Backup System (timestamped backups before modifications)
+- [ ] 01-05-PLAN.md — JSON Error Enhancement (line numbers, context)
+- [ ] 01-06-PLAN.md — Config Versioning & Migration (version field, migration framework)
+- [ ] 01-07-PLAN.md — Token Security (git tracking detection, token masking)
+
 **Delivers:**
 - 项目结构搭建（TypeScript, tsup, vitest）
 - 安全文件操作模块（atomic writes, backup system）
@@ -34,8 +45,10 @@
 - R2: Backup System (auto backup before modifications)
 - R4: Cross-Platform (macOS/Linux/Windows)
 - U1: Clear Errors (JSON errors with line numbers)
+- M2: Type Safety (TypeScript project setup)
 - M3: Schema Versioning (config version field)
 - S1: Token Isolation (tokens never in git)
+- S2: File Permissions (token file security checks)
 
 **Dependencies:** None (foundation phase)
 
@@ -281,16 +294,16 @@
 
 ## Phase Summary
 
-| Phase | Goal | Duration | Dependencies |
-|-------|------|----------|--------------|
-| 1 | Foundation & Safety | 1-2 weeks | None |
-| 2 | Types & Validation | 1 week | Phase 1 |
-| 3 | Data Layer | 1-2 weeks | Phase 1, 2 |
-| 4 | Services Layer | 2-3 weeks | Phase 2, 3 |
-| 5 | CLI Interface | 1 week | Phase 4 |
-| 6 | Core TUI | 2-3 weeks | Phase 4, 5 |
-| 7 | Project Management | 1-2 weeks | Phase 3, 4, 6 |
-| 8 | Quality & Polish | 1-2 weeks | Phase 2, 6, 7 |
+| Phase | Goal | Duration | Dependencies | Plans |
+|-------|------|----------|--------------|-------|
+| 1 | Foundation & Safety | 1-2 weeks | None | 7 |
+| 2 | Types & Validation | 1 week | Phase 1 | TBD |
+| 3 | Data Layer | 1-2 weeks | Phase 1, 2 | TBD |
+| 4 | Services Layer | 2-3 weeks | Phase 2, 3 | TBD |
+| 5 | CLI Interface | 1 week | Phase 4 | TBD |
+| 6 | Core TUI | 2-3 weeks | Phase 4, 5 | TBD |
+| 7 | Project Management | 1-2 weeks | Phase 3, 4, 6 | TBD |
+| 8 | Quality & Polish | 1-2 weeks | Phase 2, 6, 7 | TBD |
 
 **Total Estimate:** 10-16 weeks
 
@@ -465,4 +478,5 @@ This roadmap evolves at:
 
 *Roadmap for: CCAPISwitch*  
 *Created: 2026-04-13*  
-*Based on: Research Summary (HIGH confidence)*
+*Based on: Research Summary (HIGH confidence)*  
+*Phase 1 plans added: 2026-04-13*
