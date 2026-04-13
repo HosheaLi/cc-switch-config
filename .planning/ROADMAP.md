@@ -74,7 +74,7 @@
 
 **Plans:**
 - [x] 02-01-PLAN.md — Core Config Schemas (ClaudeSettingsSchema, EnvConfig, McpServerConfig, PermissionRule, HookConfig)
-- [ ] 02-02-PLAN.md — Validation Utilities (ValidationError class, validateConfig, prettifyError integration)
+- [x] 02-02-PLAN.md — Validation Utilities (ValidationError class, validateConfig, prettifyError integration)
 - [ ] 02-03-PLAN.md — Merge Algorithm (deepMergeConfig, ConfigLayer type, three-layer merge)
 - [ ] 02-04-PLAN.md — Provider Types (ApiProviderConfig, TemplateConfig, AuthType enum)
 - [ ] 02-05-PLAN.md — Barrel Export & Integration (index.ts, update DEFAULT_CONFIG)

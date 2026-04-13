@@ -3,16 +3,16 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 current_phase: 2
-current_plan: 01
-status: executing
-stopped_at: Plan 02-01 complete
-last_updated: "2026-04-13T12:30:55Z"
+current_plan: Not started
+status: planning
+stopped_at: Plan 02-02 complete
+last_updated: "2026-04-13T12:41:00Z"
 progress:
   total_phases: 8
   completed_phases: 1
   total_plans: 12
-  completed_plans: 8
-  percent: 67
+  completed_plans: 9
+  percent: 75
 ---
 
 # Project State
@@ -50,7 +50,7 @@ progress:
 | 01-06 Config Versioning & Migration | Completed | 6 |
 | 01-07 Token Security | Completed | 7 |
 
-**Progress:** [███████░░░] 67%
+**Progress:** [████████░░] 75%
 
 ---
 
@@ -58,18 +58,18 @@ progress:
 
 **Status:** Executing
 **Plans Created:** 5
-**Plans Completed:** 1
+**Plans Completed:** 2
 
 **Plan Status:**
 | Plan | Status | Wave |
 |------|--------|------|
 | 02-01 ClaudeSettingsSchema | Completed | 1 |
-| 02-02 Validation Utilities | Not started | 2 |
+| 02-02 Validation Utilities | Completed | 2 |
 | 02-03 Deep Merge Algorithm | Not started | 3 |
 | 02-04 API Provider Types | Not started | 4 |
 | 02-05 Barrel Export | Not started | 5 |
 
-**Progress:** [██░░░░░░░░] 20%
+**Progress:** [████░░░░░░] 40%
 
 ---
 
@@ -85,6 +85,7 @@ progress:
 | 01-06 Config Versioning & Migration | 3 min | 1 | 3 | 2026-04-13 |
 | 01-07 Token Security | 2 min | 1 | 2 | 2026-04-13 |
 | 02-01 ClaudeSettingsSchema | 3 min | 2 | 2 | 2026-04-13 |
+| 02-02 Validation Utilities | 2 min | 2 | 2 | 2026-04-13 |
 
 ## Decisions
 
@@ -111,6 +112,9 @@ progress:
 - [Phase 02-types-validation]: EnvConfigSchema uses .passthrough() — allows arbitrary environment variables beyond known keys
 - [Phase 02-types-validation]: PermissionRuleSchema uses .refine() — requires at least one of allow/deny fields
 - [Phase 02-types-validation]: All types derived via z.infer<> — Zod schema as single source of truth (per D-01)
+- [Phase 02-types-validation]: ValidationError class stores all Zod issues for structured programmatic access (per D-03)
+- [Phase 02-types-validation]: validateConfig uses safeParse to collect ALL errors, not just first (per D-05)
+- [Phase 02-types-validation]: ValidationResult discriminated union enables type-safe result handling
 
 ### Pending Decisions
 
@@ -128,6 +132,7 @@ progress:
 
 | Date | Action | Result |
 |------|--------|--------|
+| 2026-04-13 | Plan 02-02 executed | ValidationError class, validateConfig, 16 tests |
 | 2026-04-13 | Plan 02-01 executed | ClaudeSettingsSchema implemented, strict validation, 37 tests |
 | 2026-04-13 | Plan 01-07 executed | Token security implemented, git tracking check, token masking |
 | 2026-04-13 | Phase 01 completed | All 7 plans executed, 105 tests passing |
@@ -155,10 +160,10 @@ progress:
 
 ## Session Info
 
-**Last Session:** 2026-04-13T12:30:55Z
-**Stopped At:** Plan 02-01 complete
-**Resume From:** Plan 02-02 (next plan)
+**Last Session:** 2026-04-13T12:41:00Z
+**Stopped At:** Plan 02-02 complete
+**Resume From:** Plan 02-03 (next plan)
 
 ---
 
-*State updated: 2026-04-13 after Plan 02-01 execution*
+*State updated: 2026-04-13 after Plan 02-02 execution*
