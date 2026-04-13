@@ -66,15 +66,23 @@
 
 ### Phase 2: Types & Validation
 
-**Goal:** 定义类型系统和验证框架，建立单一数据源。
+**Goal:** 定义类型系统和验证框架，建立配置管理的单一数据源（Single Source of Truth）。
 
 **Duration Estimate:** 1 week
 
+**Plans:** 5 plans in 3 waves
+
+**Plans:**
+- [ ] 02-01-PLAN.md — Core Config Schemas (ClaudeSettingsSchema, EnvConfig, McpServerConfig, PermissionRule, HookConfig)
+- [ ] 02-02-PLAN.md — Validation Utilities (ValidationError class, validateConfig, prettifyError integration)
+- [ ] 02-03-PLAN.md — Merge Algorithm (deepMergeConfig, ConfigLayer type, three-layer merge)
+- [ ] 02-04-PLAN.md — Provider Types (ApiProviderConfig, TemplateConfig, AuthType enum)
+- [ ] 02-05-PLAN.md — Barrel Export & Integration (index.ts, update DEFAULT_CONFIG)
+
 **Delivers:**
-- TypeScript 类型定义（config, project, template, provider）
-- Zod schemas + 类型推断（消除重复类型定义）
-- JSON Schema 验证器（语法 +语义验证）
-- 配置 merge 算法（支持多层优先级）
+- TypeScript 类型定义（从 Zod schema 推断）
+- Zod schemas 验证框架
+- 配置 merge 算法
 - 默认配置和常量定义
 
 **Requirements Addressed:**
@@ -100,6 +108,8 @@
 **Goal:** 实现数据持久化层，建立 Repository 模式。
 
 **Duration Estimate:** 1-2 weeks
+
+**Plans:** TBD
 
 **Delivers:**
 - ConfigRepository 实现（read/write/exists/backup）
@@ -132,6 +142,8 @@
 
 **Duration Estimate:** 2-3 weeks
 
+**Plans:** TBD
+
 **Delivers:**
 - ConfigService（config read/write/merge/validate）
 - ProjectService（project indexing, detection, CRUD）
@@ -163,6 +175,8 @@
 
 **Duration Estimate:** 1 week
 
+**Plans:** TBD
+
 **Delivers:**
 - CLI entry point（shebang, commander setup）
 - 基础命令实现
@@ -191,6 +205,8 @@
 **Goal:** 实现交互式 TUI，核心用户界面。
 
 **Duration Estimate:** 2-3 weeks
+
+**Plans:** TBD
 
 **Delivers:**
 - TUI App container（ink/React setup）
@@ -227,6 +243,8 @@
 
 **Duration Estimate:** 1-2 weeks
 
+**Plans:** TBD
+
 **Delivers:**
 - Project directory scan（自动发现项目）
 - Auto-switch by directory（cd 自动切换配置）
@@ -259,6 +277,8 @@
 **Goal:** 质量提升和用户体验优化。
 
 **Duration Estimate:** 1-2 weeks
+
+**Plans:** TBD
 
 **Delivers:**
 - Diff Before Apply（side-by-side comparison）
@@ -297,7 +317,7 @@
 | Phase | Goal | Duration | Dependencies | Plans |
 |-------|------|----------|--------------|-------|
 | 1 | Foundation & Safety | 1-2 weeks | None | 7 |
-| 2 | Types & Validation | 1 week | Phase 1 | TBD |
+| 2 | Types & Validation | 1 week | Phase 1 | 5 |
 | 3 | Data Layer | 1-2 weeks | Phase 1, 2 | TBD |
 | 4 | Services Layer | 2-3 weeks | Phase 2, 3 | TBD |
 | 5 | CLI Interface | 1 week | Phase 4 | TBD |
@@ -479,4 +499,5 @@ This roadmap evolves at:
 *Roadmap for: CCAPISwitch*  
 *Created: 2026-04-13*  
 *Based on: Research Summary (HIGH confidence)*  
-*Phase 1 plans added: 2026-04-13*
+*Phase 1 plans added: 2026-04-13*  
+*Phase 2 plans added: 2026-04-13*
