@@ -24,7 +24,7 @@
 **Plans:** 7 plans in 7 waves
 
 **Plans:**
-- [ ] 01-01-PLAN.md — Project Setup (package.json, tsconfig, build, test configs)
+- [x] 01-01-PLAN.md — Project Setup (package.json, tsconfig, build, test configs)
 - [ ] 01-02-PLAN.md — Cross-Platform Paths (env-paths, XDG directories)
 - [ ] 01-03-PLAN.md — Atomic File Operations (write-rename pattern)
 - [ ] 01-04-PLAN.md — Backup System (timestamped backups before modifications)
