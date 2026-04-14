@@ -17,46 +17,79 @@ describe('ExitCodes', () => {
 });
 
 describe('handleCLIError', () => {
-  let mockExit: ReturnType<typeof vi.spyOn>;
   let mockError: ReturnType<typeof vi.spyOn>;
 
   beforeEach(() => {
-    mockExit = vi.spyOn(process, 'exit').mockImplementation(() => undefined as never);
     mockError = vi.spyOn(console, 'error').mockImplementation(() => {});
   });
 
   afterEach(() => {
-    mockExit.mockRestore();
     mockError.mockRestore();
   });
 
   it('handles ServiceError with mapped exit code', () => {
+    const mockExit = vi.spyOn(process, 'exit').mockImplementation((code) => {
+      throw new Error(`process.exit:${code}`);
+    });
+
     const error = new ServiceError('Template not found', 'TEMPLATE_NOT_FOUND');
-    handleCLIError(error);
+    try {
+      handleCLIError(error);
+    } catch (e) {
+      expect(e).toBeInstanceOf(Error);
+      expect((e as Error).message).toBe(`process.exit:${ExitCodes.NOT_FOUND}`);
+    }
 
     expect(mockError).toHaveBeenCalled();
-    expect(mockExit).toHaveBeenCalledWith(ExitCodes.NOT_FOUND);
+    mockExit.mockRestore();
   });
 
   it('handles generic Error with GENERAL_ERROR code', () => {
+    const mockExit = vi.spyOn(process, 'exit').mockImplementation((code) => {
+      throw new Error(`process.exit:${code}`);
+    });
+
     const error = new Error('Something went wrong');
-    handleCLIError(error);
+    try {
+      handleCLIError(error);
+    } catch (e) {
+      expect(e).toBeInstanceOf(Error);
+      expect((e as Error).message).toBe(`process.exit:${ExitCodes.GENERAL_ERROR}`);
+    }
 
     expect(mockError).toHaveBeenCalled();
-    expect(mockExit).toHaveBeenCalledWith(ExitCodes.GENERAL_ERROR);
+    mockExit.mockRestore();
   });
 
   it('handles unknown error type', () => {
-    handleCLIError('string error');
+    const mockExit = vi.spyOn(process, 'exit').mockImplementation((code) => {
+      throw new Error(`process.exit:${code}`);
+    });
+
+    try {
+      handleCLIError('string error');
+    } catch (e) {
+      expect(e).toBeInstanceOf(Error);
+      expect((e as Error).message).toBe(`process.exit:${ExitCodes.GENERAL_ERROR}`);
+    }
 
     expect(mockError).toHaveBeenCalled();
-    expect(mockExit).toHaveBeenCalledWith(ExitCodes.GENERAL_ERROR);
+    mockExit.mockRestore();
   });
 
   it('allows override exit code', () => {
-    const error = new ServiceError('Test error', 'TEMPLATE_NOT_FOUND');
-    handleCLIError(error, ExitCodes.MISUSE);
+    const mockExit = vi.spyOn(process, 'exit').mockImplementation((code) => {
+      throw new Error(`process.exit:${code}`);
+    });
 
-    expect(mockExit).toHaveBeenCalledWith(ExitCodes.MISUSE);
+    const error = new ServiceError('Test error', 'TEMPLATE_NOT_FOUND');
+    try {
+      handleCLIError(error, ExitCodes.MISUSE);
+    } catch (e) {
+      expect(e).toBeInstanceOf(Error);
+      expect((e as Error).message).toBe(`process.exit:${ExitCodes.MISUSE}`);
+    }
+
+    mockExit.mockRestore();
   });
 });
