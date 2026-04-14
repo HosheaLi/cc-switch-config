@@ -246,7 +246,16 @@
 
 **Duration Estimate:** 2-3 weeks
 
-**Plans:** TBD
+**Plans:** 7 plans in 3 waves
+
+**Plans:**
+- [ ] 06-01-PLAN.md — Wave 0: Dependencies + Hooks (ink-testing-library, useKeyInput, useNavigation, useFuzzySearch)
+- [ ] 06-02-PLAN.md — Wave 1: Reusable Components (StatusBar, LoadingIndicator, PreviewPanel, useDelayedLoading)
+- [ ] 06-03-PLAN.md — Wave 2: ProjectListScreen (F2, F14, U3, U4 - list, search, navigation)
+- [ ] 06-04-PLAN.md — Wave 2: ConfigEditorScreen (F3 - template preview, confirm/cancel)
+- [ ] 06-05-PLAN.md — Wave 2: ConfirmScreen (U5 - y/n confirmation for destructive actions)
+- [ ] 06-06-PLAN.md — Wave 3: TUI App Container (screen routing, Service integration)
+- [ ] 06-07-PLAN.md — Wave 3: CLI Integration + M4 Verification (replace stubs, verify architecture)
 
 **Delivers:**
 - TUI App container（ink/React setup）
@@ -257,11 +266,14 @@
 - Loading indicators（Spinner, progress）
 
 **Requirements Addressed:**
-- F2: Interactive TUI Selector (arrow-key navigation, fuzzy search)
-- F3: Configuration Preview (show what will change)
-- N4: Responsive TUI (<50ms render time)
-- U3: Keyboard Navigation (arrows + j/k)
-- U4: Escape to Cancel (always allow cancel)
+- F2: Interactive TUI Selector (arrow-key navigation, fuzzy search) — Plan 03
+- F3: Configuration Preview (show what will change) — Plan 04
+- F14: Fuzzy Search (quick navigation) — Plans 01, 03
+- N4: Responsive TUI (<50ms render time) — Plans 06, 07
+- U3: Keyboard Navigation (arrows + j/k) — Plans 01, 03
+- U4: Escape to Cancel (always allow cancel) — Plans 03, 04, 05
+- U5: Confirmation Prompts (destructive actions) — Plan 05
+- M4: Module Separation (Services no ink imports) — Plan 07
 
 **Dependencies:**
 - Phase 4 (services for data)
@@ -272,10 +284,13 @@
 - Navigation test: both arrow keys and j/k work
 - Render test: list renders < 50ms for 100 items
 - Escape test: all dialogs allow cancel
+- M4 test: Services have no ink/react imports
 
-**Research Notes:** Standard patterns — Ink examples, ink-testing-library, @inkjs/ui components.
+**Research Notes:** Standard patterns — Ink examples, ink-testing-library, ink-select-input, ink-text-input, fuse.js.
 
 ---
+
+### Phase 7: Project Management Features
 
 ### Phase 7: Project Management Features
 
@@ -361,7 +376,7 @@
 | 3 | Data Layer | 1-2 weeks | Phase 1, 2 | 5 |
 | 4 | Services Layer | 2-3 weeks | Phase 2, 3 | 6 |
 | 5 | CLI Interface | 1 week | Phase 4 | 6 |
-| 6 | Core TUI | 2-3 weeks | Phase 4, 5 | TBD |
+| 6 | Core TUI | 2-3 weeks | Phase 4, 5 | 7 |
 | 7 | Project Management | 1-2 weeks | Phase 3, 4, 6 | TBD |
 | 8 | Quality & Polish | 1-2 weeks | Phase 2, 6, 7 | TBD |
 
@@ -542,4 +557,5 @@ This roadmap evolves at:
 *Phase 2 plans added: 2026-04-13*  
 *Phase 3 plans added: 2026-04-13*  
 *Phase 4 plans added: 2026-04-13*  
-*Phase 5 plans added: 2026-04-14*
+*Phase 5 plans added: 2026-04-14
+*Phase 6 plans added: 2026-04-14*
