@@ -9,6 +9,7 @@ import { registerListCommand } from './commands/list.js';
 import { registerSwitchCommand } from './commands/switch.js';
 import { registerCurrentCommand } from './commands/current.js';
 import { registerTemplateCommand } from './commands/template.js';
+import { registerAutoCheckCommand } from './commands/auto-check.js';
 
 const VERSION = '0.1.0';
 
@@ -24,6 +25,7 @@ export async function runCLI(argv: string[] = process.argv): Promise<void> {
   registerSwitchCommand(program);
   registerCurrentCommand(program);
   registerTemplateCommand(program);
+  registerAutoCheckCommand(program);
 
   const args = argv.slice(2);
   if (args.length === 0) {
