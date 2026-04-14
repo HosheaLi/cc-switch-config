@@ -2,42 +2,42 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-current_phase: 5
-current_plan: Not started
-status: planning
-last_updated: "2026-04-13T16:20:39.583Z"
+current_phase: 05
+current_plan: 2
+status: executing
+last_updated: "2026-04-14T06:02:31.802Z"
 progress:
   total_phases: 8
   completed_phases: 4
-  total_plans: 23
-  completed_plans: 23
-  percent: 100
+  total_plans: 29
+  completed_plans: 24
+  percent: 83
 ---
 
 # Project State
 
 **Project:** CCAPISwitch  
-**Updated:** 2026-04-13
+**Updated:** 2026-04-14
 
 ---
 
 ## Position
 
-**Current Phase:** 5
-**Current Plan:** Not started
-**Current Status:** Phase 04 Complete
-**Next Action:** `/gsd:transition` to Phase 05 (CLI Interface)
+**Current Phase:** 05
+**Current Plan:** 2
+**Current Status:** Plan 05-01 Complete - CLI Test Infrastructure
+**Next Action:** `/gsd:execute-phase` to continue Phase 05 Plan 02
 
 ---
 
 ## Phase Progress
 
-### Phase 4: Services Layer
+### Phase 5: CLI Interface
 
-**Status:** Ready to plan
-**Plans:** 6/6
+**Status:** In Progress
+**Plans:** 1/6
 
-**Progress:** [██████████] 100%
+**Progress:** [██░░░░░░░░] 17%
 
 ---
 
@@ -53,16 +53,19 @@ progress:
 - **D-06:** Provider 测试：基础连通性
 - **D-07:** Barrel Export Services
 
+### Phase 05 Decisions
+
+- **D-08:** CLI exit codes follow Unix conventions (SUCCESS=0, NOT_FOUND=3, CONFIG_ERROR=4)
+- **D-09:** ServiceError codes mapped to specific exit codes
+- **D-10:** chalk used for colored error messages to stderr
+
 ---
-- [Phase 04]: Native fetch with AbortSignal.timeout for connectivity testing
-- [Phase 04]: D-03 verified: TemplateService applyTemplate uses deepMergeConfig to preserve non-template fields
-- [Phase 04]: ConfigService: ValidationError passed through, not wrapped in ServiceError
-- [Phase 04]: D-05 verified: AppState.scanDirectories stores user-configured scan roots
 
 ## Recent Activity
 
 | Date | Action | Result |
 |------|--------|--------|
+| 2026-04-14 | Plan 05-01 complete | Wave 0 CLI test infrastructure + error handling (14 tests) |
 | 2026-04-13 | Plan 04-06 complete | Barrel export + M4 verification (82 tests) |
 | 2026-04-13 | Plan 04-03 complete | ProjectService with directory scanning + bug fix (48 tests) |
 | 2026-04-13 | Plan 04-05 complete | ProviderService connectivity testing |
@@ -71,5 +74,4 @@ progress:
 | 2026-04-13 | Plan 04-01 complete | ServiceError + Wave 0 stubs (79 tests) |
 
 ---
-
-*State updated: 2026-04-13 after Plan 04-03 completion*
+*State updated: 2026-04-14 after Plan 05-01 completion*

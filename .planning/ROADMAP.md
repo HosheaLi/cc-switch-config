@@ -202,7 +202,7 @@
 **Plans:** 6 plans in 5 waves
 
 **Plans:**
-- [ ] 05-01-PLAN.md — Wave 0: Test Infrastructure + Error Handling (cli-table3, ExitCodes, handleCLIError)
+- [x] 05-01-PLAN.md — Wave 0: Test Infrastructure + Error Handling (cli-table3, ExitCodes, handleCLIError)
 - [ ] 05-02-PLAN.md — Wave 1: CLI Entry Point + list Command (Commander setup, table output, D-02)
 - [ ] 05-03-PLAN.md — Wave 2: switch Command (optional argument + TUI fallback, D-06)
 - [ ] 05-04-PLAN.md — Wave 3: current Command (active project/template display)
