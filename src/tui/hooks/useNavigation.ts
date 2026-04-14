@@ -4,7 +4,7 @@ import { useState } from 'react';
  * Screen types for navigation
  * Per D-02: Layer-level navigation with stack management
  */
-export type Screen = 'list' | 'editor' | 'confirm' | 'template-select';
+export type Screen = 'list' | 'editor' | 'confirm' | 'template-select' | 'import-conflict';
 
 /**
  * Navigation state interface
