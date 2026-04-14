@@ -118,3 +118,11 @@ None - no external service configuration required.
 ---
 *Phase: 05-cli-interface*
 *Completed: 2026-04-14*
+
+## Self-Check: PASSED
+
+- [x] src/cli/commands/current.ts exists
+- [x] src/cli/commands/current.test.ts exists
+- [x] 05-04-SUMMARY.md exists
+- [x] Commit e09502a (feat) found
+- [x] Commit f09005d (docs) found
