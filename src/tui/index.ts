@@ -9,3 +9,6 @@
 
 // Export all hooks
 export * from './hooks/index.js';
+
+// Export all components
+export * from './components/index.js';

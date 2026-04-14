@@ -12,3 +12,6 @@ export type { Screen } from './useNavigation.js';
 // Search hooks
 export { useFuzzySearch } from './useFuzzySearch.js';
 export type { SearchableItem } from './useFuzzySearch.js';
+
+// Loading hooks
+export { useDelayedLoading } from './useDelayedLoading.js';
