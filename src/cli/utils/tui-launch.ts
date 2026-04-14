@@ -3,12 +3,14 @@
  *
  * Per D-02: No args launches TUI.
  * Per D-06: switch without argument calls TUI selection.
+ * Per D-08: scan command with --tui launches ScanScreen.
  *
  * This module connects CLI to the Ink-based TUI screens.
  */
 
 import { runTUI } from '../../tui/index.js';
-import { TemplateService } from '../../lib/services/index.js';
+import { TemplateService, ProjectService } from '../../lib/services/index.js';
+import type { ScanResult } from '../../lib/services/index.js';
 import { TemplateStore } from '../../lib/store/index.js';
 import { readConfig, writeConfig } from '../../lib/store/config.js';
 import chalk from 'chalk';
@@ -65,4 +67,43 @@ export async function selectTemplateInTUI(): Promise<string | null> {
     }
     return null;
   }
+}
+
+/**
+ * Launch TUI for scan results multi-select.
+ * Per D-08: Called when scan command has --tui flag.
+ * Per D-09: ScanScreen displays new projects with checkbox multi-select.
+ *
+ * Note: Full ScanScreen implementation is in Phase 07-02.
+ * This placeholder returns results and prompts CLI usage until ScanScreen is ready.
+ *
+ * @param results - Scan results from ProjectService.scanProjects()
+ * @param service - ProjectService instance for registration
+ * @returns Promise that resolves when TUI exits
+ */
+export async function launchScanTUI(
+  results: ScanResult[],
+  service: ProjectService
+): Promise<void> {
+  const newProjects = results.filter(r => r.isNew);
+
+  if (newProjects.length === 0) {
+    console.log(chalk.yellow('No new projects found.'));
+    console.log(chalk.gray('All discovered projects are already registered.'));
+    return;
+  }
+
+  // For Phase 07-02, list new projects and prompt registration via CLI
+  // Full TUI multi-select is implemented in ScanScreen.tsx
+  console.log(chalk.cyan('New projects found:'));
+  for (const result of newProjects) {
+    const name = result.path.split('/').pop() ?? result.path;
+    console.log(chalk.white(`  - ${name} (${result.path})`));
+  }
+
+  console.log(chalk.gray('\nRegister projects: cc-config register <path>'));
+  console.log(chalk.gray('Or use interactive selection: cc-config scan --tui'));
+
+  // Note: When ScanScreen is fully integrated with TuiApp (Wave 4),
+  // this will launch the actual Ink-based ScanScreen component
 }

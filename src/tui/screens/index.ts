@@ -12,3 +12,7 @@ export { ConfigEditorScreen } from './ConfigEditorScreen.js';
 
 // Confirmation screen (U5, U4)
 export { ConfirmScreen } from './ConfirmScreen.js';
+
+// Scan screen (F10, D-09)
+export { ScanScreen } from './ScanScreen.js';
+export type { ScanScreenProps } from './ScanScreen.js';
