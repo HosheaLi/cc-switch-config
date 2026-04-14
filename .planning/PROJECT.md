@@ -80,9 +80,22 @@ Claude Code 配置层级：
 | npm + Git 分发 | npm 便于安装，Git 便于查看源码 | — Pending |
 
 ---
-*Last updated: 2026-04-14 after Phase 05 completion (CLI Interface)*
+*Last updated: 2026-04-14 after Phase 06 completion (Core TUI)*
 
 ## Evolution
+
+**Phase 06 (Core TUI) - Completed 2026-04-14:**
+- Complete TUI interface with Ink framework: screens, components, hooks
+- ProjectListScreen with fuzzy search (F14) and dual-mode navigation (U3: arrows + j/k)
+- ConfigEditorScreen with template preview (F3) and confirmation/cancel (U4)
+- ConfirmScreen with explicit y/n confirmation (U5) for destructive actions
+- Core hooks: useKeyInput, useNavigation, useFuzzySearch, useDelayedLoading
+- Visual components: StatusBar (D-07/D-11), LoadingIndicator (D-08), PreviewPanel (D-04)
+- TUI App Container with screen routing and Service injection (Clean Architecture)
+- CLI integration: launchTUI + selectTemplateInTUI (D-02/D-06)
+- M4 verified: Services do NOT import ink/react (18 boundary tests)
+- N4 verified: TUI renders <50ms for 100 projects (7 performance tests)
+- 644 tests passing, ready for Phase 07 (Project Management Features)
 
 **Phase 05 (CLI Interface) - Completed 2026-04-14:**
 - CLI layer foundation complete: Commander.js entry point, 4 core commands (list, switch, current, template)
