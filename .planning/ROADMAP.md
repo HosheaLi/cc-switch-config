@@ -205,8 +205,8 @@
 - [x] 05-01-PLAN.md — Wave 0: Test Infrastructure + Error Handling (cli-table3, ExitCodes, handleCLIError)
 - [x] 05-02-PLAN.md — Wave 1: CLI Entry Point + list Command (Commander setup, table output, D-02)
 - [x] 05-03-PLAN.md — Wave 2: switch Command (optional argument + TUI fallback, D-06)
-- [ ] 05-04-PLAN.md — Wave 3: current Command (active project/template display)
-- [ ] 05-05-PLAN.md — Wave 3: template Subcommand (nested CRUD, D-07 aliases)
+- [x] 05-04-PLAN.md — Wave 3: current Command (active project/template display)
+- [x] 05-05-PLAN.md — Wave 3: template Subcommand (nested CRUD, D-07 aliases)
 - [ ] 05-06-PLAN.md — Wave 4: Barrel Export + Integration (shebang entry, M4 verification)
 
 **Delivers:**

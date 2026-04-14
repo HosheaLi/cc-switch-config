@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 current_phase: 05
-current_plan: 3
+current_plan: 4
 status: executing
-last_updated: "2026-04-14T06:31:24.573Z"
+last_updated: "2026-04-14T06:42:44.279Z"
 progress:
   total_phases: 8
   completed_phases: 4
   total_plans: 29
-  completed_plans: 26
-  percent: 87
+  completed_plans: 28
+  percent: 97
 ---
 
 # Project State
@@ -24,9 +24,9 @@ progress:
 ## Position
 
 **Current Phase:** 05
-**Current Plan:** 2
-**Current Status:** Plan 05-03 Complete - Switch Command + TUI Stub
-**Next Action:** `/gsd:execute-phase` to continue Phase 05 Plan 04
+**Current Plan:** 4
+**Current Status:** Plan 05-04 Complete - Current Command
+**Next Action:** `/gsd:execute-phase` to continue Phase 05 Plan 05
 
 ---
 
@@ -35,9 +35,9 @@ progress:
 ### Phase 5: CLI Interface
 
 **Status:** In Progress
-**Plans:** 2/6
+**Plans:** 4/6
 
-**Progress:** [█████████░] 86%
+**Progress:** [██████████] 97%
 
 ---
 
@@ -52,6 +52,10 @@ progress:
 - **D-05:** 扫描目录：用户配置根目录
 - **D-06:** Provider 测试：基础连通性
 - **D-07:** Barrel Export Services
+- [Phase 05]: D-04: current command displays active project path and template name
+- [Phase 05-cli-interface]: D-07: Mixed style - tpl list/create/delete + l/c/d aliases
+- [Phase 05-cli-interface]: F7: Template CRUD operations via nested subcommands
+- [Phase 05-cli-interface]: U5: Confirmation prompt for delete without --force
 
 ### Phase 05 Decisions
 
@@ -71,6 +75,7 @@ progress:
 
 | Date | Action | Result |
 |------|--------|--------|
+| 2026-04-14 | Plan 05-04 complete | Current command + executeCurrentCommand (9 tests) |
 | 2026-04-14 | Plan 05-03 complete | Switch command + TUI stub (35 tests) |
 | 2026-04-14 | Plan 05-02 complete | CLI entry + list command + table output (25 tests) |
 | 2026-04-14 | Plan 05-01 complete | Wave 0 CLI test infrastructure + error handling (14 tests) |
@@ -82,4 +87,4 @@ progress:
 | 2026-04-13 | Plan 04-01 complete | ServiceError + Wave 0 stubs (79 tests) |
 
 ---
-*State updated: 2026-04-14 after Plan 05-01 completion*
+*State updated: 2026-04-14 after Plan 05-04 completion*
