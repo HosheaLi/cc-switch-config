@@ -5,13 +5,13 @@ milestone_name: milestone
 current_phase: 7
 current_plan: Not started
 status: planning
-last_updated: "2026-04-14T11:18:12.245Z"
+last_updated: "2026-04-14T15:00:54.087Z"
 progress:
   total_phases: 8
   completed_phases: 6
-  total_plans: 36
-  completed_plans: 36
-  percent: 100
+  total_plans: 40
+  completed_plans: 37
+  percent: 93
 ---
 
 # Project State
@@ -37,7 +37,7 @@ progress:
 **Status:** Ready to plan
 **Plans:** 6/6
 
-**Progress:** [██████████] 100%
+**Progress:** [█████████░] 93%
 
 ---
 
@@ -70,6 +70,9 @@ progress:
 - [Phase 06-core-tui]: D-04: PreviewPanel integration for template preview in ConfigEditorScreen
 - [Phase 06-core-tui]: D-02: launchTUI calls runTUI from TUI module
 - [Phase 06-core-tui]: D-06: selectTemplateInTUI lists templates via TemplateService
+- [Phase 07]: D-01: Shell hook like direnv using PROMPT_COMMAND/chpwd_functions for auto-switch
+- [Phase 07]: D-02: Silent output mode (--silent default true), only message on actual switch
+- [Phase 07]: D-03: Prompt to register when unregistered .claude directory detected
 
 ### Phase 05 Decisions
 
