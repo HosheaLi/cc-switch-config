@@ -10,15 +10,19 @@
  */
 import React, { useState, useEffect } from 'react';
 import { render, Box, Text, useApp } from 'ink';
-import { ProjectService, TemplateService, ConfigService } from '../lib/services/index.js';
+import { ProjectService, TemplateService, ConfigService, ExportService } from '../lib/services/index.js';
 import { ProjectIndex, TemplateStore, AppState, readConfig, writeConfig } from '../lib/store/index.js';
 import type { ProjectEntry } from '../lib/store/project.js';
 import type { TemplateConfig } from '../lib/types/provider.js';
+import type { ScanResult } from '../lib/services/project-service.js';
+import type { ConflictField } from '../lib/types/export-schema.js';
 import { useNavigation } from './hooks/useNavigation.js';
 import { LoadingIndicator } from './components/LoadingIndicator.js';
 import { ProjectListScreen } from './screens/ProjectListScreen.js';
 import { ConfigEditorScreen } from './screens/ConfigEditorScreen.js';
 import { ConfirmScreen } from './screens/ConfirmScreen.js';
+import { ScanScreen } from './screens/ScanScreen.js';
+import { ImportConflictScreen } from './screens/ImportConflictScreen.js';
 
 /**
  * Props for TuiApp component.
@@ -65,6 +69,13 @@ export const TuiApp: React.FC<TuiAppProps> = ({
   const [selected, setSelected] = useState<SelectedState>({ project: null, template: null });
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Scan screen state (F10, D-08)
+  const [scanResults, setScanResults] = useState<ScanResult[]>([]);
+  const [isScanning, setIsScanning] = useState(false);
+
+  // Import-conflict screen state (F13, D-07)
+  const [importConflicts, setImportConflicts] = useState<ConflictField[]>([]);
 
   // Load projects on mount
   useEffect(() => {
@@ -129,6 +140,47 @@ export const TuiApp: React.FC<TuiAppProps> = ({
   // Handle exit
   const handleExit = () => {
     exit();
+  };
+
+  // Handle scan trigger (F10, D-08)
+  const handleTriggerScan = async () => {
+    setIsScanning(true);
+    try {
+      const results = await projectService.scanProjects();
+      setScanResults(results);
+      navigation.push('scan');
+    } catch (err) {
+      if (err instanceof Error) {
+        setError(err.message);
+      }
+    }
+    setIsScanning(false);
+  };
+
+  // Handle scan confirmation - register selected projects (D-09)
+  const handleScanConfirm = async (selectedPaths: string[]) => {
+    for (const projectPath of selectedPaths) {
+      try {
+        await projectService.registerProject(projectPath);
+      } catch (err) {
+        // Continue with other projects even if one fails
+        if (err instanceof Error) {
+          console.error(`Failed to register ${projectPath}: ${err.message}`);
+        }
+      }
+    }
+    // Reload projects list
+    const updatedList = await projectService.listProjects();
+    setProjects(updatedList);
+    navigation.pop();
+  };
+
+  // Handle import-conflict resolution (F13, D-07)
+  const handleImportResolve = async (strategy: 'merge' | 'overwrite' | 'skip') => {
+    // Note: Import-conflict screen is typically launched from CLI import command
+    // This handler provides TUI integration for future use
+    // For now, just pop back to previous screen
+    navigation.pop();
   };
 
   // Render current screen
@@ -224,6 +276,26 @@ export const TuiApp: React.FC<TuiAppProps> = ({
               <Text dimColor>Press Esc to go back</Text>
             </Box>
           </Box>
+        );
+
+      case 'scan':
+        // Scan screen for project discovery (F10, D-09)
+        return (
+          <ScanScreen
+            results={scanResults}
+            onConfirm={handleScanConfirm}
+            onCancel={() => navigation.pop()}
+          />
+        );
+
+      case 'import-conflict':
+        // Import conflict resolution screen (F13, D-07)
+        return (
+          <ImportConflictScreen
+            conflicts={importConflicts}
+            onResolve={handleImportResolve}
+            onCancel={() => navigation.pop()}
+          />
         );
 
       default:
