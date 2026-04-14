@@ -43,7 +43,7 @@ patterns-established:
 
 requirements-completed: [U1]
 
-duration: 3min
+duration: 11min
 completed: 2026-04-14
 ---
 
@@ -53,9 +53,9 @@ completed: 2026-04-14
 
 ## Performance
 
-- **Duration:** 3 min
+- **Duration:** 11 min
 - **Started:** 2026-04-14T05:57:39Z
-- **Completed:** 2026-04-14T06:01:18Z
+- **Completed:** 2026-04-14T06:08:16Z
 - **Tasks:** 2
 - **Files modified:** 10
 
@@ -73,8 +73,10 @@ Each task was committed atomically:
 1. **Task 1: Install cli-table3 and create test stub files** - `a94130a` (test)
 2. **Task 2: Create error handling module** - `7435965` (feat)
 3. **Auto-fix: Improved vitest mock strategy** - `9cb6042` (fix)
+4. **Fix: Restore Wave 0 stubs, remove premature Wave 1 content** - `30e11f4` (fix)
+5. **Fix: Restore table.test.ts to Wave 0 stub** - `1023f36` (fix)
 
-**Plan metadata:** `4c7f906` (docs: complete plan)
+**Plan metadata:** (included in fix commits)
 
 ## Files Created/Modified
 - `src/cli/output/error.ts` - ExitCodes constants and handleCLIError function
@@ -114,13 +116,21 @@ Each task was committed atomically:
 - **Verification:** All 7 error handling tests pass
 - **Committed in:** 7435965 (Task 2 commit)
 
+**3. [Rule 1 - Bug] Restored Wave 0 stub tests after linter auto-added Wave 1 content**
+- **Found during:** Final verification
+- **Issue:** Pre-commit hooks/linter auto-created Wave 1 implementation stubs and test content, breaking Wave 0 stub pattern
+- **Fix:** Removed premature implementation files (index.ts, commands/*.ts, utils/tui-launch.ts) and reverted test files to placeholder stubs
+- **Files modified:** All CLI test stub files, removed premature implementation files
+- **Verification:** All 14 tests pass with placeholder stubs
+- **Committed in:** 30e11f4, 1023f36
+
 ---
 
-**Total deviations:** 2 auto-fixed (1 blocking, 1 bug)
-**Impact on plan:** Both fixes necessary for test infrastructure correctness. No scope creep.
+**Total deviations:** 3 auto-fixed (1 blocking, 2 bugs)
+**Impact on plan:** All fixes necessary for Wave 0 infrastructure correctness. Premature Wave 1 content was removed as it belongs to subsequent plans.
 
 ## Issues Encountered
-None - all tasks completed successfully
+Pre-commit hooks/linter auto-created Wave 1 content prematurely. This required multiple fix commits to restore Wave 0 stub state.
 
 ## User Setup Required
 None - no external service configuration required.
@@ -138,6 +148,6 @@ None - no external service configuration required.
 ## Self-Check: PASSED
 
 - SUMMARY.md exists at `.planning/phases/05-cli-interface/05-01-SUMMARY.md`
-- All 4 commits verified in git log (a94130a, 7435965, 9cb6042, 4c7f906)
+- All commits verified in git log (a94130a, 7435965, 9cb6042, 30e11f4, 1023f36)
 - error.ts and error.test.ts exist at expected paths
 - All 14 tests pass (8 test files)
