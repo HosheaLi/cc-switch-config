@@ -6,8 +6,10 @@
  * Per D-06: Instant fuzzy search.
  * Per D-04: Bottom popup preview.
  * Per D-09: Standard Escape behavior.
+ * Per D-08: 'S' key triggers scan (ProjectListScreen -> ScanScreen).
  *
  * Per F2: Interactive TUI Selector (arrow-key navigation, fuzzy search).
+ * Per F10: Project Directory Scan (S key trigger).
  * Per F14: Fuzzy Search (quick navigation).
  * Per U3: Keyboard Navigation (arrows + j/k).
  * Per U4: Escape to Cancel (always allow cancel).
@@ -68,7 +70,7 @@ export const ProjectListScreen: React.FC<ProjectListScreenProps> = ({
   initialQuery = '',
 }) => {
   const { exit } = useApp();
-  const { isRoot, pop } = useNavigation('list');
+  const { isRoot, pop, push } = useNavigation('list');
 
   // State for selection and search
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -132,6 +134,15 @@ export const ProjectListScreen: React.FC<ProjectListScreenProps> = ({
     isActive: true,
   });
 
+  // 'S' key handler for scan trigger (D-08, F10)
+  useInput((input, key) => {
+    // Capital 'S' triggers scan navigation
+    // Only when not in search mode (query empty or user not typing)
+    if (input === 'S' && query.length === 0) {
+      push('scan');
+    }
+  }, { isActive: true });
+
   // Helper to format project display
   const formatProjectLine = (project: ProjectEntry & SearchableItem, index: number) => {
     const isSelected = index === selectedIndex;
@@ -184,7 +195,7 @@ export const ProjectListScreen: React.FC<ProjectListScreenProps> = ({
       {/* Help Text */}
       <Box marginTop={1}>
         <Text dimColor>
-          ↑/k: up  ↓/j: down  Enter: select  Esc: exit  Type to search
+          ↑/k: up  ↓/j: down  Enter: select  S: scan  Esc: exit  Type to search
         </Text>
       </Box>
     </Box>

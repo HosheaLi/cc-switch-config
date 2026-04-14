@@ -3,9 +3,9 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 current_phase: 7
-current_plan: Not started
-status: planning
-last_updated: "2026-04-14T15:00:54.087Z"
+current_plan: 02
+status: executing
+last_updated: "2026-04-14T15:17:00.000Z"
 progress:
   total_phases: 8
   completed_phases: 6
@@ -24,9 +24,9 @@ progress:
 ## Position
 
 **Current Phase:** 7
-**Current Plan:** Not started
-**Current Status:** Plan 06-07 Complete - CLI integration with TUI, M4/N4 verification tests
-**Next Action:** Phase 06 complete - Ready for Phase 07
+**Current Plan:** 02 Complete
+**Current Status:** Plan 07-02 Complete - CLI scan command + ScanScreen TUI + navigation extension
+**Next Action:** Ready for Plan 07-03 (Import/Export Configs)
 
 ---
 
@@ -50,6 +50,15 @@ progress:
 
 ---
 
+### Phase 7: Project Management Features
+
+**Status:** Executing
+**Plans:** 1/4
+
+**Progress:** [██░░░░░░░░] 25%
+
+---
+
 ## Decisions
 
 ### Locked Decisions (Phase 04 Context)
@@ -70,9 +79,6 @@ progress:
 - [Phase 06-core-tui]: D-04: PreviewPanel integration for template preview in ConfigEditorScreen
 - [Phase 06-core-tui]: D-02: launchTUI calls runTUI from TUI module
 - [Phase 06-core-tui]: D-06: selectTemplateInTUI lists templates via TemplateService
-- [Phase 07]: D-01: Shell hook like direnv using PROMPT_COMMAND/chpwd_functions for auto-switch
-- [Phase 07]: D-02: Silent output mode (--silent default true), only message on actual switch
-- [Phase 07]: D-03: Prompt to register when unregistered .claude directory detected
 
 ### Phase 05 Decisions
 
@@ -104,12 +110,18 @@ progress:
 - **Service Injection:** runTUI factory creates stores, services with constructor DI, renders app (06-06)
 - **Clean Architecture:** TUI calls Services (ProjectService, TemplateService), not Repositories directly (06-06)
 
+### Phase 07 Decisions
+
+- **D-08:** Two trigger modes for scan - TUI 'S' key + CLI 'scan' command (07-02)
+- **D-09:** ScanScreen displays new projects with checkbox multi-select (07-02)
+
 ---
 
 ## Recent Activity
 
 | Date | Action | Result |
 |------|--------|--------|
+| 2026-04-14 | Plan 07-02 complete | CLI scan command + ScanScreen TUI + navigation extension (72 tests) |
 | 2026-04-14 | Plan 06-07 complete | CLI integration + M4/N4 verification tests (644 tests total) |
 | 2026-04-14 | Plan 06-06 complete | TUI App Container + screen routing + Service integration (9 tests, 131 total) |
 | 2026-04-14 | Plan 06-04 complete | ConfigEditorScreen with template preview + navigation (17 tests) |
@@ -130,4 +142,4 @@ progress:
 | 2026-04-13 | Plan 04-01 complete | ServiceError + Wave 0 stubs (79 tests) |
 
 ---
-*State updated: 2026-04-14 after Plan 06-07 completion*
+*State updated: 2026-04-14 after Plan 07-02 completion*

@@ -137,4 +137,29 @@ describe('useNavigation', () => {
     // The test verifies the module exports Screen
     expect(true).toBe(true);
   });
+
+  it('should support scan screen type (D-08, F10)', async () => {
+    const { useNavigation } = await import('./useNavigation.js');
+
+    const TestComponent = () => {
+      const nav = useNavigation('scan');
+      expect(nav.current).toBe('scan');
+      expect(nav.stack).toEqual(['scan']);
+      return null;
+    };
+
+    render(<TestComponent />);
+  });
+
+  it('should push scan screen to stack', async () => {
+    const { useNavigation } = await import('./useNavigation.js');
+
+    const TestComponent = () => {
+      const nav = useNavigation('list');
+      nav.push('scan');
+      return null;
+    };
+
+    render(<TestComponent />);
+  });
 });
