@@ -108,7 +108,7 @@ describe('ProviderService', () => {
       expect(Object.keys(results).length).toBe(2);
       expect(results['https://httpbin.org/status/200'].reachable).toBe(true);
       expect(results['https://httpbin.org/get'].reachable).toBe(true);
-    });
+    }, 15000); // Increased timeout for external network tests
 
     it('testMultipleConnectivity handles invalid URLs gracefully', async () => {
       const urls = [
