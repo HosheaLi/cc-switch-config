@@ -292,25 +292,29 @@
 
 ### Phase 7: Project Management Features
 
-### Phase 7: Project Management Features
-
 **Goal:** 项目管理增强功能，提升便利性。
 
 **Duration Estimate:** 1-2 weeks
 
-**Plans:** TBD
+**Plans:** 4 plans in 4 waves
+
+**Plans:**
+- [ ] 07-01-PLAN.md — Auto-Switch Shell Hook (F9: direnv-style hooks, silent output, prompt registration)
+- [ ] 07-02-PLAN.md — Project Directory Scan (F10: CLI scan command, ScanScreen TUI multi-select, navigation)
+- [ ] 07-03-PLAN.md — Import/Export Configs (F13: schema, service, CLI commands, ImportConflictScreen)
+- [ ] 07-04-PLAN.md — Integration & Barrel Exports (CLI registration, TUI routing, M4 verification)
 
 **Delivers:**
-- Project directory scan（自动发现项目）
-- Auto-switch by directory（cd 自动切换配置）
-- Import/Export configs（配置备份迁移）
-- Fuzzy search（模糊搜索过滤）
+- Auto-switch shell hook（cd 自动切换配置）
+- Project directory scan（自动发现项目 + 多选注册）
+- Import/Export configs（配置备份迁移 + 冲突处理）
+- Navigation integration（TUI 'S' key + import-conflict screen）
 
 **Requirements Addressed:**
-- F9: Auto-Switch by Directory (hands-free context switching)
-- F10: Project Directory Scan (discover existing projects)
-- F13: Import/Export Configs (backup, migrate, share)
-- F14: Fuzzy Search (quick navigation)
+- F9: Auto-Switch by Directory (hands-free context switching) — Plans 01, 04
+- F10: Project Directory Scan (discover existing projects) — Plans 02, 04
+- F13: Import/Export Configs (backup, migrate, share) — Plans 03, 04
+- F14: Fuzzy Search (quick navigation) — Already implemented in Phase 06
 
 **Dependencies:**
 - Phase 3 (project index)
@@ -318,12 +322,15 @@
 - Phase 6 (TUI screens)
 
 **Verification:**
-- Auto-switch test: cd triggers correct config
+- Auto-switch test: cd triggers correct config switch
+- Shell hook test: only outputs on actual switch (D-02)
 - Scan test: 100 projects scan < 5 seconds
-- Import/Export test: round-trip preserves all data
-- Search test: filtering < 50ms for 100+ items
+- ScanScreen test: multi-select and registration works
+- Import/Export test: round-trip preserves all config
+- Conflict test: ImportConflictScreen displays correctly
+- M4 test: ExportService has no ink imports
 
-**Research Notes:** Standard patterns — chokidar for directory watching, fuse.js for fuzzy search.
+**Research Notes:** Phase 07 research completed 2026-04-14 — direnv shell hooks (PROMPT_COMMAND/chpwd_functions), ink-select-input multi-select, deepMergeConfig for import conflicts.
 
 ---
 
@@ -377,7 +384,7 @@
 | 4 | Services Layer | 2-3 weeks | Phase 2, 3 | 6 |
 | 5 | CLI Interface | 1 week | Phase 4 | 6 |
 | 6 | Core TUI | 2-3 weeks | Phase 4, 5 | 7 |
-| 7 | Project Management | 1-2 weeks | Phase 3, 4, 6 | TBD |
+| 7 | Project Management | 1-2 weeks | Phase 3, 4, 6 | 4 |
 | 8 | Quality & Polish | 1-2 weeks | Phase 2, 6, 7 | TBD |
 
 **Total Estimate:** 10-16 weeks
@@ -479,7 +486,7 @@ Phases with standard patterns (no research needed):
 | Phase 4 | Service layer patterns, dependency injection |
 | Phase 5 | Commander.js documentation, cli-table3 |
 | Phase 6 | Ink examples, ink-testing-library |
-| Phase 7 | chokidar directory watching, fuse.js fuzzy search |
+| Phase 7 | direnv shell hooks, ink-select-input, deepMergeConfig |
 
 ---
 
@@ -557,5 +564,6 @@ This roadmap evolves at:
 *Phase 2 plans added: 2026-04-13*  
 *Phase 3 plans added: 2026-04-13*  
 *Phase 4 plans added: 2026-04-13*  
-*Phase 5 plans added: 2026-04-14
-*Phase 6 plans added: 2026-04-14*
+*Phase 5 plans added: 2026-04-14*  
+*Phase 6 plans added: 2026-04-14*  
+*Phase 7 plans added: 2026-04-14*
