@@ -7,5 +7,8 @@
 // Project list screen (F2, F14, U3, U4)
 export { ProjectListScreen } from './ProjectListScreen.js';
 
+// Config editor screen (F3, U4)
+export { ConfigEditorScreen } from './ConfigEditorScreen.js';
+
 // Confirmation screen (U5, U4)
 export { ConfirmScreen } from './ConfirmScreen.js';
