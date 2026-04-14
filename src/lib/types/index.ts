@@ -20,3 +20,6 @@ export * from './merge.js';
 
 // Provider and template types
 export * from './provider.js';
+
+// Export/import schemas
+export * from './export-schema.js';
