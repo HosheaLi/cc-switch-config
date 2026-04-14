@@ -1,10 +1,11 @@
 ---
 phase: 7
 slug: project-management-features
-status: draft
+status: approved
 shadcn_initialized: false
 preset: none
 created: 2026-04-14
+approved: 2026-04-14
 ---
 
 # Phase 7 — UI Design Contract (TUI)
@@ -289,14 +290,14 @@ export type Screen = 'list' | 'editor' | 'confirm' | 'template-select' | 'scan' 
 
 ## Checker Sign-Off
 
-- [ ] Dimension 1 Copywriting: PASS — specific labels, empty/error states, confirm prompts
-- [ ] Dimension 2 Visuals: PASS — checkbox indicators, color usage, border styles
-- [ ] Dimension 3 Color: PASS — cyan/green/red/yellow/gray palette, reserved-for list
-- [ ] Dimension 4 Typography: PASS — bold/dimColor/selected roles defined
-- [ ] Dimension 5 Spacing: PASS — padding={1} standard, padding={2} for dialogs
-- [ ] Dimension 6 Registry Safety: PASS — no third-party registries
+- [x] Dimension 1 Copywriting: PASS — specific labels, empty/error states, confirm prompts
+- [x] Dimension 2 Visuals: PASS — checkbox indicators, color usage, border styles
+- [x] Dimension 3 Color: PASS — cyan/green/red/yellow/gray palette, reserved-for list
+- [x] Dimension 4 Typography: PASS — bold/dimColor/selected roles defined
+- [x] Dimension 5 Spacing: PASS — padding={1} standard, padding={2} for dialogs
+- [x] Dimension 6 Registry Safety: PASS — no third-party registries
 
-**Approval:** pending
+**Approval:** approved 2026-04-14
 
 ---
 
