@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-current_phase: 7
+current_phase: 8
 current_plan: Not started
 status: planning
-last_updated: "2026-04-14T15:32:43.202Z"
+last_updated: "2026-04-14T15:51:00.000Z"
 progress:
   total_phases: 8
-  completed_phases: 6
+  completed_phases: 7
   total_plans: 40
-  completed_plans: 37
-  percent: 93
+  completed_plans: 40
+  percent: 100
 ---
 
 # Project State
@@ -23,10 +23,10 @@ progress:
 
 ## Position
 
-**Current Phase:** 7
-**Current Plan:** 03 complete
-**Current Status:** Plan 07-03 Complete - Import/Export configs with conflict resolution (79 tests)
-**Next Action:** Ready for Plan 07-04 (Integration & Barrel Exports)
+**Current Phase:** 8
+**Current Plan:** Not started
+**Current Status:** Phase 07 complete - All 4 plans executed (795 tests passing)
+**Next Action:** Ready for Phase 08 (Quality & Polish)
 
 ---
 
@@ -34,10 +34,10 @@ progress:
 
 ### Phase 5: CLI Interface
 
-**Status:** Ready to plan
+**Status:** Complete
 **Plans:** 6/6
 
-**Progress:** [█████████░] 93%
+**Progress:** [██████████] 100%
 
 ---
 
@@ -45,6 +45,15 @@ progress:
 
 **Status:** Complete
 **Plans:** 7/7
+
+**Progress:** [██████████] 100%
+
+---
+
+### Phase 7: Project Management Features
+
+**Status:** Complete
+**Plans:** 4/4
 
 **Progress:** [██████████] 100%
 
@@ -71,6 +80,11 @@ progress:
 - [Phase 06-core-tui]: D-02: launchTUI calls runTUI from TUI module
 - [Phase 06-core-tui]: D-06: selectTemplateInTUI lists templates via TemplateService
 - [Phase 07-03]: ExportPayload uses strict Zod schema with version 1.0 literal for future migration support — D-06 design decision for config backup/migration format
+- [Phase 07]: D-01: Shell hook like direnv using PROMPT_COMMAND/chpwd_functions for auto-switch
+- [Phase 07]: D-02: Silent output mode (--silent default true), only message on actual switch
+- [Phase 07]: D-03: Prompt to register when unregistered .claude directory detected
+- [Phase 07]: D-08: Two trigger modes for scan - TUI 'S' key + CLI 'scan' command (07-02)
+- [Phase 07]: D-09: ScanScreen displays new projects with checkbox multi-select (07-02)
 
 ### Phase 05 Decisions
 
@@ -108,7 +122,10 @@ progress:
 
 | Date | Action | Result |
 |------|--------|--------|
+| 2026-04-14 | Plan 07-04 complete | Integration & Barrel Exports - CLI registration, TUI routing, M4 tests (795 tests) |
 | 2026-04-14 | Plan 07-03 complete | Import/Export configs + ImportConflictScreen TUI (79 tests) |
+| 2026-04-14 | Plan 07-02 complete | CLI scan command + ScanScreen TUI + navigation extension (72 tests) |
+| 2026-04-14 | Plan 07-01 complete | Auto-switch shell hook + auto-check CLI command (47 tests) |
 | 2026-04-14 | Plan 06-07 complete | CLI integration + M4/N4 verification tests (644 tests total) |
 | 2026-04-14 | Plan 06-06 complete | TUI App Container + screen routing + Service integration (9 tests, 131 total) |
 | 2026-04-14 | Plan 06-04 complete | ConfigEditorScreen with template preview + navigation (17 tests) |
@@ -129,4 +146,4 @@ progress:
 | 2026-04-13 | Plan 04-01 complete | ServiceError + Wave 0 stubs (79 tests) |
 
 ---
-*State updated: 2026-04-14 after Plan 06-07 completion*
+*State updated: 2026-04-14 after Phase 07 completion*

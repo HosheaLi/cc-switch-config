@@ -3,8 +3,10 @@ import { useState } from 'react';
 /**
  * Screen types for navigation
  * Per D-02: Layer-level navigation with stack management
+ * Per D-08: 'scan' screen type added for ScanScreen integration
+ * Per 07-03: 'import-conflict' screen type for ImportConflictScreen
  */
-export type Screen = 'list' | 'editor' | 'confirm' | 'template-select' | 'import-conflict';
+export type Screen = 'list' | 'editor' | 'confirm' | 'template-select' | 'scan' | 'import-conflict';
 
 /**
  * Navigation state interface

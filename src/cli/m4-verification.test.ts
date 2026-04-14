@@ -166,4 +166,62 @@ describe('M4 Verification: Architectural Boundaries', () => {
       expect(content).not.toContain('tui');
     });
   });
+
+  describe('Phase 07 modules', () => {
+    it('ExportService has no ink/react imports', async () => {
+      const filePath = path.join(servicesDir, 'export-service.ts');
+      const content = await fs.readFile(filePath, 'utf-8');
+      expect(content).not.toMatch(/from ['"]ink['"]/);
+      expect(content).not.toMatch(/from ['"]react['"]/);
+      expect(content).not.toMatch(/from ['"]ink-[a-z-]+['"]/);
+    });
+
+    it('export-schema.ts has no UI dependencies', async () => {
+      const typesDir = path.join(process.cwd(), 'src', 'lib', 'types');
+      const filePath = path.join(typesDir, 'export-schema.ts');
+      const content = await fs.readFile(filePath, 'utf-8');
+      expect(content).not.toMatch(/from ['"]ink['"]/);
+      expect(content).not.toMatch(/from ['"]react['"]/);
+    });
+
+    it('auto-switch.ts has no ink/react imports', async () => {
+      const utilsDir = path.join(cliDir, 'utils');
+      const filePath = path.join(utilsDir, 'auto-switch.ts');
+      const content = await fs.readFile(filePath, 'utf-8');
+      expect(content).not.toMatch(/from ['"]ink['"]/);
+      expect(content).not.toMatch(/from ['"]react['"]/);
+    });
+
+    it('scan.ts command has no ink/react imports', async () => {
+      const commandsDir = path.join(cliDir, 'commands');
+      const filePath = path.join(commandsDir, 'scan.ts');
+      const content = await fs.readFile(filePath, 'utf-8');
+      expect(content).not.toMatch(/from ['"]ink['"]/);
+      expect(content).not.toMatch(/from ['"]react['"]/);
+    });
+
+    it('auto-check.ts command has no ink/react imports', async () => {
+      const commandsDir = path.join(cliDir, 'commands');
+      const filePath = path.join(commandsDir, 'auto-check.ts');
+      const content = await fs.readFile(filePath, 'utf-8');
+      expect(content).not.toMatch(/from ['"]ink['"]/);
+      expect(content).not.toMatch(/from ['"]react['"]/);
+    });
+
+    it('export.ts command has no ink/react imports', async () => {
+      const commandsDir = path.join(cliDir, 'commands');
+      const filePath = path.join(commandsDir, 'export.ts');
+      const content = await fs.readFile(filePath, 'utf-8');
+      expect(content).not.toMatch(/from ['"]ink['"]/);
+      expect(content).not.toMatch(/from ['"]react['"]/);
+    });
+
+    it('import.ts command has no ink/react imports', async () => {
+      const commandsDir = path.join(cliDir, 'commands');
+      const filePath = path.join(commandsDir, 'import.ts');
+      const content = await fs.readFile(filePath, 'utf-8');
+      expect(content).not.toMatch(/from ['"]ink['"]/);
+      expect(content).not.toMatch(/from ['"]react['"]/);
+    });
+  });
 });

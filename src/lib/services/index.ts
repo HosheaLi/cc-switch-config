@@ -9,6 +9,7 @@
  * - import { ProjectService, ScanResult } from './lib/services/index.js';
  * - import { TemplateService } from './lib/services/index.js';
  * - import { ProviderService, ConnectivityResult } from './lib/services/index.js';
+ * - import { ExportService, detectConflicts } from './lib/services/index.js';
  */
 
 // Service classes
@@ -16,6 +17,7 @@ export { ConfigService } from './config-service.js';
 export { ProjectService } from './project-service.js';
 export { TemplateService } from './template-service.js';
 export { ProviderService } from './provider-service.js';
+export { ExportService } from './export-service.js';
 
 // Service error handling
 export { ServiceError } from './types.js';
@@ -23,8 +25,13 @@ export { ServiceError } from './types.js';
 // Service-specific types
 export type { ConnectivityResult } from './provider-service.js';
 export type { ScanResult } from './project-service.js';
+export type { ImportStrategy } from './export-service.js';
+
+// Standalone utility exports
+export { detectConflicts } from './export-service.js';
 
 // Re-export types that services use (convenience for callers)
 export type { ClaudeSettings } from '../types/config.js';
 export type { TemplateConfig } from '../types/provider.js';
 export type { ProjectEntry } from '../store/project.js';
+export type { ConflictField, ExportPayload, ExportMetadata, ExportPayloadSchema } from '../types/export-schema.js';
