@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 current_phase: 05
-current_plan: 5
-status: executing
-last_updated: "2026-04-14T06:41:43Z"
+current_plan: 6
+status: phase_complete
+last_updated: "2026-04-14T06:55:00Z"
 progress:
   total_phases: 8
-  completed_phases: 4
+  completed_phases: 5
   total_plans: 29
-  completed_plans: 28
-  percent: 97
+  completed_plans: 29
+  percent: 100
 ---
 
 # Project State
@@ -24,9 +24,9 @@ progress:
 ## Position
 
 **Current Phase:** 05
-**Current Plan:** 5
-**Current Status:** Plan 05-05 Complete - Template Subcommand
-**Next Action:** `/gsd:execute-phase` to continue Phase 05 Plan 06
+**Current Plan:** 6
+**Current Status:** Phase 05 Complete - CLI Interface
+**Next Action:** `/gsd:transition` to proceed to Phase 06 (TUI Interface)
 
 ---
 
@@ -34,10 +34,10 @@ progress:
 
 ### Phase 5: CLI Interface
 
-**Status:** In Progress
-**Plans:** 5/6
+**Status:** Complete
+**Plans:** 6/6
 
-**Progress:** [██████████] 97%
+**Progress:** [██████████] 100%
 
 ---
 
@@ -68,6 +68,8 @@ progress:
 - **D-02:** launchTUI stub outputs placeholder message and exits
 - **D-06:** selectTemplateInTUI stub returns null for TUI fallback
 - **F5:** switch command applies template to current directory
+- **D-08:** src/index.ts is shebang entry for package.json bin
+- **M4:** CLI module must NOT import ink/react (architectural boundary)
 
 ---
 
@@ -75,6 +77,7 @@ progress:
 
 | Date | Action | Result |
 |------|--------|--------|
+| 2026-04-14 | Plan 05-06 complete | CLI integration final + M4 verification (491 tests) |
 | 2026-04-14 | Plan 05-05 complete | Template subcommand + CRUD operations (16 tests) |
 | 2026-04-14 | Plan 05-04 complete | Current command + project status display |
 | 2026-04-14 | Plan 05-03 complete | Switch command + TUI stub (35 tests) |
@@ -88,4 +91,4 @@ progress:
 | 2026-04-13 | Plan 04-01 complete | ServiceError + Wave 0 stubs (79 tests) |
 
 ---
-*State updated: 2026-04-14 after Plan 05-05 completion*
+*State updated: 2026-04-14 after Phase 05 completion*

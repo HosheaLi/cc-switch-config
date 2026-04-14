@@ -207,7 +207,7 @@
 - [x] 05-03-PLAN.md — Wave 2: switch Command (optional argument + TUI fallback, D-06)
 - [x] 05-04-PLAN.md — Wave 3: current Command (active project/template display)
 - [x] 05-05-PLAN.md — Wave 3: template Subcommand (nested CRUD, D-07 aliases)
-- [ ] 05-06-PLAN.md — Wave 4: Barrel Export + Integration (shebang entry, M4 verification)
+- [x] 05-06-PLAN.md — Wave 4: Barrel Export + Integration (shebang entry, M4 verification)
 
 **Delivers:**
 - CLI entry point（shebang, commander setup, version, help）
