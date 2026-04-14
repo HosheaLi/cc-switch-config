@@ -72,8 +72,9 @@ Each task was committed atomically:
 
 1. **Task 1: Install cli-table3 and create test stub files** - `a94130a` (test)
 2. **Task 2: Create error handling module** - `7435965` (feat)
+3. **Auto-fix: Improved vitest mock strategy** - `9cb6042` (fix)
 
-**Plan metadata:** (pending final commit)
+**Plan metadata:** `4c7f906` (docs: complete plan)
 
 ## Files Created/Modified
 - `src/cli/output/error.ts` - ExitCodes constants and handleCLIError function
@@ -133,3 +134,10 @@ None - no external service configuration required.
 ---
 *Phase: 05-cli-interface*
 *Completed: 2026-04-14*
+
+## Self-Check: PASSED
+
+- SUMMARY.md exists at `.planning/phases/05-cli-interface/05-01-SUMMARY.md`
+- All 4 commits verified in git log (a94130a, 7435965, 9cb6042, 4c7f906)
+- error.ts and error.test.ts exist at expected paths
+- All 14 tests pass (8 test files)
