@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 current_phase: 06
-current_plan: 6
+current_plan: 7
 status: completed
-last_updated: "2026-04-14T19:03:42.000Z"
+last_updated: "2026-04-14T19:15:00.000Z"
 progress:
   total_phases: 8
-  completed_phases: 5
+  completed_phases: 6
   total_plans: 36
-  completed_plans: 35
-  percent: 97
+  completed_plans: 36
+  percent: 100
 ---
 
 # Project State
@@ -24,9 +24,9 @@ progress:
 ## Position
 
 **Current Phase:** 06
-**Current Plan:** 6
-**Current Status:** Plan 06-06 Complete - TUI App Container with screen routing and Service integration (Wave 3)
-**Next Action:** Execute 06-07-PLAN.md - Phase 06 final plan
+**Current Plan:** 7
+**Current Status:** Plan 06-07 Complete - CLI integration with TUI, M4/N4 verification tests
+**Next Action:** Phase 06 complete - Ready for Phase 07
 
 ---
 
@@ -43,10 +43,10 @@ progress:
 
 ### Phase 6: Core TUI
 
-**Status:** Executing Wave 3 Complete
-**Plans:** 6/7
+**Status:** Complete
+**Plans:** 7/7
 
-**Progress:** [██████████░] 86%
+**Progress:** [██████████] 100%
 
 ---
 
@@ -68,6 +68,8 @@ progress:
 - [Phase 06-core-tui]: ink-testing-library for TDD testing of Ink components (D-13)
 - [Phase 06-core-tui]: fuse.js threshold 0.4 for balanced precision/recall (D-06)
 - [Phase 06-core-tui]: D-04: PreviewPanel integration for template preview in ConfigEditorScreen
+- [Phase 06-core-tui]: D-02: launchTUI calls runTUI from TUI module
+- [Phase 06-core-tui]: D-06: selectTemplateInTUI lists templates via TemplateService
 
 ### Phase 05 Decisions
 
@@ -105,6 +107,7 @@ progress:
 
 | Date | Action | Result |
 |------|--------|--------|
+| 2026-04-14 | Plan 06-07 complete | CLI integration + M4/N4 verification tests (644 tests total) |
 | 2026-04-14 | Plan 06-06 complete | TUI App Container + screen routing + Service integration (9 tests, 131 total) |
 | 2026-04-14 | Plan 06-04 complete | ConfigEditorScreen with template preview + navigation (17 tests) |
 | 2026-04-14 | Plan 06-03 complete | ProjectListScreen with fuzzy search + navigation (19 tests) |
@@ -124,4 +127,4 @@ progress:
 | 2026-04-13 | Plan 04-01 complete | ServiceError + Wave 0 stubs (79 tests) |
 
 ---
-*State updated: 2026-04-14 after Plan 06-06 completion*
+*State updated: 2026-04-14 after Plan 06-07 completion*
