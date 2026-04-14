@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 current_phase: 06
-current_plan: 1
+current_plan: 3
 status: executing
-last_updated: "2026-04-14T10:37:26.743Z"
+last_updated: "2026-04-14T10:40:19Z"
 progress:
   total_phases: 8
   completed_phases: 5
   total_plans: 36
-  completed_plans: 30
-  percent: 83
+  completed_plans: 32
+  percent: 89
 ---
 
 # Project State
@@ -24,9 +24,9 @@ progress:
 ## Position
 
 **Current Phase:** 06
-**Current Plan:** 2
-**Current Status:** Plan 06-01 Complete - TUI Hooks Foundation
-**Next Action:** Execute 06-02-PLAN.md (TUI screens implementation)
+**Current Plan:** 3
+**Current Status:** Plan 06-02 Complete - TUI Components (StatusBar, LoadingIndicator, PreviewPanel)
+**Next Action:** Execute 06-03-PLAN.md (ProjectListScreen)
 
 ---
 
@@ -34,19 +34,19 @@ progress:
 
 ### Phase 5: CLI Interface
 
-**Status:** Executing Phase 06
+**Status:** Complete
 **Plans:** 6/6
 
-**Progress:** [████████░░] 83%
+**Progress:** [██████████] 100%
 
 ---
 
 ### Phase 6: Core TUI
 
-**Status:** Executing Wave 0
-**Plans:** 1/6
+**Status:** Executing Wave 1
+**Plans:** 2/7
 
-**Progress:** [██░░░░░░░░] 17%
+**Progress:** [██░░░░░░░░] 29%
 
 ---
 
@@ -82,12 +82,21 @@ progress:
 - **D-08:** src/index.ts is shebang entry for package.json bin
 - **M4:** CLI module must NOT import ink/react (architectural boundary)
 
+### Phase 06 Decisions (Wave 0-1)
+
+- **D-08:** Threshold-triggered loading - show spinner only after 500ms (06-02)
+- **D-11:** Status bar error display - red color for errors (06-02)
+- **D-07:** Rich visual feedback with chalk colors (06-02)
+- **D-04:** Bottom popup preview for selected item (06-02)
+- **Testing:** Use @testing-library/react with mocked ink components instead of ink-testing-library (06-02)
+
 ---
 
 ## Recent Activity
 
 | Date | Action | Result |
 |------|--------|--------|
+| 2026-04-14 | Plan 06-02 complete | TUI components (StatusBar, LoadingIndicator, PreviewPanel) + barrel exports (70 tests) |
 | 2026-04-14 | Plan 06-01 complete | TUI hooks foundation + vitest .tsx config (33 tests) |
 | 2026-04-14 | Plan 05-06 complete | CLI integration final + M4 verification (491 tests) |
 | 2026-04-14 | Plan 05-05 complete | Template subcommand + CRUD operations (16 tests) |
@@ -103,4 +112,4 @@ progress:
 | 2026-04-13 | Plan 04-01 complete | ServiceError + Wave 0 stubs (79 tests) |
 
 ---
-*State updated: 2026-04-14 after Phase 05 completion*
+*State updated: 2026-04-14 after Plan 06-02 completion*

@@ -250,7 +250,7 @@
 
 **Plans:**
 - [x] 06-01-PLAN.md — Wave 0: Dependencies + Hooks (ink-testing-library, useKeyInput, useNavigation, useFuzzySearch)
-- [ ] 06-02-PLAN.md — Wave 1: Reusable Components (StatusBar, LoadingIndicator, PreviewPanel, useDelayedLoading)
+- [x] 06-02-PLAN.md — Wave 1: Reusable Components (StatusBar, LoadingIndicator, PreviewPanel, useDelayedLoading)
 - [ ] 06-03-PLAN.md — Wave 2: ProjectListScreen (F2, F14, U3, U4 - list, search, navigation)
 - [ ] 06-04-PLAN.md — Wave 2: ConfigEditorScreen (F3 - template preview, confirm/cancel)
 - [ ] 06-05-PLAN.md — Wave 2: ConfirmScreen (U5 - y/n confirmation for destructive actions)
