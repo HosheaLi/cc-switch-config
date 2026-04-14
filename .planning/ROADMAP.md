@@ -195,22 +195,35 @@
 
 ### Phase 5: CLI Interface
 
-**Goal:** 实现 CLI 入口和命令路由。
+**Goal:** 实现 CLI 入口和命令路由，提供快速操作入口和帮助文档。
 
 **Duration Estimate:** 1 week
 
-**Plans:** TBD
+**Plans:** 6 plans in 5 waves
+
+**Plans:**
+- [ ] 05-01-PLAN.md — Wave 0: Test Infrastructure + Error Handling (cli-table3, ExitCodes, handleCLIError)
+- [ ] 05-02-PLAN.md — Wave 1: CLI Entry Point + list Command (Commander setup, table output, D-02)
+- [ ] 05-03-PLAN.md — Wave 2: switch Command (optional argument + TUI fallback, D-06)
+- [ ] 05-04-PLAN.md — Wave 3: current Command (active project/template display)
+- [ ] 05-05-PLAN.md — Wave 3: template Subcommand (nested CRUD, D-07 aliases)
+- [ ] 05-06-PLAN.md — Wave 4: Barrel Export + Integration (shebang entry, M4 verification)
 
 **Delivers:**
-- CLI entry point（shebang, commander setup）
-- 基础命令实现
+- CLI entry point（shebang, commander setup, version, help）
+- 基础命令实现（list/ls, switch/sw, current/cur, template/tpl）
 - 帮助文档生成（--help, command reference）
-- 错误处理和用户反馈
+- 错误处理和用户反馈（stderr + exit code + chalk colors）
+- TUI launch stub（Phase 06 integration point）
 
 **Requirements Addressed:**
-- F5: Quick Switch Command (one-command efficiency)
-- F6: Current Status Display (show active config)
-- U4: Help Documentation (command reference)
+- F5: Quick Switch Command (one-command efficiency) — Plan 03
+- F6: Current Status Display (show active config) — Plan 04
+- F4: List All Projects (project status display) — Plan 02
+- U4: Help Documentation (command reference) — Plan 02
+- F7: Custom Provider Templates (template CRUD) — Plan 05
+- U1: Clear Errors (exit codes + colored messages) — Plan 01
+- D-01 through D-08: CLI design decisions — All plans
 
 **Dependencies:**
 - Phase 4 (services for command execution)
@@ -219,8 +232,11 @@
 - Command test: all commands execute correctly
 - Help test: --help shows accurate documentation
 - Error test: errors shown clearly with actionable messages
+- Version test: -v shows 0.1.0
+- Alias test: ls, sw, cur, tpl aliases work
+- M4 test: CLI has no ink/react imports
 
-**Research Notes:** Standard patterns — Commander.js documentation, auto-generated help.
+**Research Notes:** Standard patterns — Commander.js documentation, auto-generated help. cli-table3 for table output.
 
 ---
 
@@ -344,7 +360,7 @@
 | 2 | Types & Validation | 1 week | Phase 1 | 5 |
 | 3 | Data Layer | 1-2 weeks | Phase 1, 2 | 5 |
 | 4 | Services Layer | 2-3 weeks | Phase 2, 3 | 6 |
-| 5 | CLI Interface | 1 week | Phase 4 | TBD |
+| 5 | CLI Interface | 1 week | Phase 4 | 6 |
 | 6 | Core TUI | 2-3 weeks | Phase 4, 5 | TBD |
 | 7 | Project Management | 1-2 weeks | Phase 3, 4, 6 | TBD |
 | 8 | Quality & Polish | 1-2 weeks | Phase 2, 6, 7 | TBD |
@@ -384,13 +400,13 @@ Phase 8 (Quality)
 ### Milestone 1: Foundation Complete (End of Phase 3)
 
 **Criteria:**
-- [ ] Atomic writes verified with crash testing
-- [ ] Backup system creates timestamped backups
-- [ ] Cross-platform paths tested in CI
-- [ ] JSON errors show line numbers
-- [ ] Config migration works
-- [ ] Token security enforced
-- [ ] Data layer repositories functional
+- [x] Atomic writes verified with crash testing
+- [x] Backup system creates timestamped backups
+- [x] Cross-platform paths tested in CI
+- [x] JSON errors show line numbers
+- [x] Config migration works
+- [x] Token security enforced
+- [x] Data layer repositories functional
 
 **Deliverable:** Safe, reliable file operations foundation
 
@@ -446,7 +462,7 @@ Phases with standard patterns (no research needed):
 | Phase 2 | Zod documentation, TypeScript best practices |
 | Phase 3 | chokidar file watching, conf storage |
 | Phase 4 | Service layer patterns, dependency injection |
-| Phase 5 | Commander.js documentation |
+| Phase 5 | Commander.js documentation, cli-table3 |
 | Phase 6 | Ink examples, ink-testing-library |
 | Phase 7 | chokidar directory watching, fuse.js fuzzy search |
 
@@ -525,4 +541,5 @@ This roadmap evolves at:
 *Phase 1 plans added: 2026-04-13*  
 *Phase 2 plans added: 2026-04-13*  
 *Phase 3 plans added: 2026-04-13*  
-*Phase 4 plans added: 2026-04-13*
+*Phase 4 plans added: 2026-04-13*  
+*Phase 5 plans added: 2026-04-14*
