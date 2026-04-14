@@ -71,6 +71,9 @@ progress:
 - [Phase 06-core-tui]: D-02: launchTUI calls runTUI from TUI module
 - [Phase 06-core-tui]: D-06: selectTemplateInTUI lists templates via TemplateService
 - [Phase 07-03]: ExportPayload uses strict Zod schema with version 1.0 literal for future migration support — D-06 design decision for config backup/migration format
+- [Phase 07]: D-01: Shell hook like direnv using PROMPT_COMMAND/chpwd_functions for auto-switch
+- [Phase 07]: D-02: Silent output mode (--silent default true), only message on actual switch
+- [Phase 07]: D-03: Prompt to register when unregistered .claude directory detected
 
 ### Phase 05 Decisions
 
