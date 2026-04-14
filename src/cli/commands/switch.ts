@@ -1,6 +1,66 @@
+/**
+ * Switch Command - Quick Template Switch
+ *
+ * Per F5: Quick switch command for one-command efficiency.
+ * Per D-06: Optional argument + TUI fallback.
+ * Per D-04: One of 4 core commands.
+ *
+ * Usage:
+ * - cc-config switch <template-name>  (quick switch)
+ * - cc-config sw <template-name>      (alias)
+ * - cc-config switch                  (launch TUI selection)
+ * - cc-config sw                      (alias, TUI)
+ */
+
 import type { Command } from 'commander';
+import chalk from 'chalk';
+import { TemplateService } from '../../lib/services/index.js';
+import { handleCLIError } from '../output/error.js';
+import { selectTemplateInTUI } from '../utils/tui-launch.js';
+import { TemplateStore } from '../../lib/store/template.js';
+import { readConfig, writeConfig } from '../../lib/store/config.js';
+
+/**
+ * Register switch command with Commander program.
+ * Per D-01: 'switch' command with 'sw' alias.
+ * Per D-06: Optional [template-name] argument.
+ *
+ * @param program - Commander program instance
+ */
 export function registerSwitchCommand(program: Command): void {
-  program.command('switch').alias('sw').description('Switch active config for a project')
-    .argument('[project]', 'Project path or name').argument('[template]', 'Template name to apply')
-    .action(async () => { console.log('switch command stub - Wave 2 implementation pending'); });
+  program
+    .command('switch [template-name]')
+    .alias('sw')  // D-01: short alias
+    .description('Switch to a provider template')
+    .action(async (templateName?: string) => {
+      try {
+        // D-06: No template name -> TUI selection
+        const targetTemplate = templateName ?? await selectTemplateInTUI();
+
+        // TUI cancelled (returned null)
+        if (!targetTemplate) {
+          console.log(chalk.yellow('No template selected.'));
+          process.exit(0);
+        }
+
+        // Create TemplateService (factory pattern)
+        const templateStore = new TemplateStore();
+        const service = new TemplateService(
+          templateStore,
+          readConfig,
+          writeConfig
+        );
+
+        // Apply template to current project directory
+        const projectPath = process.cwd();
+        await service.applyTemplate(projectPath, targetTemplate);
+
+        // Success message (D-03: colored output)
+        console.log(chalk.green(`✓ Switched to template: ${targetTemplate}`));
+        console.log(chalk.gray(`Project: ${projectPath}`));
+
+      } catch (error) {
+        handleCLIError(error);
+      }
+    });
 }
