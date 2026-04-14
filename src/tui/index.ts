@@ -7,11 +7,14 @@
  * Per D-12: screens/components separation
  */
 
-// Export all hooks
+// Hooks
 export * from './hooks/index.js';
 
-// Export all components
+// Components
 export * from './components/index.js';
 
-// Export all screens
+// Screens
 export * from './screens/index.js';
+
+// App entry point (Wave 3)
+export { runTUI, TuiApp } from './app.js';
