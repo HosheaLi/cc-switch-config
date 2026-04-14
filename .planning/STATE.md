@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 current_phase: 06
-current_plan: 4
+current_plan: 6
 status: completed
-last_updated: "2026-04-14T10:51:47.709Z"
+last_updated: "2026-04-14T19:03:42.000Z"
 progress:
   total_phases: 8
   completed_phases: 5
   total_plans: 36
-  completed_plans: 34
-  percent: 94
+  completed_plans: 35
+  percent: 97
 ---
 
 # Project State
@@ -24,9 +24,9 @@ progress:
 ## Position
 
 **Current Phase:** 06
-**Current Plan:** 4
-**Current Status:** Plan 06-04 Complete - ConfigEditorScreen with template preview (F3) and navigation (U4)
-**Next Action:** Execute 06-05-PLAN.md (ConfirmScreen) - Wave 2 continues
+**Current Plan:** 6
+**Current Status:** Plan 06-06 Complete - TUI App Container with screen routing and Service integration (Wave 3)
+**Next Action:** Execute 06-07-PLAN.md - Phase 06 final plan
 
 ---
 
@@ -43,10 +43,10 @@ progress:
 
 ### Phase 6: Core TUI
 
-**Status:** Executing Wave 2
-**Plans:** 4/7
+**Status:** Executing Wave 3 Complete
+**Plans:** 6/7
 
-**Progress:** [████░░░░░░] 57%
+**Progress:** [██████████░] 86%
 
 ---
 
@@ -95,6 +95,9 @@ progress:
 - **D-06:** Instant fuzzy search via useFuzzySearch hook (06-03)
 - **D-09:** Standard Escape behavior - exit when isRoot, pop when not (06-03)
 - **Env Masking:** Keys containing TOKEN or KEY show "(masked)" for security (06-04)
+- **Screen Routing:** TuiApp uses switch(navigation.current) pattern for screen rendering (06-06)
+- **Service Injection:** runTUI factory creates stores, services with constructor DI, renders app (06-06)
+- **Clean Architecture:** TUI calls Services (ProjectService, TemplateService), not Repositories directly (06-06)
 
 ---
 
@@ -102,6 +105,7 @@ progress:
 
 | Date | Action | Result |
 |------|--------|--------|
+| 2026-04-14 | Plan 06-06 complete | TUI App Container + screen routing + Service integration (9 tests, 131 total) |
 | 2026-04-14 | Plan 06-04 complete | ConfigEditorScreen with template preview + navigation (17 tests) |
 | 2026-04-14 | Plan 06-03 complete | ProjectListScreen with fuzzy search + navigation (19 tests) |
 | 2026-04-14 | Plan 06-02 complete | TUI components (StatusBar, LoadingIndicator, PreviewPanel) + barrel exports (70 tests) |
@@ -120,4 +124,4 @@ progress:
 | 2026-04-13 | Plan 04-01 complete | ServiceError + Wave 0 stubs (79 tests) |
 
 ---
-*State updated: 2026-04-14 after Plan 06-04 completion*
+*State updated: 2026-04-14 after Plan 06-06 completion*
