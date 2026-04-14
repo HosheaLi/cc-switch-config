@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 current_phase: 06
-current_plan: 3
+current_plan: 4
 status: executing
-last_updated: "2026-04-14T10:40:19Z"
+last_updated: "2026-04-14T10:48:30Z"
 progress:
   total_phases: 8
   completed_phases: 5
   total_plans: 36
-  completed_plans: 32
-  percent: 89
+  completed_plans: 33
+  percent: 92
 ---
 
 # Project State
@@ -24,9 +24,9 @@ progress:
 ## Position
 
 **Current Phase:** 06
-**Current Plan:** 3
-**Current Status:** Plan 06-02 Complete - TUI Components (StatusBar, LoadingIndicator, PreviewPanel)
-**Next Action:** Execute 06-03-PLAN.md (ProjectListScreen)
+**Current Plan:** 4
+**Current Status:** Plan 06-03 Complete - ProjectListScreen with fuzzy search and navigation
+**Next Action:** Execute 06-04-PLAN.md (ConfigEditorScreen)
 
 ---
 
@@ -43,10 +43,10 @@ progress:
 
 ### Phase 6: Core TUI
 
-**Status:** Executing Wave 1
-**Plans:** 2/7
+**Status:** Executing Wave 2
+**Plans:** 3/7
 
-**Progress:** [██░░░░░░░░] 29%
+**Progress:** [███░░░░░░░] 43%
 
 ---
 
@@ -82,13 +82,17 @@ progress:
 - **D-08:** src/index.ts is shebang entry for package.json bin
 - **M4:** CLI module must NOT import ink/react (architectural boundary)
 
-### Phase 06 Decisions (Wave 0-1)
+### Phase 06 Decisions (Wave 0-2)
 
 - **D-08:** Threshold-triggered loading - show spinner only after 500ms (06-02)
 - **D-11:** Status bar error display - red color for errors (06-02)
 - **D-07:** Rich visual feedback with chalk colors (06-02)
 - **D-04:** Bottom popup preview for selected item (06-02)
 - **Testing:** Use @testing-library/react with mocked ink components instead of ink-testing-library (06-02)
+- **D-01:** Single-screen list layout with top search, middle list, bottom preview (06-03)
+- **D-05:** Dual-mode navigation - arrows + vim j/k (06-03)
+- **D-06:** Instant fuzzy search via useFuzzySearch hook (06-03)
+- **D-09:** Standard Escape behavior - exit when isRoot, pop when not (06-03)
 
 ---
 
@@ -96,6 +100,7 @@ progress:
 
 | Date | Action | Result |
 |------|--------|--------|
+| 2026-04-14 | Plan 06-03 complete | ProjectListScreen with fuzzy search + navigation (19 tests) |
 | 2026-04-14 | Plan 06-02 complete | TUI components (StatusBar, LoadingIndicator, PreviewPanel) + barrel exports (70 tests) |
 | 2026-04-14 | Plan 06-01 complete | TUI hooks foundation + vitest .tsx config (33 tests) |
 | 2026-04-14 | Plan 05-06 complete | CLI integration final + M4 verification (491 tests) |
@@ -112,4 +117,4 @@ progress:
 | 2026-04-13 | Plan 04-01 complete | ServiceError + Wave 0 stubs (79 tests) |
 
 ---
-*State updated: 2026-04-14 after Plan 06-02 completion*
+*State updated: 2026-04-14 after Plan 06-03 completion*
