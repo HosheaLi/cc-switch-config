@@ -5,13 +5,13 @@ milestone_name: milestone
 current_phase: 05
 current_plan: 2
 status: executing
-last_updated: "2026-04-14T06:02:31.802Z"
+last_updated: "2026-04-14T06:18:53.487Z"
 progress:
   total_phases: 8
   completed_phases: 4
   total_plans: 29
-  completed_plans: 24
-  percent: 83
+  completed_plans: 25
+  percent: 86
 ---
 
 # Project State
@@ -25,8 +25,8 @@ progress:
 
 **Current Phase:** 05
 **Current Plan:** 2
-**Current Status:** Plan 05-01 Complete - CLI Test Infrastructure
-**Next Action:** `/gsd:execute-phase` to continue Phase 05 Plan 02
+**Current Status:** Plan 05-02 Complete - CLI Entry + list Command
+**Next Action:** `/gsd:execute-phase` to continue Phase 05 Plan 03
 
 ---
 
@@ -35,9 +35,9 @@ progress:
 ### Phase 5: CLI Interface
 
 **Status:** In Progress
-**Plans:** 1/6
+**Plans:** 2/6
 
-**Progress:** [██░░░░░░░░] 17%
+**Progress:** [█████████░] 86%
 
 ---
 
@@ -58,6 +58,9 @@ progress:
 - **D-08:** CLI exit codes follow Unix conventions (SUCCESS=0, NOT_FOUND=3, CONFIG_ERROR=4)
 - **D-09:** ServiceError codes mapped to specific exit codes
 - **D-10:** chalk used for colored error messages to stderr
+- **D-02:** Smart mode - no args launches TUI, args -> CLI commands
+- **D-01:** Mixed style - list command has ls alias
+- **D-05:** Colored table output using cli-table3 and chalk
 
 ---
 
@@ -65,6 +68,7 @@ progress:
 
 | Date | Action | Result |
 |------|--------|--------|
+| 2026-04-14 | Plan 05-02 complete | CLI entry + list command + table output (25 tests) |
 | 2026-04-14 | Plan 05-01 complete | Wave 0 CLI test infrastructure + error handling (14 tests) |
 | 2026-04-13 | Plan 04-06 complete | Barrel export + M4 verification (82 tests) |
 | 2026-04-13 | Plan 04-03 complete | ProjectService with directory scanning + bug fix (48 tests) |
