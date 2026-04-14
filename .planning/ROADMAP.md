@@ -301,7 +301,7 @@
 **Plans:**
 - [ ] 07-01-PLAN.md — Auto-Switch Shell Hook (F9: direnv-style hooks, silent output, prompt registration)
 - [ ] 07-02-PLAN.md — Project Directory Scan (F10: CLI scan command, ScanScreen TUI multi-select, navigation)
-- [ ] 07-03-PLAN.md — Import/Export Configs (F13: schema, service, CLI commands, ImportConflictScreen)
+- [x] 07-03-PLAN.md — Import/Export Configs (F13: schema, service, CLI commands, ImportConflictScreen)
 - [ ] 07-04-PLAN.md — Integration & Barrel Exports (CLI registration, TUI routing, M4 verification)
 
 **Delivers:**
