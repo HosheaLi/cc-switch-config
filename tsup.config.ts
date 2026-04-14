@@ -9,6 +9,6 @@ export default defineConfig({
   dts: true,
   minify: false,
   sourcemap: true,
-  banner: { js: '#!/usr/bin/env node' },
+  // Banner removed - shebang now in src/index.ts directly (per D-08)
   outDir: 'dist',
 });
