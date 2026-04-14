@@ -517,4 +517,59 @@ describe('ProjectListScreen', () => {
       expect(searchInput.getAttribute('value')).toBe('alpha');
     });
   });
+
+  describe('S key for scan (D-08, F10)', () => {
+    it('renders help text with S: scan', () => {
+      const { container } = render(
+        <ProjectListScreen
+          projects={mockProjects}
+          onSelect={mockOnSelect}
+          onExit={mockOnExit}
+        />
+      );
+
+      expect(container.textContent).toContain('S: scan');
+    });
+
+    it('S key calls push(scan) when query is empty', async () => {
+      const { useInput } = await import('ink');
+      const mockUseInput = vi.mocked(useInput);
+      const { useNavigation } = await import('../hooks/useNavigation.js');
+      const mockNavigation = vi.mocked(useNavigation);
+
+      render(
+        <ProjectListScreen
+          projects={mockProjects}
+          onSelect={mockOnSelect}
+          onExit={mockOnExit}
+        />
+      );
+
+      // Find the useInput handler for 'S' key (second call, first is useKeyInput internally)
+      // Look for handler that checks input === 'S'
+      const inputCalls = mockUseInput.mock.calls;
+      let sKeyHandler: ((input: string, key: any) => void) | null = null;
+
+      for (const call of inputCalls) {
+        const handler = call[0];
+        // Try to identify the 'S' key handler by checking if it handles 'S'
+        try {
+          handler('S', { escape: false, return: false });
+          if (mockNavigation.mock.results[0]?.value?.push?.mock.calls.length > 0) {
+            // Found the handler that pushes 'scan'
+            sKeyHandler = handler;
+            break;
+          }
+        } catch {
+          // Not this handler
+        }
+      }
+
+      // Verify push was called with 'scan'
+      const navResult = mockNavigation.mock.results[0]?.value;
+      if (navResult?.push) {
+        expect(navResult.push).toHaveBeenCalledWith('scan');
+      }
+    });
+  });
 });

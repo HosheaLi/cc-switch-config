@@ -3,8 +3,9 @@ import { useState } from 'react';
 /**
  * Screen types for navigation
  * Per D-02: Layer-level navigation with stack management
+ * Per D-08: 'scan' screen type added for ScanScreen integration
  */
-export type Screen = 'list' | 'editor' | 'confirm' | 'template-select';
+export type Screen = 'list' | 'editor' | 'confirm' | 'template-select' | 'scan';
 
 /**
  * Navigation state interface
