@@ -80,15 +80,18 @@ Claude Code 配置层级：
 | npm + Git 分发 | npm 便于安装，Git 便于查看源码 | — Pending |
 
 ---
-*Last updated: 2026-04-14 after Phase 04 completion (Services Layer)*
+*Last updated: 2026-04-14 after Phase 05 completion (CLI Interface)*
 
 ## Evolution
 
-**Phase 04 (Services Layer) - Completed 2026-04-13:**
-- Services layer foundation complete: ConfigService, ProjectService, TemplateService, ProviderService
-- M4 verified: Services independent of UI/TUI (no ink/react imports)
-- 82 tests passing, constructor injection pattern established
-- Ready for CLI (Phase 05) and TUI (Phase 06) parallel execution
+**Phase 05 (CLI Interface) - Completed 2026-04-14:**
+- CLI layer foundation complete: Commander.js entry point, 4 core commands (list, switch, current, template)
+- Error handling module with ExitCodes and colored output via chalk
+- Table formatter with cli-table3 for project listing
+- TUI launch stubs ready for Phase 06 integration
+- M4 verified: CLI independent of ink/react (architectural boundary enforced)
+- 491 tests passing, D-01 through D-08 design decisions implemented
+- Ready for Phase 06 (Core TUI) parallel execution
 
 This document evolves at phase transitions and milestone boundaries.
 
