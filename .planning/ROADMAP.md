@@ -340,23 +340,31 @@
 
 **Duration Estimate:** 1-2 weeks
 
-**Plans:** TBD
+**Plans:** 5 plans in 4 waves
+
+**Plans:**
+- [ ] 08-01-PLAN.md — Diff Utilities + UnifiedDiff Component (F12: diff generation and rendering)
+- [ ] 08-02-PLAN.md — DiffScreen + ConfigEditorScreen Integration (F12: mandatory diff display before apply)
+- [ ] 08-03-PLAN.md — ValidationErrorScreen + Undo Service + CLI undo (F11 + U2: validation blocking and undo mechanism)
+- [ ] 08-04-PLAN.md — TUI Undo Integration (U2: ProjectListScreen 'U' key + validation error flow)
+- [ ] 08-05-PLAN.md — Performance Benchmarks + Documentation (N1-N4 + D-09)
 
 **Delivers:**
-- Diff Before Apply（side-by-side comparison）
-- Config validation UI（validation errors display）
-- Undo/Rollback mechanism（撤销修改）
-- Confirmation prompts（危险操作确认）
-- Performance optimization（benchmark, optimize）
-- Documentation complete（README, API docs）
+- Diff Before Apply（unified diff generation and full-screen display）
+- Config validation UI（ValidationErrorScreen blocks continuation）
+- Undo/Rollback mechanism（CLI undo command + TUI 'U' key）
+- Performance benchmarks（N1-N4 validation with vitest bench）
+- Documentation complete（README + USAGE.md + TypeDoc API docs）
 
 **Requirements Addressed:**
-- F11: Config Validation (validation with helpful errors)
-- F12: Diff Before Apply (side-by-side comparison)
-- U2: Undo Support (ability to undo modifications)
-- U5: Confirmation Prompts (destructive actions require confirmation)
-- N3: Scalable Scanning (<5s for 100 projects)
-- M1: Test Coverage (>=80% for core modules)
+- F11: Config Validation (validation with helpful errors, blocks continuation)
+- F12: Diff Before Apply (unified diff, only changed fields, mandatory display)
+- U2: Undo Support (CLI undo command + TUI 'U' key trigger)
+- N1: Fast Startup (<1s cold start benchmark)
+- N2: Quick Operations (<100ms for switch/list benchmark)
+- N3: Scalable Scanning (<5s for 100 projects benchmark)
+- N4: Responsive TUI (<50ms render benchmark)
+- D-09: Documentation (README, USAGE.md, API docs)
 
 **Dependencies:**
 - Phase 2 (validation)
@@ -364,13 +372,14 @@
 - Phase 7 (project features)
 
 **Verification:**
-- Diff test: diff shown before every modification
-- Undo test: undo works for all modification types
-- Confirmation test: destructive actions require explicit approval
+- Diff test: diff shown before every modification (D-03 mandatory)
+- Validation test: ValidationErrorScreen blocks invalid applies (D-05)
+- Undo test: CLI undo + TUI 'U' key work correctly (D-06, D-07)
 - Coverage test: >=80% coverage for services, lib, store
-- Performance test: benchmarks meet targets
+- Performance test: N1-N4 benchmarks meet targets
+- Documentation test: README + USAGE.md + TypeDoc complete
 
-**Research Notes:** May need API validation research — patterns vary by provider.
+**Research Notes:** Phase 08 research completed 2026-04-15 — diff package for unified diff, deep-object-diff for field comparison, vitest bench for benchmarks, TypeDoc for API docs.
 
 ---
 
@@ -385,7 +394,7 @@
 | 5 | CLI Interface | 1 week | Phase 4 | 6 |
 | 6 | Core TUI | 2-3 weeks | Phase 4, 5 | 7 |
 | 7 | Project Management | 1-2 weeks | Phase 3, 4, 6 | 4 |
-| 8 | Quality & Polish | 1-2 weeks | Phase 2, 6, 7 | TBD |
+| 8 | Quality & Polish | 1-2 weeks | Phase 2, 6, 7 | 5 |
 
 **Total Estimate:** 10-16 weeks
 
@@ -474,7 +483,7 @@ Phases needing additional research during planning:
 
 | Phase | Research Topic | Confidence | Action |
 |-------|----------------|------------|--------|
-| Phase 8 | API validation patterns by provider | LOW | May need provider-specific implementations |
+| Phase 8 | API validation patterns by provider | HIGH | Research completed 2026-04-15 — standard patterns confirmed |
 
 Phases with standard patterns (no research needed):
 
@@ -487,6 +496,7 @@ Phases with standard patterns (no research needed):
 | Phase 5 | Commander.js documentation, cli-table3 |
 | Phase 6 | Ink examples, ink-testing-library |
 | Phase 7 | direnv shell hooks, ink-select-input, deepMergeConfig |
+| Phase 8 | diff package, deep-object-diff, vitest bench, TypeDoc |
 
 ---
 
@@ -500,7 +510,7 @@ Phases with standard patterns (no research needed):
 | 3 | File watcher race conditions | Debounce changes, handle ENOENT gracefully |
 | 6 | TUI performance lag | Virtual scrolling for large lists, benchmark early |
 | 7 | Auto-switch detection fails | Multiple detection strategies, graceful fallback |
-| 8 | API validation complex | Research phase if patterns unclear |
+| 8 | Performance benchmarks unreliable | Use vitest bench with statistical sampling, warmup phase |
 
 ### Mitigation Strategies
 
@@ -533,10 +543,10 @@ Phases with standard patterns (no research needed):
 | Metric | Target | Verification Method |
 |--------|--------|---------------------|
 | Test Coverage | >=80% core modules | vitest coverage report |
-| Cold Start Time | <1 second | Benchmark test |
-| Switch Operation | <100ms | Performance test |
-| TUI Render | <50ms | Ink performance profiling |
-| 100 Project Scan | <5 seconds | Scalability benchmark |
+| Cold Start Time | <1 second | Benchmark test (N1) |
+| Switch Operation | <100ms | Performance test (N2) |
+| TUI Render | <50ms | Ink performance profiling (N4) |
+| 100 Project Scan | <5 seconds | Scalability benchmark (N3) |
 
 ### User Success Metrics
 
@@ -566,4 +576,5 @@ This roadmap evolves at:
 *Phase 4 plans added: 2026-04-13*  
 *Phase 5 plans added: 2026-04-14*  
 *Phase 6 plans added: 2026-04-14*  
-*Phase 7 plans added: 2026-04-14*
+*Phase 7 plans added: 2026-04-14*  
+*Phase 8 plans added: 2026-04-15*
