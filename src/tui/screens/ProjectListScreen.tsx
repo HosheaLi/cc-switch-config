@@ -7,10 +7,12 @@
  * Per D-04: Bottom popup preview.
  * Per D-09: Standard Escape behavior.
  * Per D-08: 'S' key triggers scan (ProjectListScreen -> ScanScreen).
+ * Per D-07: 'U' key triggers undo for selected project (U2).
  *
  * Per F2: Interactive TUI Selector (arrow-key navigation, fuzzy search).
  * Per F10: Project Directory Scan (S key trigger).
  * Per F14: Fuzzy Search (quick navigation).
+ * Per U2: Undo support for config modifications (U key trigger).
  * Per U3: Keyboard Navigation (arrows + j/k).
  * Per U4: Escape to Cancel (always allow cancel).
  *
@@ -28,11 +30,14 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Box, Text, useApp, useInput } from 'ink';
 import TextInput from 'ink-text-input';
+import path from 'path';
 import { useKeyInput } from '../hooks/useKeyInput.js';
 import { useFuzzySearch } from '../hooks/useFuzzySearch.js';
 import { useNavigation } from '../hooks/useNavigation.js';
 import { PreviewPanel } from '../components/PreviewPanel.js';
 import { StatusBar } from '../components/StatusBar.js';
+import { UndoService } from '../../lib/services/undo-service.js';
+import { ServiceError } from '../../lib/services/types.js';
 import type { ProjectEntry } from '../../lib/store/project.js';
 import type { SearchableItem } from '../hooks/useFuzzySearch.js';
 
@@ -134,12 +139,54 @@ export const ProjectListScreen: React.FC<ProjectListScreenProps> = ({
     isActive: true,
   });
 
+  /**
+   * Handle undo operation for selected project (D-07, U2).
+   * Creates UndoService, calls undo, updates status bar with result.
+   */
+  const handleUndo = async () => {
+    if (!selectedProject) return;
+
+    try {
+      // Create UndoService with config path resolver
+      const undoService = new UndoService((projectPath) =>
+        path.join(projectPath, '.claude', 'settings.json')
+      );
+
+      // Perform undo operation
+      const result = await undoService.undo(selectedProject.path);
+
+      // Calculate time ago in minutes
+      const minutesAgo = Math.round((Date.now() - result.backupTime.getTime()) / 60000);
+
+      // Update status bar with success message (per UI-SPEC.md)
+      setStatusMessage(`Restored from backup (${minutesAgo} min ago)`);
+      setStatusType('success');
+    } catch (error) {
+      // Handle NO_BACKUP error specifically
+      if (error instanceof ServiceError && error.code === 'NO_BACKUP') {
+        setStatusMessage('No backup available to undo');
+        setStatusType('error');
+      } else {
+        // Generic undo failure
+        setStatusMessage('Undo failed');
+        setStatusType('error');
+      }
+    }
+  };
+
   // 'S' key handler for scan trigger (D-08, F10)
+  // 'U' key handler for undo trigger (D-07, U2)
   useInput((input, key) => {
     // Capital 'S' triggers scan navigation
     // Only when not in search mode (query empty or user not typing)
     if (input === 'S' && query.length === 0) {
       push('scan');
+    }
+
+    // Capital 'U' triggers undo for selected project (D-07)
+    // Only when not in search mode and a project is selected
+    if (input === 'U' && query.length === 0 && selectedProject) {
+      handleUndo();
     }
   }, { isActive: true });
 
@@ -195,7 +242,7 @@ export const ProjectListScreen: React.FC<ProjectListScreenProps> = ({
       {/* Help Text */}
       <Box marginTop={1}>
         <Text dimColor>
-          ↑/k: up  ↓/j: down  Enter: select  S: scan  Esc: exit  Type to search
+          ↑/k: up  ↓/j: down  Enter: select  S: scan  U: undo  Esc: exit  Type to search
         </Text>
       </Box>
     </Box>

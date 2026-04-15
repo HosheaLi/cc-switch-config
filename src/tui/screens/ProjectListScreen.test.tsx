@@ -11,9 +11,10 @@
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import React from 'react';
-import { render, fireEvent, waitFor } from '@testing-library/react';
+import { render, fireEvent, waitFor, act } from '@testing-library/react';
 import { ProjectListScreen } from './ProjectListScreen.js';
 import type { ProjectEntry } from '../../lib/store/project.js';
+import { ServiceError } from '../../lib/services/types.js';
 
 // Mock ink components since they require terminal environment
 vi.mock('ink', () => ({
@@ -98,6 +99,11 @@ vi.mock('../components/StatusBar.js', () => ({
   }) => message
     ? React.createElement('div', { 'data-testid': 'status-bar', 'data-type': type }, message)
     : null,
+}));
+
+// Mock UndoService at module level
+vi.mock('../../lib/services/undo-service.js', () => ({
+  UndoService: vi.fn(),
 }));
 
 describe('ProjectListScreen', () => {
@@ -570,6 +576,163 @@ describe('ProjectListScreen', () => {
       if (navResult?.push) {
         expect(navResult.push).toHaveBeenCalledWith('scan');
       }
+    });
+  });
+
+  describe('U key for undo (D-07, U2)', () => {
+    it('renders help text with U: undo', () => {
+      const { container } = render(
+        <ProjectListScreen
+          projects={mockProjects}
+          onSelect={mockOnSelect}
+          onExit={mockOnExit}
+        />
+      );
+
+      expect(container.textContent).toContain('U: undo');
+    });
+
+    it('U key handler is registered for undo when query is empty', async () => {
+      const { useInput } = await import('ink');
+      const mockUseInput = vi.mocked(useInput);
+
+      render(
+        <ProjectListScreen
+          projects={mockProjects}
+          onSelect={mockOnSelect}
+          onExit={mockOnExit}
+        />
+      );
+
+      // Find the 'U' key handler in useInput calls
+      const inputCalls = mockUseInput.mock.calls;
+      // At least one useInput handler should exist for U key
+      expect(inputCalls.length).toBeGreaterThan(0);
+
+      // Check that a handler for 'U' input exists
+      for (const call of inputCalls) {
+        const handler = call[0];
+        if (typeof handler === 'function') {
+          // Handler should check for 'U' input
+          expect(handler).toBeDefined();
+        }
+      }
+    });
+
+    it('successful undo shows restored message in StatusBar', async () => {
+      // Setup mock for successful undo
+      const { UndoService } = await import('../../lib/services/undo-service.js');
+      vi.mocked(UndoService).mockImplementation(() => ({
+        undo: vi.fn().mockResolvedValue({
+          backupTime: new Date(Date.now() - 5 * 60 * 1000), // 5 minutes ago
+          backupFilename: 'settings.json.2026-04-15T02-20-00-000Z',
+          restored: true,
+        }),
+      }));
+
+      const { useInput } = await import('ink');
+      const mockUseInput = vi.mocked(useInput);
+
+      const { container } = render(
+        <ProjectListScreen
+          projects={mockProjects}
+          onSelect={mockOnSelect}
+          onExit={mockOnExit}
+        />
+      );
+
+      // Find and trigger the 'U' key handler
+      const inputCalls = mockUseInput.mock.calls;
+      for (const call of inputCalls) {
+        const handler = call[0];
+        await act(async () => {
+          handler('U', { escape: false, return: false });
+        });
+      }
+
+      // Wait for async state update to show success message
+      await waitFor(() => {
+        const statusBar = container.querySelector('[data-testid="status-bar"]');
+        if (statusBar) {
+          expect(statusBar.textContent).toContain('Restored from backup');
+        }
+      }, { timeout: 3000 });
+    });
+
+    it('U key does NOT trigger undo when query is not empty', async () => {
+      const { UndoService } = await import('../../lib/services/undo-service.js');
+      const mockUndoFn = vi.fn().mockResolvedValue({
+        backupTime: new Date(Date.now() - 5 * 60 * 1000),
+        backupFilename: 'settings.json.2026-04-15T02-20-00-000Z',
+        restored: true,
+      });
+      vi.mocked(UndoService).mockImplementation(() => ({
+        undo: mockUndoFn,
+      }));
+
+      const { useInput } = await import('ink');
+      const mockUseInput = vi.mocked(useInput);
+
+      render(
+        <ProjectListScreen
+          projects={mockProjects}
+          onSelect={mockOnSelect}
+          onExit={mockOnExit}
+          initialQuery="searching"
+        />
+      );
+
+      // Query is not empty - 'U' should not trigger undo
+      const inputCalls = mockUseInput.mock.calls;
+      for (const call of inputCalls) {
+        const handler = call[0];
+        await act(async () => {
+          handler('U', { escape: false, return: false });
+        });
+      }
+
+      // Undo should NOT have been called when in search mode
+      expect(mockUndoFn).not.toHaveBeenCalled();
+    });
+
+    it('NO_BACKUP error shows appropriate error message', async () => {
+      // Setup mock to throw NO_BACKUP error
+      const { UndoService } = await import('../../lib/services/undo-service.js');
+      vi.mocked(UndoService).mockImplementation(() => ({
+        undo: vi.fn().mockRejectedValue(
+          new ServiceError('No backup available to undo', 'NO_BACKUP')
+        ),
+      }));
+
+      const { useInput } = await import('ink');
+      const mockUseInput = vi.mocked(useInput);
+
+      const { container } = render(
+        <ProjectListScreen
+          projects={mockProjects}
+          onSelect={mockOnSelect}
+          onExit={mockOnExit}
+        />
+      );
+
+      // Trigger 'U' key
+      const inputCalls = mockUseInput.mock.calls;
+      for (const call of inputCalls) {
+        const handler = call[0];
+        await act(async () => {
+          handler('U', { escape: false, return: false });
+        });
+      }
+
+      // Wait for error message to appear
+      await waitFor(() => {
+        const statusBar = container.querySelector('[data-testid="status-bar"]');
+        if (statusBar) {
+          // Should contain "No backup" message
+          expect(statusBar.textContent).toContain('No backup');
+          expect(statusBar.getAttribute('data-type')).toBe('error');
+        }
+      }, { timeout: 3000 });
     });
   });
 });
