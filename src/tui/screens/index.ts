@@ -20,3 +20,7 @@ export type { ScanScreenProps } from './ScanScreen.js';
 // Import conflict screen (F13, D-07)
 export { ImportConflictScreen } from './ImportConflictScreen.js';
 export type { ImportConflictScreenProps } from './ImportConflictScreen.js';
+
+// Diff screen (F12, D-03)
+export { DiffScreen } from './DiffScreen.js';
+export type { DiffScreenProps } from './DiffScreen.js';
