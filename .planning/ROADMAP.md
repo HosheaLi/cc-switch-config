@@ -344,7 +344,7 @@
 
 **Plans:**
 - [x] 08-01-PLAN.md — Diff Utilities + UnifiedDiff Component (F12: diff generation and rendering)
-- [ ] 08-02-PLAN.md — DiffScreen + ConfigEditorScreen Integration (F12: mandatory diff display before apply)
+- [x] 08-02-PLAN.md — DiffScreen + ConfigEditorScreen Integration (F12: mandatory diff display before apply)
 - [x] 08-03-PLAN.md — ValidationErrorScreen + Undo Service + CLI undo (F11 + U2: validation blocking and undo mechanism)
 - [ ] 08-04-PLAN.md — TUI Undo Integration (U2: ProjectListScreen 'U' key + validation error flow)
 - [ ] 08-05-PLAN.md — Performance Benchmarks + Documentation (N1-N4 + D-09)
