@@ -10,6 +10,7 @@
  * - import { TemplateService } from './lib/services/index.js';
  * - import { ProviderService, ConnectivityResult } from './lib/services/index.js';
  * - import { ExportService, detectConflicts } from './lib/services/index.js';
+ * - import { UndoService, UndoResult } from './lib/services/index.js';
  */
 
 // Service classes
@@ -18,6 +19,7 @@ export { ProjectService } from './project-service.js';
 export { TemplateService } from './template-service.js';
 export { ProviderService } from './provider-service.js';
 export { ExportService } from './export-service.js';
+export { UndoService } from './undo-service.js';
 
 // Service error handling
 export { ServiceError } from './types.js';
@@ -26,6 +28,7 @@ export { ServiceError } from './types.js';
 export type { ConnectivityResult } from './provider-service.js';
 export type { ScanResult } from './project-service.js';
 export type { ImportStrategy } from './export-service.js';
+export type { UndoResult } from './undo-service.js';
 
 // Standalone utility exports
 export { detectConflicts } from './export-service.js';

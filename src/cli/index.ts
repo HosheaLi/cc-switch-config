@@ -13,6 +13,7 @@ import { registerAutoCheckCommand } from './commands/auto-check.js';
 import { registerScanCommand } from './commands/scan.js';
 import { registerExportCommand } from './commands/export.js';
 import { registerImportCommand } from './commands/import.js';
+import { registerUndoCommand } from './commands/undo.js';
 
 const VERSION = '0.1.0';
 
@@ -35,6 +36,9 @@ export async function runCLI(argv: string[] = process.argv): Promise<void> {
   registerScanCommand(program);
   registerExportCommand(program);
   registerImportCommand(program);
+
+  // Phase 08 commands
+  registerUndoCommand(program);
 
   const args = argv.slice(2);
   if (args.length === 0) {
