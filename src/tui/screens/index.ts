@@ -24,3 +24,7 @@ export type { ImportConflictScreenProps } from './ImportConflictScreen.js';
 // Diff screen (F12, D-03)
 export { DiffScreen } from './DiffScreen.js';
 export type { DiffScreenProps } from './DiffScreen.js';
+
+// Validation error screen (F11, D-04, D-05)
+export { ValidationErrorScreen } from './ValidationErrorScreen.js';
+export type { ValidationErrorScreenProps } from './ValidationErrorScreen.js';
