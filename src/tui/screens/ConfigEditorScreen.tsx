@@ -25,8 +25,10 @@ import { useKeyInput } from '../hooks/useKeyInput.js';
 import { PreviewPanel } from '../components/PreviewPanel.js';
 import { StatusBar } from '../components/StatusBar.js';
 import { LoadingIndicator } from '../components/LoadingIndicator.js';
+import { DiffScreen } from './DiffScreen.js';
 import type { ProjectEntry } from '../../lib/store/project.js';
 import type { TemplateConfig } from '../../lib/types/provider.js';
+import type { ClaudeSettings } from '../../lib/types/config.js';
 
 /**
  * Props for ConfigEditorScreen component.
@@ -36,6 +38,8 @@ interface ConfigEditorScreenProps {
   project: ProjectEntry;
   /** Template configuration to preview and apply */
   template: TemplateConfig;
+  /** Existing project config (null/undefined if no config exists) */
+  existingConfig?: ClaudeSettings | null;
   /** Callback when user confirms application */
   onConfirm: () => void;
   /** Callback when user cancels (Escape) */
@@ -65,6 +69,7 @@ interface ConfigEditorScreenProps {
 export const ConfigEditorScreen: React.FC<ConfigEditorScreenProps> = ({
   project,
   template,
+  existingConfig,
   onConfirm,
   onBack,
 }) => {
@@ -73,19 +78,39 @@ export const ConfigEditorScreen: React.FC<ConfigEditorScreenProps> = ({
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [statusType, setStatusType] = useState<'error' | 'success' | 'info' | 'warning' | 'none'>('none');
 
+  // State for DiffScreen (F12, D-03)
+  const [showDiffScreen, setShowDiffScreen] = useState(false);
+
+  // Compute merged config from template provider settings
+  // Per D-03: Template provider fields (env) merge into ClaudeSettings
+  const mergedConfig: ClaudeSettings = {
+    ...(existingConfig ?? {}),
+    env: {
+      ...(existingConfig?.env ?? {}),
+      ...(template.provider.env ?? {}),
+    },
+  };
+
   // Extract project name from path
   const projectName = project.path.split('/').pop() ?? project.path;
 
   // Keyboard input handling
+  // Per D-03: Enter shows DiffScreen first, NOT direct apply
   useKeyInput({
     onSelect: () => {
-      setIsApplying(true);
+      // Show DiffScreen instead of directly applying (F12, D-03)
+      setShowDiffScreen(true);
       setStatusMessage(null);
-      // Actual apply happens in parent via onConfirm
-      onConfirm();
     },
-    onEscape: () => onBack(),
-    isActive: !isApplying,
+    onEscape: () => {
+      // If DiffScreen is showing, hide it; otherwise go back
+      if (showDiffScreen) {
+        setShowDiffScreen(false);
+      } else {
+        onBack();
+      }
+    },
+    isActive: !isApplying && !showDiffScreen,
   });
 
   // Prepare env preview with masking for sensitive keys
@@ -152,12 +177,27 @@ export const ConfigEditorScreen: React.FC<ConfigEditorScreenProps> = ({
       <StatusBar message={statusMessage} type={statusType} />
 
       {/* Help */}
-      {!isApplying && (
+      {!isApplying && !showDiffScreen && (
         <Box marginTop={1}>
           <Text dimColor>
             Enter: confirm  Esc: cancel
           </Text>
         </Box>
+      )}
+
+      {/* DiffScreen (F12, D-03) - shown before every apply */}
+      {showDiffScreen && (
+        <DiffScreen
+          before={existingConfig ?? {}}
+          after={mergedConfig}
+          onApply={() => {
+            setShowDiffScreen(false);
+            setIsApplying(true);
+            // Now actually apply the template (D-03: after user confirms diff)
+            onConfirm();
+          }}
+          onCancel={() => setShowDiffScreen(false)}
+        />
       )}
     </Box>
   );

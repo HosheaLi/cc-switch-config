@@ -9,7 +9,7 @@
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, act, waitFor } from '@testing-library/react';
 import { ConfigEditorScreen } from './ConfigEditorScreen.js';
 import type { ProjectEntry } from '../../lib/store/project.js';
 import type { TemplateConfig } from '../../lib/types/provider.js';
@@ -85,6 +85,33 @@ vi.mock('../components/LoadingIndicator.js', () => ({
   }) => isLoading ? React.createElement('div', {
     'data-testid': 'loading-indicator',
   }, message || 'Loading...') : null,
+}));
+
+// Mock DiffScreen component (for F12 diff integration tests)
+vi.mock('./DiffScreen.js', () => ({
+  DiffScreen: ({ before, after, onApply, onCancel }: {
+    before: Record<string, unknown>;
+    after: Record<string, unknown>;
+    onApply: () => void;
+    onCancel: () => void;
+  }) => React.createElement('div', {
+    'data-testid': 'diff-screen',
+    'data-has-changes': JSON.stringify(before) !== JSON.stringify(after),
+  },
+    React.createElement('button', {
+      'data-testid': 'diff-apply-btn',
+      onClick: onApply,
+    }, 'Apply'),
+    React.createElement('button', {
+      'data-testid': 'diff-cancel-btn',
+      onClick: onCancel,
+    }, 'Cancel')
+  ),
+}));
+
+// Mock generateUnifiedDiff (for diff computation)
+vi.mock('../../cli/utils/diff.js', () => ({
+  generateUnifiedDiff: vi.fn(),
 }));
 
 describe('ConfigEditorScreen', () => {
@@ -287,7 +314,7 @@ describe('ConfigEditorScreen', () => {
   });
 
   describe('keyboard navigation (U4)', () => {
-    it('Enter calls onConfirm callback', async () => {
+    it('Enter shows DiffScreen (F12, D-03 - mandatory preview before apply)', async () => {
       const { useKeyInput } = await import('../hooks/useKeyInput.js');
       const mockUseKeyInput = vi.mocked(useKeyInput);
 
@@ -306,10 +333,14 @@ describe('ConfigEditorScreen', () => {
       // Get the options passed to useKeyInput
       const callOptions = mockUseKeyInput.mock.calls[0][0];
 
-      // Simulate Enter press by calling onSelect
-      callOptions.onSelect?.();
+      // Per D-03: Enter now shows DiffScreen, NOT directly calls onConfirm
+      // Simulate Enter press by calling onSelect (wrapped in act)
+      await act(async () => {
+        callOptions.onSelect?.();
+      });
 
-      expect(mockOnConfirm).toHaveBeenCalled();
+      // onConfirm should NOT be called yet (DiffScreen must appear first)
+      expect(mockOnConfirm).not.toHaveBeenCalled();
     });
 
     it('Escape calls onBack callback (U4)', async () => {
@@ -438,6 +469,215 @@ describe('ConfigEditorScreen', () => {
       );
 
       expect(container.textContent).toContain('project-name');
+    });
+  });
+
+  describe('DiffScreen integration (F12, D-03)', () => {
+    it('shows DiffScreen when Enter pressed (before applying)', async () => {
+      const { useKeyInput } = await import('../hooks/useKeyInput.js');
+      const mockUseKeyInput = vi.mocked(useKeyInput);
+
+      const existingConfig = { env: { MODEL: 'claude-3-opus' } };
+
+      render(
+        <ConfigEditorScreen
+          project={mockProject}
+          template={mockTemplate}
+          existingConfig={existingConfig}
+          onConfirm={mockOnConfirm}
+          onBack={mockOnBack}
+        />
+      );
+
+      // Get useKeyInput options and trigger Enter (wrapped in act)
+      const callOptions = mockUseKeyInput.mock.calls[0][0];
+      await act(async () => {
+        callOptions.onSelect?.();
+      });
+
+      // DiffScreen should now be visible (wait for re-render)
+      await waitFor(() => {
+        const diffScreen = screen.getByTestId('diff-screen');
+        expect(diffScreen).toBeDefined();
+      });
+    });
+
+    it('user must confirm in DiffScreen to proceed with apply', async () => {
+      const { useKeyInput } = await import('../hooks/useKeyInput.js');
+      const mockUseKeyInput = vi.mocked(useKeyInput);
+
+      const existingConfig = { env: { MODEL: 'claude-3-opus' } };
+
+      render(
+        <ConfigEditorScreen
+          project={mockProject}
+          template={mockTemplate}
+          existingConfig={existingConfig}
+          onConfirm={mockOnConfirm}
+          onBack={mockOnBack}
+        />
+      );
+
+      // Trigger Enter to show DiffScreen (wrapped in act)
+      const callOptions = mockUseKeyInput.mock.calls[0][0];
+      await act(async () => {
+        callOptions.onSelect?.();
+      });
+
+      // DiffScreen is now visible
+      await waitFor(() => {
+        expect(screen.getByTestId('diff-screen')).toBeDefined();
+      });
+
+      // onConfirm should NOT have been called yet (per D-03 mandatory preview)
+      expect(mockOnConfirm).not.toHaveBeenCalled();
+
+      // Click Apply button in DiffScreen
+      const applyBtn = screen.getByTestId('diff-apply-btn');
+      await act(async () => {
+        fireEvent.click(applyBtn);
+      });
+
+      // Now onConfirm should be called
+      expect(mockOnConfirm).toHaveBeenCalled();
+    });
+
+    it('Escape in DiffScreen returns to ConfigEditorScreen without applying', async () => {
+      const { useKeyInput } = await import('../hooks/useKeyInput.js');
+      const mockUseKeyInput = vi.mocked(useKeyInput);
+
+      const existingConfig = { env: { MODEL: 'claude-3-opus' } };
+
+      render(
+        <ConfigEditorScreen
+          project={mockProject}
+          template={mockTemplate}
+          existingConfig={existingConfig}
+          onConfirm={mockOnConfirm}
+          onBack={mockOnBack}
+        />
+      );
+
+      // Trigger Enter to show DiffScreen (wrapped in act)
+      const callOptions = mockUseKeyInput.mock.calls[0][0];
+      await act(async () => {
+        callOptions.onSelect?.();
+      });
+
+      // DiffScreen is now visible
+      await waitFor(() => {
+        expect(screen.getByTestId('diff-screen')).toBeDefined();
+      });
+
+      // Click Cancel button in DiffScreen
+      const cancelBtn = screen.getByTestId('diff-cancel-btn');
+      await act(async () => {
+        fireEvent.click(cancelBtn);
+      });
+
+      // onConfirm should NOT be called
+      expect(mockOnConfirm).not.toHaveBeenCalled();
+
+      // DiffScreen should be hidden now
+      await waitFor(() => {
+        expect(screen.queryByTestId('diff-screen')).toBeNull();
+      });
+    });
+
+    it('onConfirm callback called after DiffScreen confirmation (not before)', async () => {
+      const { useKeyInput } = await import('../hooks/useKeyInput.js');
+      const mockUseKeyInput = vi.mocked(useKeyInput);
+
+      const existingConfig = { env: { MODEL: 'claude-3-opus' } };
+
+      render(
+        <ConfigEditorScreen
+          project={mockProject}
+          template={mockTemplate}
+          existingConfig={existingConfig}
+          onConfirm={mockOnConfirm}
+          onBack={mockOnBack}
+        />
+      );
+
+      // Clear any previous calls
+      mockOnConfirm.mockClear();
+
+      // Trigger Enter to show DiffScreen (wrapped in act)
+      const callOptions = mockUseKeyInput.mock.calls[0][0];
+      await act(async () => {
+        callOptions.onSelect?.();
+      });
+
+      // onConfirm NOT called yet
+      expect(mockOnConfirm).not.toHaveBeenCalled();
+
+      // Confirm in DiffScreen
+      await waitFor(() => {
+        const applyBtn = screen.getByTestId('diff-apply-btn');
+        expect(applyBtn).toBeDefined();
+      });
+      const applyBtn = screen.getByTestId('diff-apply-btn');
+      await act(async () => {
+        fireEvent.click(applyBtn);
+      });
+
+      // NOW onConfirm should be called
+      expect(mockOnConfirm).toHaveBeenCalledOnce();
+    });
+
+    it('handles null existingConfig (uses empty object)', async () => {
+      const { useKeyInput } = await import('../hooks/useKeyInput.js');
+      const mockUseKeyInput = vi.mocked(useKeyInput);
+
+      render(
+        <ConfigEditorScreen
+          project={mockProject}
+          template={mockTemplate}
+          existingConfig={null}
+          onConfirm={mockOnConfirm}
+          onBack={mockOnBack}
+        />
+      );
+
+      // Trigger Enter to show DiffScreen (wrapped in act)
+      const callOptions = mockUseKeyInput.mock.calls[0][0];
+      await act(async () => {
+        callOptions.onSelect?.();
+      });
+
+      // DiffScreen should still appear
+      await waitFor(() => {
+        const diffScreen = screen.getByTestId('diff-screen');
+        expect(diffScreen).toBeDefined();
+      });
+    });
+
+    it('handles undefined existingConfig (uses empty object)', async () => {
+      const { useKeyInput } = await import('../hooks/useKeyInput.js');
+      const mockUseKeyInput = vi.mocked(useKeyInput);
+
+      render(
+        <ConfigEditorScreen
+          project={mockProject}
+          template={mockTemplate}
+          existingConfig={undefined}
+          onConfirm={mockOnConfirm}
+          onBack={mockOnBack}
+        />
+      );
+
+      // Trigger Enter to show DiffScreen (wrapped in act)
+      const callOptions = mockUseKeyInput.mock.calls[0][0];
+      await act(async () => {
+        callOptions.onSelect?.();
+      });
+
+      // DiffScreen should still appear
+      await waitFor(() => {
+        const diffScreen = screen.getByTestId('diff-screen');
+        expect(diffScreen).toBeDefined();
+      });
     });
   });
 });
