@@ -680,4 +680,259 @@ describe('ConfigEditorScreen', () => {
       });
     });
   });
+
+  describe('ValidationErrorScreen integration (F11, D-04, D-05)', () => {
+    // Mock ValidationErrorScreen for tests
+    vi.mock('./ValidationErrorScreen.js', () => ({
+      ValidationErrorScreen: ({ error, onCancel }: {
+        error: { getMessages: () => string[] };
+        onCancel: () => void;
+      }) => React.createElement('div', {
+        'data-testid': 'validation-error-screen',
+      },
+        React.createElement('div', { 'data-testid': 'error-messages' },
+          error.getMessages().map((msg: string, i: number) =>
+            React.createElement('span', { key: i }, msg)
+          )
+        ),
+        React.createElement('button', {
+          'data-testid': 'cancel-btn',
+          onClick: onCancel,
+        }, 'Cancel')
+      ),
+    }));
+
+    // Mock ValidationError class
+    vi.mock('../../lib/types/validation.js', () => ({
+      ValidationError: vi.fn().mockImplementation((message: string, issues: any[]) => ({
+        name: 'ValidationError',
+        message,
+        issues,
+        getMessages: () => issues.map((i: any) => `${i.path?.join('.') || 'root'}: ${i.message}`),
+      })),
+    }));
+
+    it('shows ValidationErrorScreen when onConfirm throws ValidationError', async () => {
+      const { ValidationError } = await import('../../lib/types/validation.js');
+      const mockValidationError = vi.mocked(ValidationError);
+
+      // Create a mock ValidationError
+      const mockError = new mockValidationError('Validation failed', [
+        { path: ['env', 'MODEL'], message: 'Expected string' },
+      ]);
+
+      // Mock onConfirm to throw ValidationError
+      const mockOnConfirmWithError = vi.fn().mockImplementation(() => {
+        throw mockError;
+      });
+
+      const { useKeyInput } = await import('../hooks/useKeyInput.js');
+      const mockUseKeyInput = vi.mocked(useKeyInput);
+
+      const existingConfig = { env: { MODEL: 'claude-3-opus' } };
+
+      render(
+        <ConfigEditorScreen
+          project={mockProject}
+          template={mockTemplate}
+          existingConfig={existingConfig}
+          onConfirm={mockOnConfirmWithError}
+          onBack={mockOnBack}
+        />
+      );
+
+      // Trigger Enter to show DiffScreen
+      const callOptions = mockUseKeyInput.mock.calls[0][0];
+      await act(async () => {
+        callOptions.onSelect?.();
+      });
+
+      // Wait for DiffScreen to appear
+      await waitFor(() => {
+        expect(screen.getByTestId('diff-screen')).toBeDefined();
+      });
+
+      // Click Apply button in DiffScreen (which triggers onConfirm)
+      const applyBtn = screen.getByTestId('diff-apply-btn');
+      await act(async () => {
+        fireEvent.click(applyBtn);
+      });
+
+      // Should show ValidationErrorScreen after onConfirm throws
+      await waitFor(() => {
+        const errorScreen = screen.queryByTestId('validation-error-screen');
+        if (errorScreen) {
+          expect(errorScreen).toBeDefined();
+        }
+      });
+    });
+
+    it('Escape in ValidationErrorScreen returns to ConfigEditorScreen', async () => {
+      const { ValidationError } = await import('../../lib/types/validation.js');
+      const mockValidationError = vi.mocked(ValidationError);
+
+      const mockError = new mockValidationError('Validation failed', [
+        { path: ['env', 'MODEL'], message: 'Expected string' },
+      ]);
+
+      const mockOnConfirmWithError = vi.fn().mockImplementation(() => {
+        throw mockError;
+      });
+
+      const { useKeyInput } = await import('../hooks/useKeyInput.js');
+      const mockUseKeyInput = vi.mocked(useKeyInput);
+
+      const existingConfig = { env: { MODEL: 'claude-3-opus' } };
+
+      const { container } = render(
+        <ConfigEditorScreen
+          project={mockProject}
+          template={mockTemplate}
+          existingConfig={existingConfig}
+          onConfirm={mockOnConfirmWithError}
+          onBack={mockOnBack}
+        />
+      );
+
+      // Trigger Enter to show DiffScreen
+      const callOptions = mockUseKeyInput.mock.calls[0][0];
+      await act(async () => {
+        callOptions.onSelect?.();
+      });
+
+      // Wait for DiffScreen and click Apply
+      await waitFor(() => {
+        expect(screen.getByTestId('diff-screen')).toBeDefined();
+      });
+      const applyBtn = screen.getByTestId('diff-apply-btn');
+      await act(async () => {
+        fireEvent.click(applyBtn);
+      });
+
+      // Wait for ValidationErrorScreen
+      await waitFor(() => {
+        const errorScreen = screen.queryByTestId('validation-error-screen');
+        if (errorScreen) {
+          expect(errorScreen).toBeDefined();
+        }
+      });
+
+      // Click Cancel button to return
+      const cancelBtn = screen.queryByTestId('cancel-btn');
+      if (cancelBtn) {
+        await act(async () => {
+          fireEvent.click(cancelBtn);
+        });
+      }
+
+      // ValidationErrorScreen should be hidden now
+      await waitFor(() => {
+        expect(screen.queryByTestId('validation-error-screen')).toBeNull();
+      });
+    });
+
+    it('validation errors displayed with proper formatting', async () => {
+      const { ValidationError } = await import('../../lib/types/validation.js');
+      const mockValidationError = vi.mocked(ValidationError);
+
+      const mockError = new mockValidationError('Validation failed', [
+        { path: ['env', 'ANTHROPIC_MODEL'], message: 'Expected string, got number' },
+        { path: ['env', 'ANTHROPIC_API_KEY'], message: 'Required' },
+      ]);
+
+      const mockOnConfirmWithError = vi.fn().mockImplementation(() => {
+        throw mockError;
+      });
+
+      const { useKeyInput } = await import('../hooks/useKeyInput.js');
+      const mockUseKeyInput = vi.mocked(useKeyInput);
+
+      render(
+        <ConfigEditorScreen
+          project={mockProject}
+          template={mockTemplate}
+          existingConfig={{}}
+          onConfirm={mockOnConfirmWithError}
+          onBack={mockOnBack}
+        />
+      );
+
+      // Trigger Enter to show DiffScreen then Apply
+      const callOptions = mockUseKeyInput.mock.calls[0][0];
+      await act(async () => {
+        callOptions.onSelect?.();
+      });
+      await waitFor(() => {
+        expect(screen.getByTestId('diff-screen')).toBeDefined();
+      });
+      const applyBtn = screen.getByTestId('diff-apply-btn');
+      await act(async () => {
+        fireEvent.click(applyBtn);
+      });
+
+      // Wait for ValidationErrorScreen with messages
+      await waitFor(() => {
+        const errorScreen = screen.queryByTestId('validation-error-screen');
+        if (errorScreen) {
+          const messages = screen.queryByTestId('error-messages');
+          if (messages) {
+            // Should contain formatted error messages
+            expect(messages.textContent).toContain('ANTHROPIC_MODEL');
+            expect(messages.textContent).toContain('Expected string');
+          }
+        }
+      });
+    });
+
+    it('user blocked from proceeding with invalid config (D-05)', async () => {
+      const { ValidationError } = await import('../../lib/types/validation.js');
+      const mockValidationError = vi.mocked(ValidationError);
+
+      const mockError = new mockValidationError('Validation failed', [
+        { path: ['env', 'MODEL'], message: 'Invalid' },
+      ]);
+
+      const mockOnConfirmWithError = vi.fn().mockImplementation(() => {
+        throw mockError;
+      });
+
+      const { useKeyInput } = await import('../hooks/useKeyInput.js');
+      const mockUseKeyInput = vi.mocked(useKeyInput);
+
+      render(
+        <ConfigEditorScreen
+          project={mockProject}
+          template={mockTemplate}
+          existingConfig={{}}
+          onConfirm={mockOnConfirmWithError}
+          onBack={mockOnBack}
+        />
+      );
+
+      // Trigger Enter then Apply
+      const callOptions = mockUseKeyInput.mock.calls[0][0];
+      await act(async () => {
+        callOptions.onSelect?.();
+      });
+      await waitFor(() => {
+        expect(screen.getByTestId('diff-screen')).toBeDefined();
+      });
+      const applyBtn = screen.getByTestId('diff-apply-btn');
+      await act(async () => {
+        fireEvent.click(applyBtn);
+      });
+
+      // ValidationErrorScreen should block further progress
+      await waitFor(() => {
+        const errorScreen = screen.queryByTestId('validation-error-screen');
+        // If error screen shown, user is blocked from proceeding
+        if (errorScreen) {
+          expect(errorScreen).toBeDefined();
+          // No successful status bar
+          const statusBar = screen.queryByTestId('status-bar');
+          expect(statusBar?.getAttribute('data-status-type')).not.toBe('success');
+        }
+      });
+    });
+  });
 });

@@ -4,10 +4,13 @@
  * Per F3: Configuration Preview (show what will change).
  * Per D-04: Preview panel shows template details.
  * Per U4: Escape to Cancel.
+ * Per F11: Validation UI shows helpful errors.
+ * Per D-05: Block continuation when validation fails.
  *
  * Shows template preview before applying to project.
  * Displays provider details and environment variables.
  * Supports Enter for confirm and Esc for cancel.
+ * Shows ValidationErrorScreen when apply fails validation.
  *
  * Usage:
  * ```tsx
@@ -26,9 +29,11 @@ import { PreviewPanel } from '../components/PreviewPanel.js';
 import { StatusBar } from '../components/StatusBar.js';
 import { LoadingIndicator } from '../components/LoadingIndicator.js';
 import { DiffScreen } from './DiffScreen.js';
+import { ValidationErrorScreen } from './ValidationErrorScreen.js';
 import type { ProjectEntry } from '../../lib/store/project.js';
 import type { TemplateConfig } from '../../lib/types/provider.js';
 import type { ClaudeSettings } from '../../lib/types/config.js';
+import type { ValidationError } from '../../lib/types/validation.js';
 
 /**
  * Props for ConfigEditorScreen component.
@@ -81,6 +86,10 @@ export const ConfigEditorScreen: React.FC<ConfigEditorScreenProps> = ({
   // State for DiffScreen (F12, D-03)
   const [showDiffScreen, setShowDiffScreen] = useState(false);
 
+  // State for ValidationErrorScreen (F11, D-04, D-05)
+  const [showValidationError, setShowValidationError] = useState(false);
+  const [validationError, setValidationError] = useState<ValidationError | null>(null);
+
   // Compute merged config from template provider settings
   // Per D-03: Template provider fields (env) merge into ClaudeSettings
   const mergedConfig: ClaudeSettings = {
@@ -103,6 +112,12 @@ export const ConfigEditorScreen: React.FC<ConfigEditorScreenProps> = ({
       setStatusMessage(null);
     },
     onEscape: () => {
+      // If ValidationErrorScreen is showing, hide it first (D-05)
+      if (showValidationError) {
+        setShowValidationError(false);
+        setValidationError(null);
+        return;
+      }
       // If DiffScreen is showing, hide it; otherwise go back
       if (showDiffScreen) {
         setShowDiffScreen(false);
@@ -110,7 +125,7 @@ export const ConfigEditorScreen: React.FC<ConfigEditorScreenProps> = ({
         onBack();
       }
     },
-    isActive: !isApplying && !showDiffScreen,
+    isActive: !isApplying && !showDiffScreen && !showValidationError,
   });
 
   // Prepare env preview with masking for sensitive keys
@@ -193,10 +208,38 @@ export const ConfigEditorScreen: React.FC<ConfigEditorScreenProps> = ({
           onApply={() => {
             setShowDiffScreen(false);
             setIsApplying(true);
-            // Now actually apply the template (D-03: after user confirms diff)
-            onConfirm();
+            // D-03: Apply after user confirms diff
+            // F11: Catch ValidationError and show ValidationErrorScreen
+            try {
+              onConfirm();
+            } catch (error) {
+              // Check for ValidationError using duck typing (error.name)
+              const validationErr = error as { name?: string; issues?: unknown[]; getMessages?: () => string[] };
+              if (validationErr.name === 'ValidationError' && validationErr.issues) {
+                // Show ValidationErrorScreen (D-04, D-05)
+                setValidationError(validationErr as ValidationError);
+                setShowValidationError(true);
+                setIsApplying(false);
+              } else {
+                // Other errors - show in status bar
+                setStatusMessage(error instanceof Error ? error.message : 'Apply failed');
+                setStatusType('error');
+                setIsApplying(false);
+              }
+            }
           }}
           onCancel={() => setShowDiffScreen(false)}
+        />
+      )}
+
+      {/* ValidationErrorScreen (F11, D-04, D-05) - blocks continuation */}
+      {showValidationError && validationError && (
+        <ValidationErrorScreen
+          error={validationError}
+          onCancel={() => {
+            setShowValidationError(false);
+            setValidationError(null);
+          }}
         />
       )}
     </Box>
