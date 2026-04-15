@@ -13,3 +13,6 @@ export { LoadingIndicator } from './LoadingIndicator.js';
 
 // Preview components
 export { PreviewPanel } from './PreviewPanel.js';
+
+// Diff components
+export { UnifiedDiff } from './UnifiedDiff.js';
