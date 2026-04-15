@@ -1,0 +1,17 @@
+{
+  "$schema": "https://typedoc.org/schema.json",
+  "entryPoints": ["src/lib", "src/cli", "src/tui"],
+  "out": "docs/api",
+  "exclude": ["**/*.test.ts", "**/*.test.tsx", "**/node_modules/**"],
+  "excludePrivate": true,
+  "excludeProtected": false,
+  "excludeInternal": true,
+  "plugin": [],
+  "theme": "default",
+  "name": "CC Config Switch API",
+  "readme": "./README.md",
+  "gaID": "",
+  "hideGenerator": true,
+  "toc": ["Lib", "CLI", "TUI"],
+  "entryPointStrategy": "Resolve"
+}
