@@ -193,7 +193,8 @@ export const ProjectListScreen: React.FC<ProjectListScreenProps> = ({
   // Helper to format project display
   const formatProjectLine = (project: ProjectEntry & SearchableItem, index: number) => {
     const isSelected = index === selectedIndex;
-    const name = project.path.split('/').pop() ?? project.path;
+    // Use name with fallback to path basename for legacy data safety
+    const name = project.name ?? project.path.split('/').pop() ?? project.path;
     const config = project.activeConfig ? ` [${project.activeConfig}]` : '';
 
     return (

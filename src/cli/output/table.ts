@@ -22,7 +22,8 @@ export function formatProjectTable(projects: ProjectEntry[]): string {
   });
 
   for (const project of projects) {
-    const projectName = project.path.split('/').pop() ?? project.path;
+    // Use name with fallback to path basename for legacy data safety
+    const projectName = project.name ?? project.path.split('/').pop() ?? project.path;
     const configName = project.activeConfig ? chalk.green(project.activeConfig) : chalk.gray('none');
     const statusIcon = project.activeConfig ? chalk.green('✓') : chalk.yellow('○');
 

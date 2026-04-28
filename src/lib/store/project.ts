@@ -30,6 +30,8 @@ import { getDataDir } from '../paths/xdg.js';
 export interface ProjectEntry {
   /** UUID for stable reference ( survives path changes ) */
   id: string;
+  /** Project name (defaults to directory name from path) */
+  name: string;
   /** Absolute path to project root ( resolved via realpath ) */
   path: string;
   /** Active configuration template name, or null */
@@ -92,6 +94,7 @@ export class ProjectIndex {
   /**
    * Load data from projects.json.
    * Returns cached data if already loaded, otherwise reads from disk.
+   * Performs data migration for legacy entries without name field.
    */
   private async load(): Promise<ProjectIndexData> {
     if (this.data !== null) {
@@ -99,8 +102,17 @@ export class ProjectIndex {
     }
 
     const loaded = await readJSON<ProjectIndexData>(this.filePath);
-    this.data = loaded ?? createDefaultData();
-    return this.data;
+    const data = loaded ?? createDefaultData();
+
+    // Migration: Fill missing name field with path basename for legacy entries
+    for (const entry of Object.values(data.projects)) {
+      if (!entry.name) {
+        entry.name = path.basename(entry.path);
+      }
+    }
+
+    this.data = data;
+    return data;
   }
 
   /**
@@ -156,11 +168,13 @@ export class ProjectIndex {
       return data.projects[existingId];
     }
 
-    // Create new entry
+    // Create new entry with name derived from path basename
     const id = randomUUID();
     const now = new Date().toISOString();
+    const name = path.basename(normalizedPath);
     const entry: ProjectEntry = {
       id,
+      name,
       path: normalizedPath,
       activeConfig: null,
       lastModified: now,
