@@ -130,6 +130,8 @@ describe('ProjectListScreen', () => {
 
   const mockOnSelect = vi.fn();
   const mockOnExit = vi.fn();
+  const mockOnScan = vi.fn();
+  const mockOnUndo = vi.fn();
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -142,6 +144,8 @@ describe('ProjectListScreen', () => {
           projects={mockProjects}
           onSelect={mockOnSelect}
           onExit={mockOnExit}
+          onScan={mockOnScan}
+          onUndo={mockOnUndo}
         />
       );
 
@@ -156,6 +160,8 @@ describe('ProjectListScreen', () => {
           projects={mockProjects}
           onSelect={mockOnSelect}
           onExit={mockOnExit}
+          onScan={mockOnScan}
+          onUndo={mockOnUndo}
         />
       );
 
@@ -168,6 +174,8 @@ describe('ProjectListScreen', () => {
           projects={mockProjects}
           onSelect={mockOnSelect}
           onExit={mockOnExit}
+          onScan={mockOnScan}
+          onUndo={mockOnUndo}
         />
       );
 
@@ -181,6 +189,8 @@ describe('ProjectListScreen', () => {
           projects={mockProjects}
           onSelect={mockOnSelect}
           onExit={mockOnExit}
+          onScan={mockOnScan}
+          onUndo={mockOnUndo}
         />
       );
 
@@ -197,6 +207,8 @@ describe('ProjectListScreen', () => {
           projects={[]}
           onSelect={mockOnSelect}
           onExit={mockOnExit}
+          onScan={mockOnScan}
+          onUndo={mockOnUndo}
         />
       );
 
@@ -209,6 +221,8 @@ describe('ProjectListScreen', () => {
           projects={mockProjects}
           onSelect={mockOnSelect}
           onExit={mockOnExit}
+          onScan={mockOnScan}
+          onUndo={mockOnUndo}
         />
       );
 
@@ -224,6 +238,8 @@ describe('ProjectListScreen', () => {
           projects={mockProjects}
           onSelect={mockOnSelect}
           onExit={mockOnExit}
+          onScan={mockOnScan}
+          onUndo={mockOnUndo}
         />
       );
 
@@ -248,6 +264,8 @@ describe('ProjectListScreen', () => {
           projects={mockProjects}
           onSelect={mockOnSelect}
           onExit={mockOnExit}
+          onScan={mockOnScan}
+          onUndo={mockOnUndo}
         />
       );
 
@@ -264,6 +282,8 @@ describe('ProjectListScreen', () => {
           projects={mockProjects}
           onSelect={mockOnSelect}
           onExit={mockOnExit}
+          onScan={mockOnScan}
+          onUndo={mockOnUndo}
         />
       );
 
@@ -274,6 +294,8 @@ describe('ProjectListScreen', () => {
           projects={mockProjects}
           onSelect={mockOnSelect}
           onExit={mockOnExit}
+          onScan={mockOnScan}
+          onUndo={mockOnUndo}
         />
       );
 
@@ -290,6 +312,8 @@ describe('ProjectListScreen', () => {
           projects={mockProjects}
           onSelect={mockOnSelect}
           onExit={mockOnExit}
+          onScan={mockOnScan}
+          onUndo={mockOnUndo}
         />
       );
 
@@ -315,6 +339,8 @@ describe('ProjectListScreen', () => {
           projects={mockProjects}
           onSelect={mockOnSelect}
           onExit={mockOnExit}
+          onScan={mockOnScan}
+          onUndo={mockOnUndo}
         />
       );
 
@@ -332,6 +358,8 @@ describe('ProjectListScreen', () => {
           projects={mockProjects}
           onSelect={mockOnSelect}
           onExit={mockOnExit}
+          onScan={mockOnScan}
+          onUndo={mockOnUndo}
         />
       );
 
@@ -342,6 +370,8 @@ describe('ProjectListScreen', () => {
           projects={mockProjects}
           onSelect={mockOnSelect}
           onExit={mockOnExit}
+          onScan={mockOnScan}
+          onUndo={mockOnUndo}
         />
       );
 
@@ -358,6 +388,8 @@ describe('ProjectListScreen', () => {
           projects={mockProjects}
           onSelect={mockOnSelect}
           onExit={mockOnExit}
+          onScan={mockOnScan}
+          onUndo={mockOnUndo}
         />
       );
 
@@ -369,6 +401,8 @@ describe('ProjectListScreen', () => {
           projects={mockProjects}
           onSelect={mockOnSelect}
           onExit={mockOnExit}
+          onScan={mockOnScan}
+          onUndo={mockOnUndo}
         />
       );
 
@@ -379,6 +413,8 @@ describe('ProjectListScreen', () => {
           projects={mockProjects}
           onSelect={mockOnSelect}
           onExit={mockOnExit}
+          onScan={mockOnScan}
+          onUndo={mockOnUndo}
         />
       );
 
@@ -394,6 +430,8 @@ describe('ProjectListScreen', () => {
           projects={mockProjects}
           onSelect={mockOnSelect}
           onExit={mockOnExit}
+          onScan={mockOnScan}
+          onUndo={mockOnUndo}
           initialQuery="test"
         />
       );
@@ -413,6 +451,8 @@ describe('ProjectListScreen', () => {
           projects={mockProjects}
           onSelect={mockOnSelect}
           onExit={mockOnExit}
+          onScan={mockOnScan}
+          onUndo={mockOnUndo}
           initialQuery=""
         />
       );
@@ -431,6 +471,8 @@ describe('ProjectListScreen', () => {
           projects={mockProjects}
           onSelect={mockOnSelect}
           onExit={mockOnExit}
+          onScan={mockOnScan}
+          onUndo={mockOnUndo}
           initialQuery="test"
         />
       );
@@ -446,6 +488,8 @@ describe('ProjectListScreen', () => {
           projects={mockProjects}
           onSelect={mockOnSelect}
           onExit={mockOnExit}
+          onScan={mockOnScan}
+          onUndo={mockOnUndo}
         />
       );
 
@@ -464,6 +508,8 @@ describe('ProjectListScreen', () => {
           projects={mockProjects}
           onSelect={mockOnSelect}
           onExit={mockOnExit}
+          onScan={mockOnScan}
+          onUndo={mockOnUndo}
         />
       );
 
@@ -475,6 +521,8 @@ describe('ProjectListScreen', () => {
           projects={mockProjects}
           onSelect={mockOnSelect}
           onExit={mockOnExit}
+          onScan={mockOnScan}
+          onUndo={mockOnUndo}
         />
       );
 
@@ -490,6 +538,8 @@ describe('ProjectListScreen', () => {
           projects={mockProjects}
           onSelect={mockOnSelect}
           onExit={mockOnExit}
+          onScan={mockOnScan}
+          onUndo={mockOnUndo}
           initialQuery="alpha"
         />
       );
@@ -506,33 +556,32 @@ describe('ProjectListScreen', () => {
           projects={mockProjects}
           onSelect={mockOnSelect}
           onExit={mockOnExit}
+          onScan={mockOnScan}
+          onUndo={mockOnUndo}
         />
       );
 
       expect(container.textContent).toContain('S scan');
     });
 
-    it('S key calls push(scan) when not in search mode', async () => {
+    it('S key calls onScan callback when not in search mode', async () => {
       const { useInput } = await import('ink');
       const mockUseInput = vi.mocked(useInput);
-      const { useNavigation } = await import('../hooks/useNavigation.js');
-      const mockNavigation = vi.mocked(useNavigation);
 
       render(
         <ProjectListScreen
           projects={mockProjects}
           onSelect={mockOnSelect}
           onExit={mockOnExit}
+          onScan={mockOnScan}
+          onUndo={mockOnUndo}
         />
       );
 
       const handler = mockUseInput.mock.calls[0]?.[0];
       handler('S', { escape: false, return: false });
 
-      const navResult = mockNavigation.mock.results[0]?.value;
-      if (navResult?.push) {
-        expect(navResult.push).toHaveBeenCalledWith('scan');
-      }
+      expect(mockOnScan).toHaveBeenCalled();
     });
   });
 
@@ -543,6 +592,8 @@ describe('ProjectListScreen', () => {
           projects={mockProjects}
           onSelect={mockOnSelect}
           onExit={mockOnExit}
+          onScan={mockOnScan}
+          onUndo={mockOnUndo}
         />
       );
 
@@ -558,57 +609,15 @@ describe('ProjectListScreen', () => {
           projects={mockProjects}
           onSelect={mockOnSelect}
           onExit={mockOnExit}
+          onScan={mockOnScan}
+          onUndo={mockOnUndo}
         />
       );
 
       expect(mockUseInput.mock.calls.length).toBeGreaterThan(0);
     });
 
-    it('successful undo shows restored message in StatusBar', async () => {
-      const { UndoService } = await import('../../lib/services/undo-service.js');
-      vi.mocked(UndoService).mockImplementation(() => ({
-        undo: vi.fn().mockResolvedValue({
-          backupTime: new Date(Date.now() - 5 * 60 * 1000),
-          backupFilename: 'settings.json.2026-04-15T02-20-00-000Z',
-          restored: true,
-        }),
-      }));
-
-      const { useInput } = await import('ink');
-      const mockUseInput = vi.mocked(useInput);
-
-      const { container } = render(
-        <ProjectListScreen
-          projects={mockProjects}
-          onSelect={mockOnSelect}
-          onExit={mockOnExit}
-        />
-      );
-
-      const handler = mockUseInput.mock.calls[0]?.[0];
-      await act(async () => {
-        handler('U', { escape: false, return: false });
-      });
-
-      await waitFor(() => {
-        const statusBar = container.querySelector('[data-testid="status-bar"]');
-        if (statusBar) {
-          expect(statusBar.textContent).toContain('Restored from backup');
-        }
-      }, { timeout: 3000 });
-    });
-
-    it('U key does NOT trigger undo when in search mode', async () => {
-      const { UndoService } = await import('../../lib/services/undo-service.js');
-      const mockUndoFn = vi.fn().mockResolvedValue({
-        backupTime: new Date(Date.now() - 5 * 60 * 1000),
-        backupFilename: 'settings.json.2026-04-15T02-20-00-000Z',
-        restored: true,
-      });
-      vi.mocked(UndoService).mockImplementation(() => ({
-        undo: mockUndoFn,
-      }));
-
+    it('U key calls onUndo with selected project', async () => {
       const { useInput } = await import('ink');
       const mockUseInput = vi.mocked(useInput);
 
@@ -617,6 +626,30 @@ describe('ProjectListScreen', () => {
           projects={mockProjects}
           onSelect={mockOnSelect}
           onExit={mockOnExit}
+          onScan={mockOnScan}
+          onUndo={mockOnUndo}
+        />
+      );
+
+      const handler = mockUseInput.mock.calls[0]?.[0];
+      handler('U', { escape: false, return: false });
+
+      expect(mockOnUndo).toHaveBeenCalledWith(
+        expect.objectContaining({ id: mockProjects[0].id })
+      );
+    });
+
+    it('U key does NOT trigger undo when in search mode', async () => {
+      const { useInput } = await import('ink');
+      const mockUseInput = vi.mocked(useInput);
+
+      render(
+        <ProjectListScreen
+          projects={mockProjects}
+          onSelect={mockOnSelect}
+          onExit={mockOnExit}
+          onScan={mockOnScan}
+          onUndo={mockOnUndo}
           initialQuery="searching"
         />
       );
@@ -626,40 +659,7 @@ describe('ProjectListScreen', () => {
         handler('U', { escape: false, return: false });
       });
 
-      expect(mockUndoFn).not.toHaveBeenCalled();
-    });
-
-    it('NO_BACKUP error shows appropriate error message', async () => {
-      const { UndoService } = await import('../../lib/services/undo-service.js');
-      vi.mocked(UndoService).mockImplementation(() => ({
-        undo: vi.fn().mockRejectedValue(
-          new ServiceError('No backup available to undo', 'NO_BACKUP')
-        ),
-      }));
-
-      const { useInput } = await import('ink');
-      const mockUseInput = vi.mocked(useInput);
-
-      const { container } = render(
-        <ProjectListScreen
-          projects={mockProjects}
-          onSelect={mockOnSelect}
-          onExit={mockOnExit}
-        />
-      );
-
-      const handler = mockUseInput.mock.calls[0]?.[0];
-      await act(async () => {
-        handler('U', { escape: false, return: false });
-      });
-
-      await waitFor(() => {
-        const statusBar = container.querySelector('[data-testid="status-bar"]');
-        if (statusBar) {
-          expect(statusBar.textContent).toContain('No backup');
-          expect(statusBar.getAttribute('data-type')).toBe('error');
-        }
-      }, { timeout: 3000 });
+      expect(mockOnUndo).not.toHaveBeenCalled();
     });
   });
 });

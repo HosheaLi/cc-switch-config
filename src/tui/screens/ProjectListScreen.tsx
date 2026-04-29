@@ -30,13 +30,9 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Box, Text, useApp, useInput } from 'ink';
 import TextInput from 'ink-text-input';
-import path from 'path';
 import { useFuzzySearch } from '../hooks/useFuzzySearch.js';
-import { useNavigation } from '../hooks/useNavigation.js';
 import { PreviewPanel } from '../components/PreviewPanel.js';
 import { StatusBar } from '../components/StatusBar.js';
-import { UndoService } from '../../lib/services/undo-service.js';
-import { ServiceError } from '../../lib/services/types.js';
 import type { ProjectEntry } from '../../lib/store/project.js';
 import type { SearchableItem } from '../hooks/useFuzzySearch.js';
 
@@ -48,8 +44,12 @@ interface ProjectListScreenProps {
   projects: ProjectEntry[];
   /** Callback when a project is selected (Enter key) */
   onSelect: (project: ProjectEntry) => void;
-  /** Callback when user exits (Escape key when isRoot) */
+  /** Callback when user exits (Escape key) */
   onExit: () => void;
+  /** Callback when user triggers scan (S key) */
+  onScan: () => void;
+  /** Callback when user triggers undo for selected project (U key) */
+  onUndo: (project: ProjectEntry) => void;
   /** Initial search query (optional) */
   initialQuery?: string;
 }
@@ -71,10 +71,11 @@ export const ProjectListScreen: React.FC<ProjectListScreenProps> = ({
   projects,
   onSelect,
   onExit,
+  onScan,
+  onUndo,
   initialQuery = '',
 }) => {
   const { exit } = useApp();
-  const { isRoot, pop, push } = useNavigation('list');
 
   // State for selection and search
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -123,50 +124,21 @@ export const ProjectListScreen: React.FC<ProjectListScreenProps> = ({
   };
 
   const handleEscape = () => {
-    if (query.length > 0) {
-      // Clear search first, then exit on next Esc
+    if (isSearchMode) {
+      setIsSearchMode(false);
       setQuery('');
       return;
     }
-    if (isRoot) {
-      onExit();
-    } else {
-      pop();
-    }
+    onExit();
   };
 
   /**
    * Handle undo operation for selected project (D-07, U2).
-   * Creates UndoService, calls undo, updates status bar with result.
+   * Delegates to parent via onUndo callback.
    */
-  const handleUndo = async () => {
-    if (!selectedProject) return;
-
-    try {
-      // Create UndoService with config path resolver
-      const undoService = new UndoService((projectPath) =>
-        path.join(projectPath, '.claude', 'settings.json')
-      );
-
-      // Perform undo operation
-      const result = await undoService.undo(selectedProject.path);
-
-      // Calculate time ago in minutes
-      const minutesAgo = Math.round((Date.now() - result.backupTime.getTime()) / 60000);
-
-      // Update status bar with success message (per UI-SPEC.md)
-      setStatusMessage(`Restored from backup (${minutesAgo} min ago)`);
-      setStatusType('success');
-    } catch (error) {
-      // Handle NO_BACKUP error specifically
-      if (error instanceof ServiceError && error.code === 'NO_BACKUP') {
-        setStatusMessage('No backup available to undo');
-        setStatusType('error');
-      } else {
-        // Generic undo failure
-        setStatusMessage('Undo failed');
-        setStatusType('error');
-      }
+  const handleUndo = () => {
+    if (selectedProject) {
+      onUndo(selectedProject);
     }
   };
 
@@ -217,7 +189,7 @@ export const ProjectListScreen: React.FC<ProjectListScreenProps> = ({
       return;
     }
     if (input === 'S') {
-      push('scan');
+      onScan();
       return;
     }
     if (input === 'U' && selectedProject) {

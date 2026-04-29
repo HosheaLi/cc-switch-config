@@ -11,7 +11,8 @@
 import path from 'path';
 import React, { useState, useEffect } from 'react';
 import { render, Box, Text, useApp } from 'ink';
-import { ProjectService, TemplateService, ConfigService } from '../lib/services/index.js';
+import { ProjectService, TemplateService, ConfigService, UndoService } from '../lib/services/index.js';
+import { ServiceError } from '../lib/services/types.js';
 import { ProjectIndex, TemplateStore, AppState, readConfig, writeConfig } from '../lib/store/index.js';
 import type { ProjectEntry } from '../lib/store/project.js';
 import type { TemplateConfig } from '../lib/types/provider.js';
@@ -165,6 +166,23 @@ export const TuiApp: React.FC<TuiAppProps> = ({
     setIsScanning(false);
   };
 
+  // Handle undo for a project (D-07, U2)
+  const handleUndo = async (project: ProjectEntry) => {
+    try {
+      const undoService = new UndoService((projectPath) =>
+        path.join(projectPath, '.claude', 'settings.json')
+      );
+      await undoService.undo(project.path);
+      // Refresh project list to reflect restored config
+      const updatedList = await projectService.listProjects();
+      setProjects(updatedList);
+    } catch (err) {
+      if (err instanceof Error) {
+        setError(err.message);
+      }
+    }
+  };
+
   // Handle scan confirmation - register selected projects (D-09)
   const handleScanConfirm = async (selectedPaths: string[]) => {
     for (const projectPath of selectedPaths) {
@@ -222,6 +240,8 @@ export const TuiApp: React.FC<TuiAppProps> = ({
             projects={projects}
             onSelect={handleProjectSelect}
             onExit={handleExit}
+            onScan={handleTriggerScan}
+            onUndo={handleUndo}
           />
         );
 
