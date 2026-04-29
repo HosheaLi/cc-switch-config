@@ -18,10 +18,8 @@ import { TemplateStore } from '../../lib/store/template.js';
 import { ConfigService } from '../../lib/services/config-service.js';
 import { readConfig, writeConfig } from '../../lib/store/config.js';
 import { handleCLIError } from '../output/error.js';
-import { launchTUI } from '../utils/tui-launch.js';
 import type { ConflictField } from '../../lib/types/export-schema.js';
 import type { ExportPayload } from '../../lib/types/export-schema.js';
-import type { ClaudeSettings } from '../../lib/types/index.js';
 
 /**
  * Import command options.
@@ -46,10 +44,16 @@ export function registerImportCommand(program: Command): void {
     .command('import <file>')
     .description('Import project configuration from JSON file')
     .option('-s, --strategy <merge|overwrite|skip>', 'import strategy (non-interactive mode)')
+    .option('-m, --merge', 'merge with existing config (alias for --strategy merge)')
     .option('-t, --target <path>', 'override target project path')
-    .action(async (file: string, options: ImportOptions) => {
+    .action(async (file: string, options: ImportOptions & { merge?: boolean }) => {
       try {
-        await importConfig(file, options);
+        // --merge is alias for --strategy merge
+        const normalizedOptions: ImportOptions = {
+          ...options,
+          strategy: options.merge ? 'merge' : options.strategy,
+        };
+        await importConfig(file, normalizedOptions);
       } catch (error) {
         handleCLIError(error);
       }
@@ -67,8 +71,14 @@ async function importConfig(file: string, options: ImportOptions): Promise<void>
   const payload: unknown = await fs.readJSON(file);
 
   // Validate basic structure to get project path
-  const basicPayload = payload as Partial<ExportPayload>;
-  if (!basicPayload?.project?.path) {
+  if (typeof payload !== 'object' || payload === null) {
+    console.error(chalk.red('Invalid export file: not a JSON object'));
+    process.exit(4); // CONFIG_ERROR
+  }
+
+  const basicPayload = payload as Record<string, unknown>;
+  const projectObj = basicPayload.project as Record<string, unknown> | undefined;
+  if (typeof projectObj?.path !== 'string') {
     console.error(chalk.red('Invalid export file: missing project path'));
     process.exit(4); // CONFIG_ERROR
   }
@@ -128,6 +138,10 @@ async function importConfig(file: string, options: ImportOptions): Promise<void>
  * @returns Selected strategy or null if cancelled
  */
 async function launchImportConflictTUI(conflicts: ConflictField[]): Promise<ImportStrategy | null> {
+  // TODO: Implement true interactive TUI (ImportConflictScreen) for conflict resolution.
+  // This placeholder always returns 'merge' as the safest default.
+  // When implementing, use Ink's ImportConflictScreen with keyboard input (1/2/3/Esc).
+
   // Display conflicts summary
   console.log(chalk.cyan.bold('Import Conflicts Detected'));
   console.log(chalk.gray(`${conflicts.length} conflicting fields found`));
@@ -141,10 +155,6 @@ async function launchImportConflictTUI(conflicts: ConflictField[]): Promise<Impo
     console.log();
   }
 
-  // For Phase 07, provide interactive selection via CLI prompts
-  // Full TUI screen (ImportConflictScreen) would be launched here
-  // But since TUI requires terminal interaction, we use a simpler approach
-
   console.log(chalk.white('Resolution options:'));
   console.log(chalk.white('  [1] Merge all - preserve existing values, add new fields'));
   console.log(chalk.white('  [2] Overwrite all - replace with imported values'));
@@ -152,8 +162,6 @@ async function launchImportConflictTUI(conflicts: ConflictField[]): Promise<Impo
   console.log(chalk.gray('  [Esc] Cancel import'));
   console.log();
 
-  // For now, default to 'merge' as the safest option
-  // In production, this would wait for user input via ImportConflictScreen TUI
   console.log(chalk.gray('Proceeding with merge strategy (default).'));
   return 'merge';
 }

@@ -11,6 +11,7 @@
  * - formatSwitchMessage: Format output message (silent unless switch)
  */
 
+import path from 'path';
 import fs from 'fs-extra';
 import type { ProjectIndex } from '../../lib/store/project.js';
 import type { AppState } from '../../lib/store/state.js';
@@ -58,7 +59,7 @@ export async function detectAutoSwitch(
     const switched = currentActiveId !== project.id;
 
     // Derive project name from path basename
-    const projectName = require('path').basename(project.path);
+    const projectName = path.basename(project.path);
 
     return {
       switched,
@@ -70,8 +71,10 @@ export async function detectAutoSwitch(
   }
 
   // Not registered - check for .claude directory (D-03)
-  const claudeSettingsPath = require('path').join(cwd, '.claude', 'settings.json');
-  const hasClaudeDir = await fs.pathExists(claudeSettingsPath);
+  const claudeDir = path.join(cwd, '.claude');
+  const settingsPath = path.join(claudeDir, 'settings.json');
+  const localSettingsPath = path.join(claudeDir, 'settings.local.json');
+  const hasClaudeDir = await fs.pathExists(settingsPath) || await fs.pathExists(localSettingsPath);
 
   if (hasClaudeDir) {
     // D-03: Found .claude but not registered
@@ -123,7 +126,7 @@ export function formatSwitchMessage(result: AutoSwitchResult): string | null {
 
   // D-03: Prompt for unregistered .claude directories
   if (result.unregisteredDir) {
-    return 'Found .claude directory. Register with: cc-config register';
+    return 'Found .claude directory. Register with: cc-config register <path>';
   }
 
   // D-02: Message on actual switch

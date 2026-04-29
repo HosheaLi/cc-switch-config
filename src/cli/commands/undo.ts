@@ -15,6 +15,7 @@ import { AppState } from '../../lib/store/state.js';
 import { ProjectIndex } from '../../lib/store/project.js';
 import { UndoService } from '../../lib/services/undo-service.js';
 import { ServiceError } from '../../lib/services/types.js';
+import { handleCLIError } from '../output/error.js';
 
 /**
  * Execute the undo command logic.
@@ -113,12 +114,7 @@ export function registerUndoCommand(program: Command): void {
       try {
         await executeUndoCommand();
       } catch (error) {
-        // Handle unexpected errors
-        if (error instanceof Error) {
-          console.error(chalk.red(`Error: ${error.message}`));
-          process.exit(1);
-        }
-        throw error;
+        handleCLIError(error);
       }
     });
 }

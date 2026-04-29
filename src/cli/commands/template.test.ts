@@ -8,7 +8,17 @@ vi.mock('../../lib/services/template-service.js', () => ({
   TemplateService: vi.fn().mockImplementation(() => ({
     listTemplates: vi.fn().mockResolvedValue(['anthropic', 'openai', 'groq']),
     deleteTemplate: vi.fn().mockResolvedValue(true),
+    getTemplate: vi.fn().mockResolvedValue(null),
+    createTemplate: vi.fn().mockResolvedValue(undefined),
   })),
+}));
+
+// Mock readline for interactive template create
+vi.mock('readline', () => ({
+  createInterface: vi.fn().mockReturnValue({
+    question: vi.fn((_q: string, cb: (answer: string) => void) => cb('')),
+    close: vi.fn(),
+  }),
 }));
 
 // Mock TemplateStore
@@ -32,7 +42,17 @@ describe('template command', () => {
   let mockConsole: ReturnType<typeof vi.spyOn>;
   let mockExit: ReturnType<typeof vi.spyOn>;
 
-  beforeEach(() => {
+  beforeEach(async () => {
+    // Reset TemplateService mock to full implementation so list tests don't break create tests
+    const mod = await import('../../lib/services/template-service.js');
+    const MockedTemplateService = vi.mocked(mod.TemplateService);
+    MockedTemplateService.mockImplementation(() => ({
+      listTemplates: vi.fn().mockResolvedValue(['anthropic', 'openai', 'groq']),
+      deleteTemplate: vi.fn().mockResolvedValue(true),
+      getTemplate: vi.fn().mockResolvedValue(null),
+      createTemplate: vi.fn().mockResolvedValue(undefined),
+    }));
+
     program = new Command();
     program.exitOverride();
     registerTemplateCommand(program);
@@ -186,28 +206,46 @@ describe('template command', () => {
   });
 
   describe('template create execution', () => {
-    it('outputs placeholder message', async () => {
+    it('outputs creation header', async () => {
+      const freshProgram = new Command();
+      freshProgram.exitOverride();
+      registerTemplateCommand(freshProgram);
+      const freshConsole = vi.spyOn(console, 'log').mockImplementation(() => {});
+      const freshExit = vi.spyOn(process, 'exit').mockImplementation(() => undefined as never);
+
       try {
-        await program.parseAsync(['node', 'cc-config', 'template', 'create', 'my-template']);
+        await freshProgram.parseAsync(['node', 'cc-config', 'template', 'create', 'my-template']);
       } catch {
         // May exit on success
       }
 
-      expect(mockConsole.mock.calls.some(call =>
-        call[0].includes('Phase 06')
+      expect(freshConsole.mock.calls.some(call =>
+        typeof call[0] === 'string' && call[0].includes('Creating template')
       )).toBe(true);
+
+      freshConsole.mockRestore();
+      freshExit.mockRestore();
     });
 
-    it('outputs template name', async () => {
+    it('outputs success message with template name', async () => {
+      const freshProgram = new Command();
+      freshProgram.exitOverride();
+      registerTemplateCommand(freshProgram);
+      const freshConsole = vi.spyOn(console, 'log').mockImplementation(() => {});
+      const freshExit = vi.spyOn(process, 'exit').mockImplementation(() => undefined as never);
+
       try {
-        await program.parseAsync(['node', 'cc-config', 'template', 'create', 'my-template']);
+        await freshProgram.parseAsync(['node', 'cc-config', 'template', 'create', 'my-template']);
       } catch {
         // May exit on success
       }
 
-      expect(mockConsole.mock.calls.some(call =>
-        call[0].includes('my-template')
+      expect(freshConsole.mock.calls.some(call =>
+        typeof call[0] === 'string' && call[0].includes('my-template')
       )).toBe(true);
+
+      freshConsole.mockRestore();
+      freshExit.mockRestore();
     });
   });
 

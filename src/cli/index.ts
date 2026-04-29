@@ -3,7 +3,6 @@
  */
 import { Command } from 'commander';
 import chalk from 'chalk';
-import { handleCLIError } from './output/error.js';
 import { launchTUI } from './utils/tui-launch.js';
 import { registerListCommand } from './commands/list.js';
 import { registerSwitchCommand } from './commands/switch.js';
@@ -14,6 +13,7 @@ import { registerScanCommand } from './commands/scan.js';
 import { registerExportCommand } from './commands/export.js';
 import { registerImportCommand } from './commands/import.js';
 import { registerUndoCommand } from './commands/undo.js';
+import { registerRegisterCommand } from './commands/register.js';
 
 const VERSION = '0.1.0';
 
@@ -34,6 +34,7 @@ export async function runCLI(argv: string[] = process.argv): Promise<void> {
   // Phase 07 commands
   registerAutoCheckCommand(program);
   registerScanCommand(program);
+  registerRegisterCommand(program);
   registerExportCommand(program);
   registerImportCommand(program);
 
@@ -46,8 +47,4 @@ export async function runCLI(argv: string[] = process.argv): Promise<void> {
   } else {
     await program.parseAsync(argv);
   }
-}
-
-if (import.meta.url === `file://${process.argv[1]}`) {
-  runCLI().catch(handleCLIError);
 }

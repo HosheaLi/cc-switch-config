@@ -61,6 +61,7 @@ describe('current command', () => {
     mockGetActiveProject.mockReturnValue('test-project-id');
     mockGetProjectById.mockResolvedValue({
       id: 'test-project-id',
+      name: 'my-project',
       path: '/Users/test/my-project',
       activeConfig: 'anthropic-template',
       lastModified: '2026-04-14T00:00:00Z',
@@ -140,6 +141,7 @@ describe('current command', () => {
     it('displays template none when no activeConfig', async () => {
       mockGetProjectById.mockResolvedValue({
         id: 'test-project-id',
+        name: 'my-project',
         path: '/Users/test/my-project',
         activeConfig: null,
         lastModified: '2026-04-14T00:00:00Z',

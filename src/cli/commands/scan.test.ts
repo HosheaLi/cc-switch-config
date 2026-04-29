@@ -136,7 +136,7 @@ describe('scan command', () => {
 
       await scanProjectsCLI({ depth: 5 });
 
-      expect(mockScanProjects).toHaveBeenCalledWith(5);
+      expect(mockScanProjects).toHaveBeenCalledWith(5, undefined);
     });
 
     it('uses default depth 3 when not specified', async () => {
@@ -148,15 +148,14 @@ describe('scan command', () => {
 
       await scanProjectsCLI({});
 
-      expect(mockScanProjects).toHaveBeenCalledWith(3);
+      expect(mockScanProjects).toHaveBeenCalledWith(3, undefined);
     });
 
-    it('handles --root option by calling AppState.set', async () => {
-      const mockGet = vi.fn().mockReturnValue([]);
+    it('passes --root as overrideDirs to scanProjects without persisting', async () => {
       const mockSet = vi.fn();
       const MockAppState = vi.mocked(await import('../../lib/store/state.js')).AppState;
       MockAppState.mockImplementation(() => ({
-        get: mockGet,
+        get: vi.fn().mockReturnValue([]),
         set: mockSet,
       }) as any);
 
@@ -168,16 +167,15 @@ describe('scan command', () => {
 
       await scanProjectsCLI({ root: '/custom/path' });
 
-      expect(mockGet).toHaveBeenCalledWith('scanDirectories');
-      expect(mockSet).toHaveBeenCalledWith('scanDirectories', ['/custom/path']);
+      expect(mockScanProjects).toHaveBeenCalledWith(3, ['/custom/path']);
+      expect(mockSet).not.toHaveBeenCalled();
     });
 
-    it('does not duplicate root if already in scanDirectories', async () => {
-      const mockGet = vi.fn().mockReturnValue(['/existing/path', '/custom/path']);
+    it('does not call AppState.set when --root is used', async () => {
       const mockSet = vi.fn();
       const MockAppState = vi.mocked(await import('../../lib/store/state.js')).AppState;
       MockAppState.mockImplementation(() => ({
-        get: mockGet,
+        get: vi.fn().mockReturnValue(['/existing/path', '/custom/path']),
         set: mockSet,
       }) as any);
 
@@ -190,6 +188,7 @@ describe('scan command', () => {
       await scanProjectsCLI({ root: '/custom/path' });
 
       expect(mockSet).not.toHaveBeenCalled();
+      expect(mockScanProjects).toHaveBeenCalledWith(3, ['/custom/path']);
     });
 
     it('calls launchScanTUI when --tui option is set', async () => {

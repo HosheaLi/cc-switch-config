@@ -23,12 +23,14 @@ import { launchScanTUI } from '../utils/tui-launch.js';
 export interface ScanOptions {
   /** Override scan directory (default: from AppState.scanDirectories) */
   root?: string;
-  /** Max scan depth (default: 3) */
-  depth?: number;
+  /** Max scan depth (default: 3) - passed as string by Commander */
+  depth?: string;
   /** Launch TUI interface for multi-select */
   tui?: boolean;
   /** JSON output format */
   json?: boolean;
+  /** Automatically register found projects */
+  register?: boolean;
 }
 
 /**
@@ -37,15 +39,21 @@ export interface ScanOptions {
  */
 export function registerScanCommand(program: Command): void {
   program
-    .command('scan')
+    .command('scan [directory]')
     .description('Scan directories for .claude projects')
     .option('-r, --root <dir>', 'override scan directory')
     .option('-d, --depth <number>', 'max scan depth (default: 3)', '3')
     .option('-t, --tui', 'launch TUI multi-select interface')
     .option('-j, --json', 'output as JSON format')
-    .action(async (options: ScanOptions) => {
+    .option('--register', 'automatically register found projects')
+    .action(async (directory: string | undefined, options: ScanOptions) => {
       try {
-        await scanProjectsCLI(options);
+        // [directory] positional argument acts as --root shortcut
+        const mergedOptions: ScanOptions = {
+          ...options,
+          root: directory ?? options.root,
+        };
+        await scanProjectsCLI(mergedOptions);
       } catch (error) {
         handleCLIError(error);
       }
@@ -59,6 +67,7 @@ export function registerScanCommand(program: Command): void {
  * - TUI: Launch ScanScreen for multi-select registration
  * - JSON: Output ScanResult[] array to stdout
  * - Table: Formatted table with Path and Status columns
+ * - Register: Auto-register all found projects
  *
  * @param options - Scan options from CLI
  */
@@ -66,23 +75,35 @@ export async function scanProjectsCLI(options: ScanOptions): Promise<void> {
   // Create service instances
   const projectIndex = new ProjectIndex();
   const appState = new AppState();
-
-  // Handle --root override
-  if (options.root) {
-    // Temporarily add the root directory for this scan
-    const currentDirs = appState.get('scanDirectories');
-    if (!currentDirs.includes(options.root)) {
-      appState.set('scanDirectories', [...currentDirs, options.root]);
-    }
-  }
-
   const service = new ProjectService(projectIndex, appState);
 
   // Parse depth option
   const depth = options.depth ? parseInt(options.depth, 10) : 3;
 
+  // Use --root as temporary override without persisting to appState
+  const overrideDirs = options.root ? [options.root] : undefined;
+
   // Execute scan
-  const results = await service.scanProjects(depth);
+  const results = await service.scanProjects(depth, overrideDirs);
+
+  // Handle auto-register mode
+  if (options.register) {
+    const newProjects = results.filter(r => r.isNew);
+    if (newProjects.length === 0) {
+      console.log(chalk.gray('No new projects to register.'));
+      return;
+    }
+    for (const result of newProjects) {
+      try {
+        await service.registerProject(result.path);
+        console.log(chalk.green(`✓ Registered: ${result.path}`));
+      } catch (err) {
+        console.error(chalk.red(`✗ Failed to register ${result.path}: ${err instanceof Error ? err.message : String(err)}`));
+      }
+    }
+    console.log(chalk.gray(`\nRegistered ${newProjects.length} project(s).`));
+    return;
+  }
 
   // Handle TUI mode
   if (options.tui) {
@@ -110,7 +131,7 @@ export async function scanProjectsCLI(options: ScanOptions): Promise<void> {
 function outputScanTable(results: ScanResult[]): void {
   if (results.length === 0) {
     console.log(chalk.yellow('No projects found in configured directories.'));
-    console.log(chalk.gray('Add scan directories: cc-config config --add-scan-dir <path>'));
+    console.log(chalk.gray('Scan a specific directory: cc-config scan --root <path>'));
     return;
   }
 
@@ -145,7 +166,7 @@ function outputScanTable(results: ScanResult[]): void {
 
   if (newProjects.length > 0) {
     console.log(chalk.gray('\nRegister new projects: cc-config register <path>'));
-    console.log(chalk.gray('Or use TUI multi-select: cc-config scan --tui'));
+    console.log(chalk.gray('Register all from list: cc-config scan --tui'));
   }
 }
 

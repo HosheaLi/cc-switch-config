@@ -4,10 +4,10 @@ import { formatProjectTable, truncatePath } from './table.js';
 
 describe('table formatter', () => {
   const mockProject: ProjectEntry = {
-    id: 'test-uuid', path: '/Users/test/my-project', activeConfig: 'anthropic-template', lastModified: '2026-04-14T00:00:00Z',
+    id: 'test-uuid', name: 'my-project', path: '/Users/test/my-project', activeConfig: 'anthropic-template', lastModified: '2026-04-14T00:00:00Z',
   };
   const mockProjectNoConfig: ProjectEntry = {
-    id: 'test-uuid-2', path: '/Users/test/another-project', activeConfig: null, lastModified: '2026-04-14T00:00:00Z',
+    id: 'test-uuid-2', name: 'another-project', path: '/Users/test/another-project', activeConfig: null, lastModified: '2026-04-14T00:00:00Z',
   };
 
   describe('formatProjectTable', () => {

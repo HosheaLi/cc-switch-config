@@ -32,14 +32,17 @@ export function registerSwitchCommand(program: Command): void {
     .command('switch [template-name]')
     .alias('sw')  // D-01: short alias
     .description('Switch to a provider template')
-    .action(async (templateName?: string) => {
+    .option('--silent', 'suppress output messages', false)
+    .action(async (templateName?: string, options?: { silent?: boolean }) => {
       try {
         // D-06: No template name -> TUI selection
         const targetTemplate = templateName ?? await selectTemplateInTUI();
 
         // TUI cancelled (returned null)
         if (!targetTemplate) {
-          console.log(chalk.yellow('No template selected.'));
+          if (!options?.silent) {
+            console.log(chalk.yellow('No template selected.'));
+          }
           process.exit(0);
         }
 
@@ -56,8 +59,10 @@ export function registerSwitchCommand(program: Command): void {
         await service.applyTemplate(projectPath, targetTemplate);
 
         // Success message (D-03: colored output)
-        console.log(chalk.green(`✓ Switched to template: ${targetTemplate}`));
-        console.log(chalk.gray(`Project: ${projectPath}`));
+        if (!options?.silent) {
+          console.log(chalk.green(`✓ Switched to template: ${targetTemplate}`));
+          console.log(chalk.gray(`Project: ${projectPath}`));
+        }
 
       } catch (error) {
         handleCLIError(error);

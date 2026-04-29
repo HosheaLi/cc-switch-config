@@ -41,13 +41,18 @@ interface ExportOptions {
  */
 export function registerExportCommand(program: Command): void {
   program
-    .command('export [project-id]')
+    .command('export [project-id] [file]')
     .description('Export project configuration to JSON file')
     .option('-o, --output <path>', 'output file path (default: <project-name>-config.json)')
     .option('-s, --stdout', 'output to stdout instead of file')
-    .action(async (projectId: string | undefined, options: ExportOptions) => {
+    .action(async (projectId: string | undefined, file: string | undefined, options: ExportOptions) => {
       try {
-        await exportConfig(projectId, options);
+        // [file] positional argument acts as --output shortcut
+        const mergedOptions: ExportOptions = {
+          ...options,
+          output: file ?? options.output,
+        };
+        await exportConfig(projectId, mergedOptions);
       } catch (error) {
         handleCLIError(error);
       }

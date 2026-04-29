@@ -15,6 +15,7 @@
 
 import type { Command } from 'commander';
 import chalk from 'chalk';
+import { createInterface } from 'readline';
 import { TemplateService } from '../../lib/services/template-service.js';
 import { handleCLIError } from '../output/error.js';
 import { TemplateStore } from '../../lib/store/template.js';
@@ -60,20 +61,73 @@ export function registerTemplateCommand(program: Command): void {
       }
     });
 
-  // template create - create new template (Phase 06 will add interactive form)
+  // template create - interactive CLI form
   template
     .command('create <name>')
     .alias('c')  // D-07: subcommand alias
-    .description('Create a new template')
+    .description('Create a new provider template interactively')
     .action(async (name: string) => {
       try {
-        // Phase 06: Will launch TUI form for template creation
-        // Current: Placeholder message
-        console.log(chalk.yellow('Interactive template creation coming in Phase 06.'));
-        console.log(chalk.gray(`Template name: ${name}`));
-        console.log(chalk.gray('For now, create templates manually in templates.json.'));
-        process.exit(0);
+        const templateStore = new TemplateStore();
+        const service = new TemplateService(templateStore, readConfig, writeConfig);
 
+        // Check if template already exists
+        const existing = await service.getTemplate(name);
+        if (existing) {
+          console.error(chalk.red(`Template "${name}" already exists.`));
+          console.error(chalk.gray('Use a different name or delete the existing template first.'));
+          process.exit(1);
+        }
+
+        // Interactive prompts via readline
+        const rl = createInterface({
+          input: process.stdin,
+          output: process.stdout,
+        });
+
+        const ask = (q: string): Promise<string> =>
+          new Promise(resolve => rl.question(q, resolve));
+
+        console.log(chalk.cyan.bold(`Creating template: ${name}`));
+        console.log(chalk.gray('Press Enter to use defaults. Env vars can be added later by editing templates.json.\n'));
+
+        const providerName = await ask(chalk.white('Provider name (e.g. openrouter): ')) || 'custom';
+        const baseUrl = await ask(chalk.white('Base URL (e.g. https://openrouter.ai/api/v1): ')) || '';
+        const authType = await ask(chalk.white('Auth type (bearer/api-key/none): ')) || 'none';
+
+        // Optional env vars
+        const env: Record<string, string> = {};
+        const envInput = await ask(chalk.white('Env vars as KEY=VALUE (comma-separated, optional): '));
+        if (envInput.trim()) {
+          for (const pair of envInput.split(',')) {
+            const [k, ...v] = pair.trim().split('=');
+            if (k) env[k.trim()] = v.join('=').trim();
+          }
+        }
+
+        rl.close();
+
+        const config = {
+          name,
+          description: `${providerName} template`,
+          provider: {
+            name: providerName,
+            baseUrl: baseUrl || undefined,
+            authType: authType as 'bearer' | 'api-key' | 'none',
+            env: Object.keys(env).length > 0 ? env : undefined,
+          },
+        };
+
+        await service.createTemplate(name, config);
+        console.log(chalk.green(`\n✓ Template "${name}" created.`));
+        console.log(chalk.gray(`Provider: ${providerName}`));
+        if (baseUrl) console.log(chalk.gray(`URL: ${baseUrl}`));
+        if (Object.keys(env).length > 0) {
+          console.log(chalk.gray('Env vars:'));
+          for (const [k, v] of Object.entries(env)) {
+            console.log(chalk.gray(`  ${k}: ${k.includes('TOKEN') || k.includes('KEY') ? '(masked)' : v}`));
+          }
+        }
       } catch (error) {
         handleCLIError(error);
       }
