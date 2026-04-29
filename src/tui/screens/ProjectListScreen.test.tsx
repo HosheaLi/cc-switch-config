@@ -150,8 +150,8 @@ describe('ProjectListScreen', () => {
       expect(container.textContent).toContain('project-gamma');
     });
 
-    it('renders search input at top', () => {
-      const { getByTestId } = render(
+    it('does not render search input by default', () => {
+      const { queryByTestId } = render(
         <ProjectListScreen
           projects={mockProjects}
           onSelect={mockOnSelect}
@@ -159,8 +159,7 @@ describe('ProjectListScreen', () => {
         />
       );
 
-      const searchInput = getByTestId('search-input');
-      expect(searchInput).toBeDefined();
+      expect(queryByTestId('search-input')).toBeNull();
     });
 
     it('renders header with "Projects" title', () => {
@@ -189,6 +188,7 @@ describe('ProjectListScreen', () => {
       expect(container.textContent).toContain('down');
       expect(container.textContent).toContain('Enter');
       expect(container.textContent).toContain('Esc');
+      expect(container.textContent).toContain('/ or f: filter projects');
     });
 
     it('shows "No projects found" when list is empty', () => {
@@ -388,12 +388,13 @@ describe('ProjectListScreen', () => {
   });
 
   describe('search', () => {
-    it('typing updates query and filters list', async () => {
+    it('typing updates query and filters list when in search mode', async () => {
       const { getByTestId } = render(
         <ProjectListScreen
           projects={mockProjects}
           onSelect={mockOnSelect}
           onExit={mockOnExit}
+          initialQuery="test"
         />
       );
 
@@ -511,7 +512,7 @@ describe('ProjectListScreen', () => {
       expect(container.textContent).toContain('S scan');
     });
 
-    it('S key calls push(scan) when query is empty', async () => {
+    it('S key calls push(scan) when not in search mode', async () => {
       const { useInput } = await import('ink');
       const mockUseInput = vi.mocked(useInput);
       const { useNavigation } = await import('../hooks/useNavigation.js');
@@ -548,7 +549,7 @@ describe('ProjectListScreen', () => {
       expect(container.textContent).toContain('U undo');
     });
 
-    it('U key handler is registered for undo when query is empty', async () => {
+    it('U key handler is registered for undo when not in search mode', async () => {
       const { useInput } = await import('ink');
       const mockUseInput = vi.mocked(useInput);
 
@@ -597,7 +598,7 @@ describe('ProjectListScreen', () => {
       }, { timeout: 3000 });
     });
 
-    it('U key does NOT trigger undo when query is not empty', async () => {
+    it('U key does NOT trigger undo when in search mode', async () => {
       const { UndoService } = await import('../../lib/services/undo-service.js');
       const mockUndoFn = vi.fn().mockResolvedValue({
         backupTime: new Date(Date.now() - 5 * 60 * 1000),

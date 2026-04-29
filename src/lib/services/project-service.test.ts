@@ -141,10 +141,24 @@ describe('ProjectService', () => {
       expect(results.map((r) => r.path)).toContain(validProject);
     });
 
-    it('should return empty array when no scan directories configured', async () => {
+    it('should default to current directory when no scan directories configured', async () => {
+      const originalCwd = process.cwd();
       mockAppState.set('scanDirectories', []);
-      const results = await projectService.scanProjects();
-      expect(results).toEqual([]);
+
+      // Create a project in temp dir and chdir there
+      const cwdProject = path.join(tempDir, 'cwd-project');
+      await fs.ensureDir(path.join(cwdProject, '.claude'));
+      await fs.writeJSON(path.join(cwdProject, '.claude', 'settings.json'), {});
+      process.chdir(tempDir);
+
+      try {
+        const results = await projectService.scanProjects();
+        // Use realpath to handle macOS /var -> /private/var symlink
+        const realCwdProject = await fs.realpath(cwdProject);
+        expect(results.map((r) => path.resolve(r.path))).toContain(realCwdProject);
+      } finally {
+        process.chdir(originalCwd);
+      }
     });
 
     it('should mark found projects as isNew when not registered', async () => {

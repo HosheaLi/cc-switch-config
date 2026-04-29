@@ -79,6 +79,7 @@ export const ProjectListScreen: React.FC<ProjectListScreenProps> = ({
   // State for selection and search
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [query, setQuery] = useState(initialQuery);
+  const [isSearchMode, setIsSearchMode] = useState(initialQuery.length > 0);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [statusType, setStatusType] = useState<'error' | 'success' | 'info' | 'warning' | 'none'>('none');
 
@@ -169,19 +170,28 @@ export const ProjectListScreen: React.FC<ProjectListScreenProps> = ({
     }
   };
 
-  // Unified keyboard handling — avoids conflict with TextInput during search (P0 bug)
+  // Unified keyboard handling — search mode is secondary (activated by / or f)
   useInput((input, key) => {
-    // When searching (query non-empty), only handle Escape (clear search) and Enter (select)
-    if (query.length > 0) {
+    if (isSearchMode) {
+      // Search mode: navigation + special keys; character input handled by TextInput
       if (key.escape) {
-        handleEscape();
+        setIsSearchMode(false);
+        setQuery('');
+        return;
+      }
+      if (key.upArrow || input === 'k') {
+        handleUp();
+        return;
+      }
+      if (key.downArrow || input === 'j') {
+        handleDown();
         return;
       }
       if (key.return) {
         handleSelect();
         return;
       }
-      // Let TextInput handle all other keys (typing)
+      // Let TextInput handle all other character keys
       return;
     }
 
@@ -200,6 +210,10 @@ export const ProjectListScreen: React.FC<ProjectListScreenProps> = ({
     }
     if (key.escape) {
       handleEscape();
+      return;
+    }
+    if (input === '/' || input === 'f') {
+      setIsSearchMode(true);
       return;
     }
     if (input === 'S') {
@@ -237,15 +251,17 @@ export const ProjectListScreen: React.FC<ProjectListScreenProps> = ({
       {/* Header */}
       <Text bold color="cyan">Projects</Text>
 
-      {/* Search Input */}
-      <Box marginTop={1}>
-        <Text dimColor>Search: </Text>
-        <TextInput
-          value={query}
-          onChange={setQuery}
-          placeholder="Type to filter..."
-        />
-      </Box>
+      {/* Search Input — only shown in search mode (activated by / or f) */}
+      {isSearchMode && (
+        <Box marginTop={1}>
+          <Text dimColor>/ </Text>
+          <TextInput
+            value={query}
+            onChange={setQuery}
+            placeholder="Type to filter..."
+          />
+        </Box>
+      )}
 
       {/* Project List */}
       <Box flexDirection="column" marginTop={1}>
@@ -263,10 +279,10 @@ export const ProjectListScreen: React.FC<ProjectListScreenProps> = ({
       <StatusBar message={statusMessage} type={statusType} />
 
       {/* Help Text — contextual based on search mode */}
-      {query.length > 0 ? (
+      {isSearchMode ? (
         <Box marginTop={1} flexDirection="column">
           <Text dimColor>
-            Enter: select  Esc: clear search
+            ↑/k up  ↓/j down  Enter select  Esc exit search
           </Text>
         </Box>
       ) : (
@@ -275,7 +291,7 @@ export const ProjectListScreen: React.FC<ProjectListScreenProps> = ({
             ↑/k up  ↓/j down  Enter select  S scan  U undo  Esc exit
           </Text>
           <Text dimColor>
-            Type to filter projects
+            / or f: filter projects
           </Text>
         </Box>
       )}

@@ -69,14 +69,14 @@ export class ProjectService {
    */
   async scanProjects(maxDepth?: number, overrideDirs?: string[]): Promise<ScanResult[]> {
     const rootDirs = overrideDirs ?? this.appState.get('scanDirectories');
-    if (rootDirs.length === 0) {
-      return [];
-    }
 
     const depth = maxDepth ?? this.defaultMaxDepth;
     const found: string[] = [];
 
-    for (const rootDir of rootDirs) {
+    // Default to current directory if no scan directories configured and no override
+    const dirsToScan = rootDirs.length > 0 ? rootDirs : ['.'];
+
+    for (const rootDir of dirsToScan) {
       const expanded = this.expandPath(rootDir);
       await this.walkDirectory(expanded, 0, depth, found);
     }
