@@ -15,6 +15,7 @@
  * - scanDirectories management via AppState
  */
 
+import os from 'os';
 import path from 'path';
 import fs from 'fs-extra';
 import { ServiceError } from './types.js';
@@ -66,8 +67,8 @@ export class ProjectService {
    * @param maxDepth - Optional override for maximum scan depth (default: 3)
    * @returns Array of ScanResult with paths and isNew flags
    */
-  async scanProjects(maxDepth?: number): Promise<ScanResult[]> {
-    const rootDirs = this.appState.get('scanDirectories');
+  async scanProjects(maxDepth?: number, overrideDirs?: string[]): Promise<ScanResult[]> {
+    const rootDirs = overrideDirs ?? this.appState.get('scanDirectories');
     if (rootDirs.length === 0) {
       return [];
     }
@@ -110,9 +111,12 @@ export class ProjectService {
   ): Promise<void> {
     if (depth > maxDepth) return;
 
-    // Check if this directory has .claude/settings.json
-    const claudePath = path.join(dir, '.claude', 'settings.json');
-    if (await fs.pathExists(claudePath)) {
+    // Check if this directory has .claude/settings.json or .claude/settings.local.json
+    const claudeDir = path.join(dir, '.claude');
+    const settingsPath = path.join(claudeDir, 'settings.json');
+    const localSettingsPath = path.join(claudeDir, 'settings.local.json');
+
+    if (await fs.pathExists(settingsPath) || await fs.pathExists(localSettingsPath)) {
       found.push(dir);
     }
 
@@ -124,8 +128,11 @@ export class ProjectService {
           await this.walkDirectory(path.join(dir, entry.name), depth + 1, maxDepth, found);
         }
       }
-    } catch {
+    } catch (err) {
       // Permission errors or other issues - skip this directory
+      if (err instanceof Error) {
+        console.error(`Scan skipped directory ${dir}: ${err.message}`);
+      }
     }
   }
 
@@ -137,7 +144,7 @@ export class ProjectService {
    */
   private expandPath(p: string): string {
     if (p.startsWith('~')) {
-      return path.join(process.env.HOME ?? '', p.slice(1));
+      return path.join(os.homedir(), p.slice(1));
     }
     return path.resolve(p);
   }

@@ -57,6 +57,7 @@ describe('ExportService', () => {
     it('should export project with config and no template', async () => {
       const project: ProjectEntry = {
         id: '550e8400-e29b-41d4-a716-446655440000',
+        name: 'project',
         path: '/Users/test/project',
         activeConfig: null,
         lastModified: '2026-04-14T00:00:00.000Z',
@@ -83,6 +84,7 @@ describe('ExportService', () => {
     it('should export project with template', async () => {
       const project: ProjectEntry = {
         id: '550e8400-e29b-41d4-a716-446655440000',
+        name: 'project',
         path: '/Users/test/project',
         activeConfig: 'custom-provider',
         lastModified: '2026-04-14T00:00:00.000Z',
@@ -122,6 +124,7 @@ describe('ExportService', () => {
     it('should handle empty config (null returns empty object)', async () => {
       const project: ProjectEntry = {
         id: '550e8400-e29b-41d4-a716-446655440000',
+        name: 'project',
         path: '/Users/test/project',
         activeConfig: null,
         lastModified: '2026-04-14T00:00:00.000Z',
@@ -135,9 +138,10 @@ describe('ExportService', () => {
       expect(payload.settings).toEqual({});
     });
 
-    it('should derive project name from path basename', async () => {
+    it('should use project name from entry', async () => {
       const project: ProjectEntry = {
         id: '550e8400-e29b-41d4-a716-446655440000',
+        name: 'my-awesome-project',
         path: '/Users/test/my-awesome-project',
         activeConfig: null,
         lastModified: '2026-04-14T00:00:00.000Z',

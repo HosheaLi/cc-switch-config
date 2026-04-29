@@ -18,6 +18,7 @@ import type { ClaudeSettings } from '../types/config.js';
 import { deepMergeConfig } from '../types/merge.js';
 import { ServiceError } from './types.js';
 import type { TemplateStore } from '../store/template.js';
+import { getProjectConfigPath } from '../paths/claude.js';
 
 /**
  * TemplateService class for template management.
@@ -63,6 +64,14 @@ export class TemplateService {
    * @throws ServiceError with code TEMPLATE_CREATE_FAILED on failure
    */
   async createTemplate(name: string, config: TemplateConfig): Promise<void> {
+    const existing = await this.templateStore.get(name);
+    if (existing) {
+      throw new ServiceError(
+        `Template "${name}" already exists`,
+        'TEMPLATE_ALREADY_EXISTS'
+      );
+    }
+
     try {
       await this.templateStore.set(name, config);
     } catch (error) {
@@ -184,7 +193,7 @@ export class TemplateService {
       );
     }
 
-    const configPath = this.getConfigPath(projectPath);
+    const configPath = getProjectConfigPath(projectPath);
 
     // Ensure .claude directory exists
     await fs.ensureDir(path.dirname(configPath));
@@ -214,13 +223,4 @@ export class TemplateService {
     }
   }
 
-  /**
-   * Get the config file path for a project.
-   *
-   * @param projectPath - Project directory path
-   * @returns Path to .claude/settings.json
-   */
-  private getConfigPath(projectPath: string): string {
-    return path.join(projectPath, '.claude', 'settings.json');
-  }
 }

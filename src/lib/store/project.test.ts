@@ -59,6 +59,7 @@ describe('ProjectIndex', () => {
       expect(entry).toBeDefined();
       expect(entry.id).toBeDefined();
       expect(entry.id).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i); // UUID format
+      expect(entry.name).toBe('test-project'); // name from path basename
       expect(entry.path).toBe(testProjectDirReal); // realpath resolved
       expect(entry.activeConfig).toBeNull();
       expect(entry.lastModified).toBeDefined();

@@ -17,12 +17,10 @@
  */
 
 import path from 'path';
-import fs from 'fs-extra';
 import { ServiceError } from './types.js';
 import { ExportPayloadSchema } from '../types/export-schema.js';
 import { deepMergeConfig } from '../types/merge.js';
-import { createBackup } from '../file-system/backup.js';
-import type { ProjectIndex, ProjectEntry } from '../store/index.js';
+import type { ProjectIndex } from '../store/index.js';
 import type { TemplateStore } from '../store/index.js';
 import type { ConfigService } from './config-service.js';
 import type { ExportPayload, ConflictField, ExportMetadata } from '../types/export-schema.js';
@@ -110,7 +108,7 @@ export class ExportService {
     const projectRef = {
       id: project.id,
       path: project.path,
-      name: this.deriveProjectName(project.path),
+      name: project.name,
     };
 
     // Build payload
@@ -138,6 +136,17 @@ export class ExportService {
    * @returns Array of ConflictField with key, imported value, existing value
    */
   detectConflicts(imported: ClaudeSettings, existing: ClaudeSettings): ConflictField[] {
+    return ExportService.detectConflicts(imported, existing);
+  }
+
+  /**
+   * Static version of conflict detection (no instance required).
+   *
+   * @param imported - Settings from import file
+   * @param existing - Current project settings
+   * @returns Array of ConflictField
+   */
+  static detectConflicts(imported: ClaudeSettings, existing: ClaudeSettings): ConflictField[] {
     const conflicts: ConflictField[] = [];
 
     // Check env variables
@@ -175,7 +184,7 @@ export class ExportService {
         const existingServer = existing.mcpServers?.[serverName];
 
         // Conflict if existing has the server with different config
-        if (existingServer !== undefined && !this.serversEqual(importedServer, existingServer)) {
+        if (existingServer !== undefined && !ExportService.serversEqual(importedServer, existingServer)) {
           conflicts.push({
             key: `mcpServers.${serverName}`,
             imported: importedServer,
@@ -185,9 +194,9 @@ export class ExportService {
       }
     }
 
-    // Check permissions (arrays - compare by length if both exist)
+    // Check permissions (deep compare arrays)
     if (imported.permissions && existing.permissions) {
-      if (imported.permissions.length !== existing.permissions.length) {
+      if (!ExportService.arraysEqual(imported.permissions, existing.permissions)) {
         conflicts.push({
           key: 'permissions',
           imported: imported.permissions,
@@ -196,9 +205,9 @@ export class ExportService {
       }
     }
 
-    // Check hooks (arrays - compare by length if both exist)
+    // Check hooks (deep compare arrays)
     if (imported.hooks && existing.hooks) {
-      if (imported.hooks.length !== existing.hooks.length) {
+      if (!ExportService.arraysEqual(imported.hooks, existing.hooks)) {
         conflicts.push({
           key: 'hooks',
           imported: imported.hooks,
@@ -266,13 +275,7 @@ export class ExportService {
       finalSettings = deepMergeConfig(existing, validPayload.settings);
     }
 
-    // Create backup before write (Safety-First)
-    const configPath = path.join(targetPath, '.claude', 'settings.json');
-    if (await fs.pathExists(configPath)) {
-      await createBackup(configPath);
-    }
-
-    // Write config
+    // Write config (backup is handled by writeConfig internally)
     await this.configService.writeProjectConfig(targetPath, finalSettings);
   }
 
@@ -289,18 +292,18 @@ export class ExportService {
 
   /**
    * Compare two MCP server configs for equality.
-   * Compares command, args, and env fields.
+   * Treats undefined and empty array/object as equivalent.
    *
    * @param a - First server config
    * @param b - Second server config
    * @returns true if configs are equal
    */
-  private serversEqual(a: { command: string; args?: string[]; env?: Record<string, string> },
+  private static serversEqual(a: { command: string; args?: string[]; env?: Record<string, string> },
                        b: { command: string; args?: string[]; env?: Record<string, string> }): boolean {
     // Compare command
     if (a.command !== b.command) return false;
 
-    // Compare args (undefined === undefined, empty !== undefined)
+    // Compare args (undefined and empty array are treated as equivalent)
     const argsA = a.args ?? [];
     const argsB = b.args ?? [];
     if (argsA.length !== argsB.length) return false;
@@ -320,6 +323,19 @@ export class ExportService {
 
     return true;
   }
+
+  /**
+   * Deep compare two arrays for equality using JSON serialization.
+   * Suitable for comparing permission rules and hook configs.
+   *
+   * @param a - First array
+   * @param b - Second array
+   * @returns true if arrays are deeply equal
+   */
+  private static arraysEqual(a: unknown[], b: unknown[]): boolean {
+    if (a.length !== b.length) return false;
+    return JSON.stringify(a) === JSON.stringify(b);
+  }
 }
 
 /**
@@ -331,12 +347,5 @@ export class ExportService {
  * @returns Array of ConflictField
  */
 export function detectConflicts(imported: ClaudeSettings, existing: ClaudeSettings): ConflictField[] {
-  // Create temporary service instance with null dependencies
-  // (detectConflicts doesn't need dependencies)
-  const service = new ExportService(
-    null as unknown as ProjectIndex,
-    null as unknown as TemplateStore,
-    null as unknown as ConfigService
-  );
-  return service.detectConflicts(imported, existing);
+  return ExportService.detectConflicts(imported, existing);
 }

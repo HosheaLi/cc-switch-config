@@ -70,6 +70,36 @@ describe('ProjectService', () => {
       expect(results.map((r) => r.path)).toContain(project2);
     });
 
+    it('should find directories with .claude/settings.local.json', async () => {
+      // Create test directory with settings.local.json only
+      const project3 = path.join(tempDir, 'project3');
+      await fs.ensureDir(path.join(project3, '.claude'));
+      await fs.writeJSON(path.join(project3, '.claude', 'settings.local.json'), {});
+
+      mockAppState.set('scanDirectories', [tempDir]);
+
+      const results = await projectService.scanProjects();
+
+      expect(results.map((r) => r.path)).toContain(project3);
+    });
+
+    it('should find directories with either settings.json or settings.local.json', async () => {
+      // Create one with settings.json, one with settings.local.json
+      const project4 = path.join(tempDir, 'project4');
+      const project5 = path.join(tempDir, 'project5');
+      await fs.ensureDir(path.join(project4, '.claude'));
+      await fs.ensureDir(path.join(project5, '.claude'));
+      await fs.writeJSON(path.join(project4, '.claude', 'settings.json'), {});
+      await fs.writeJSON(path.join(project5, '.claude', 'settings.local.json'), {});
+
+      mockAppState.set('scanDirectories', [tempDir]);
+
+      const results = await projectService.scanProjects();
+
+      expect(results.map((r) => r.path)).toContain(project4);
+      expect(results.map((r) => r.path)).toContain(project5);
+    });
+
     it('should respect maxDepth limit', async () => {
       // Create nested structure
       const deepProject = path.join(tempDir, 'level1', 'level2', 'level3', 'level4', 'project');

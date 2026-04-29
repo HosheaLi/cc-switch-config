@@ -23,6 +23,7 @@ import type { TemplateConfig } from '../types/provider.js';
 import { deepMergeConfig } from '../types/merge.js';
 import { ServiceError } from './types.js';
 import { ValidationError } from '../types/validation.js';
+import { getProjectConfigPath } from '../paths/claude.js';
 
 /**
  * ConfigService provides configuration management operations.
@@ -62,7 +63,7 @@ export class ConfigService {
    * @throws ServiceError with code 'CONFIG_READ_FAILED' on read failure
    */
   async readProjectConfig(projectPath: string): Promise<ClaudeSettings | null> {
-    const configPath = this.getConfigPath(projectPath);
+    const configPath = getProjectConfigPath(projectPath);
     try {
       return await this.readConfigFn(configPath);
     } catch (error) {
@@ -89,7 +90,7 @@ export class ConfigService {
    * @throws ServiceError with code 'CONFIG_WRITE_FAILED' on write failure
    */
   async writeProjectConfig(projectPath: string, config: ClaudeSettings): Promise<void> {
-    const configPath = this.getConfigPath(projectPath);
+    const configPath = getProjectConfigPath(projectPath);
     try {
       await this.writeConfigFn(configPath, config);
     } catch (error) {
@@ -151,16 +152,4 @@ export class ConfigService {
     await this.writeProjectConfig(projectPath, merged);
   }
 
-  /**
-   * Get config filepath for a project.
-   *
-   * Config path follows Claude Code convention:
-   * <projectPath>/.claude/settings.json
-   *
-   * @param projectPath - Root path of the project
-   * @returns Full path to settings.json
-   */
-  private getConfigPath(projectPath: string): string {
-    return path.join(projectPath, '.claude', 'settings.json');
-  }
 }

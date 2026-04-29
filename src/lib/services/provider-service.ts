@@ -40,7 +40,7 @@ export interface ConnectivityResult {
  */
 export class ProviderService {
   /** Default timeout in milliseconds (5 seconds per D-06) */
-  private defaultTimeoutMs: number = 5000;
+  private readonly defaultTimeoutMs: number = 5000;
 
   /**
    * Create a ProviderService.
@@ -135,12 +135,10 @@ export class ProviderService {
       try {
         results[url] = await this.testConnectivity(url, timeoutMs);
       } catch (error) {
-        if (error instanceof ServiceError) {
-          results[url] = {
-            reachable: false,
-            error: error.message
-          };
-        }
+        results[url] = {
+          reachable: false,
+          error: error instanceof Error ? error.message : 'Unknown error'
+        };
       }
     }
 
@@ -159,8 +157,8 @@ export class ProviderService {
     }
 
     try {
-      new URL(url);
-      return true;
+      const parsed = new URL(url);
+      return parsed.protocol === 'http:' || parsed.protocol === 'https:';
     } catch {
       return false;
     }
