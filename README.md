@@ -92,7 +92,7 @@ cc-config switch <template-name> [--silent]
 ```
 
 Options:
-- `--silent`: Suppress output messages (default: true)
+- `--silent`: Suppress output messages
 
 ### `cc-config template`
 
@@ -102,7 +102,7 @@ Manage provider templates.
 # List all templates
 cc-config template list
 
-# Create a new template (opens TUI editor)
+# Create a new template (interactive CLI)
 cc-config template create <name>
 
 # Delete a template
@@ -127,11 +127,13 @@ Restores from the latest backup file and shows the backup timestamp.
 Scan directories for Claude Code projects.
 
 ```bash
-cc-config scan [directory] [--register]
+cc-config scan [directory] [--register] [--tui] [--json]
 ```
 
 Options:
 - `--register`: Automatically register found projects
+- `--tui`: Launch TUI multi-select interface
+- `--json`: Output as JSON format
 
 ### `cc-config auto-check`
 
@@ -148,19 +150,23 @@ Used by shell hooks to detect project directories.
 Import configurations from a JSON file.
 
 ```bash
-cc-config import <file> [--merge]
+cc-config import <file> [--merge] [--strategy <merge|overwrite|skip>]
 ```
 
 Options:
-- `--merge`: Merge with existing templates instead of replacing
+- `--merge`: Alias for `--strategy merge`
+- `--strategy`: Import strategy (non-interactive mode)
 
 ### `cc-config export`
 
 Export configurations to a JSON file.
 
 ```bash
-cc-config export <file>
+cc-config export [project-id] [file] [--stdout]
 ```
+
+Options:
+- `--stdout`: Output to stdout instead of file
 
 ## TUI Navigation
 

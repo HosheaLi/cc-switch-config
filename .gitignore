@@ -27,4 +27,4 @@ npm-debug.log*
 .backups/
 
 # Claude Code local settings (tokens!)
-.claude/settings.local.json
+.claude/
