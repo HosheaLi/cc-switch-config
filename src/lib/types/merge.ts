@@ -56,7 +56,7 @@ export function deepMergeConfig<T extends Record<string, unknown>>(
 ): T {
   const result = { ...base } as T;
 
-  for (const key in override) {
+  for (const key of Object.keys(override)) {
     const overrideValue = override[key];
     const baseValue = result[key];
 

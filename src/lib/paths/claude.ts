@@ -30,3 +30,13 @@ export function getClaudeSettingsFilePath(): string {
 export function getClaudeLocalSettingsFilePath(): string {
   return path.join(getClaudeSettingsPath(), 'settings.local.json');
 }
+
+/**
+ * Get the path to a project's Claude Code settings.json file.
+ *
+ * @param projectPath - Root path of the project
+ * @returns Path to <projectPath>/.claude/settings.json
+ */
+export function getProjectConfigPath(projectPath: string): string {
+  return path.join(projectPath, '.claude', 'settings.json');
+}

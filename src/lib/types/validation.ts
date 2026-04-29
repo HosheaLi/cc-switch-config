@@ -11,6 +11,7 @@
  */
 
 import { z } from 'zod';
+import type { ZodIssue } from 'zod';
 import { ClaudeSettingsSchema } from './config.js';
 import type { ClaudeSettings } from './config.js';
 
@@ -24,9 +25,9 @@ import type { ClaudeSettings } from './config.js';
  * - getMessages(): Returns formatted messages for each issue
  */
 export class ValidationError extends Error {
-  public readonly issues: z.core.$ZodIssue[];
+  public readonly issues: ZodIssue[];
 
-  constructor(message: string, issues: z.core.$ZodIssue[]) {
+  constructor(message: string, issues: ZodIssue[]) {
     super(message);
     this.name = 'ValidationError';
     this.issues = issues;
@@ -89,7 +90,7 @@ export function validateConfig(config: unknown): ValidationResult<ClaudeSettings
  * @param issues - Array of Zod validation issues
  * @returns Multi-line formatted message
  */
-export function formatValidationErrors(issues: z.core.$ZodIssue[]): string {
+export function formatValidationErrors(issues: ZodIssue[]): string {
   const lines: string[] = [];
 
   for (const issue of issues) {

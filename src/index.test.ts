@@ -28,9 +28,17 @@ describe('CLI entry point (src/index.ts)', () => {
     expect(content.includes("import { handleCLIError } from './cli/output/error.js'")).toBe(true);
   });
 
-  it('calls runCLI().catch(handleCLIError)', async () => {
+  it('imports CommanderError from commander', async () => {
     const content = await fs.readFile(indexPath, 'utf-8');
-    expect(content.includes('runCLI().catch(handleCLIError)')).toBe(true);
+    expect(content.includes("import { CommanderError } from 'commander'")).toBe(true);
+  });
+
+  it('calls runCLI().catch with CommanderError handling', async () => {
+    const content = await fs.readFile(indexPath, 'utf-8');
+    // Should have runCLI().catch() with CommanderError handling for version/help display
+    expect(content.includes('runCLI().catch')).toBe(true);
+    expect(content.includes('CommanderError')).toBe(true);
+    expect(content.includes('handleCLIError')).toBe(true);
   });
 
   it('is NOT a skeleton placeholder', async () => {
