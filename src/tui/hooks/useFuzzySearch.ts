@@ -3,7 +3,6 @@ import { useMemo } from 'react';
 
 /**
  * Interface for items searchable by name and path
- * Per F14: Fuzzy Search for quick navigation
  */
 export interface SearchableItem {
   /** Item name (displayed in list) */
@@ -12,13 +11,18 @@ export interface SearchableItem {
   path: string;
 }
 
+/** Default fuse.js options for fuzzy search */
+const DEFAULT_FUSE_OPTIONS: IFuseOptions<SearchableItem> = {
+  keys: ['name', 'path'],
+  threshold: 0.4,
+  includeMatches: true,
+  ignoreLocation: true,
+};
+
 /**
- * Hook for fuzzy searching items by name and path
+ * Hook for fuzzy searching items by name and path.
  *
- * Per D-06: Instant fuzzy search
- * Per F14: Fuzzy Search for quick navigation
- *
- * Uses fuse.js with threshold 0.4 for balanced precision/recall
+ * Uses fuse.js with threshold 0.4 for balanced precision/recall.
  *
  * @param items - Array of searchable items
  * @param query - Search query string
@@ -30,19 +34,16 @@ export function useFuzzySearch<T extends SearchableItem>(
   query: string,
   options?: Partial<IFuseOptions<T>>
 ): T[] {
-  // Default fuse.js options (D-06, F14)
-  const defaultOptions: IFuseOptions<T> = {
-    keys: ['name', 'path'],         // Search both name and path
-    threshold: 0.4,                 // Balance precision vs recall (D-06)
-    includeMatches: true,           // Enable match highlighting
-    ignoreLocation: true,           // Better for long strings (path names)
-    ...options,                     // Allow overrides
-  };
+  // Build effective options (merge defaults with caller overrides)
+  const effectiveOptions = useMemo<IFuseOptions<T>>(
+    () => ({ ...DEFAULT_FUSE_OPTIONS, ...options } as IFuseOptions<T>),
+    [options]
+  );
 
   // Create fuse instance (memoized for performance)
   const fuse = useMemo(
-    () => new Fuse(items, defaultOptions),
-    [items, defaultOptions]
+    () => new Fuse(items, effectiveOptions),
+    [items, effectiveOptions]
   );
 
   // Filter items based on query (memoized)

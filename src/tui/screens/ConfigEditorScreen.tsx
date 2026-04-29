@@ -100,8 +100,8 @@ export const ConfigEditorScreen: React.FC<ConfigEditorScreenProps> = ({
     },
   };
 
-  // Extract project name from path
-  const projectName = project.path.split('/').pop() ?? project.path;
+  // Use project name from entry
+  const projectName = project.name;
 
   // Keyboard input handling
   // Per D-03: Enter shows DiffScreen first, NOT direct apply
@@ -205,26 +205,29 @@ export const ConfigEditorScreen: React.FC<ConfigEditorScreenProps> = ({
         <DiffScreen
           before={existingConfig ?? {}}
           after={mergedConfig}
-          onApply={() => {
+          onApply={async () => {
             setShowDiffScreen(false);
             setIsApplying(true);
+            setStatusMessage(null);
             // D-03: Apply after user confirms diff
             // F11: Catch ValidationError and show ValidationErrorScreen
             try {
-              onConfirm();
+              await onConfirm();
+              setIsApplying(false);
+              setStatusMessage('Template applied successfully');
+              setStatusType('success');
             } catch (error) {
+              setIsApplying(false);
               // Check for ValidationError using duck typing (error.name)
               const validationErr = error as { name?: string; issues?: unknown[]; getMessages?: () => string[] };
               if (validationErr.name === 'ValidationError' && validationErr.issues) {
                 // Show ValidationErrorScreen (D-04, D-05)
                 setValidationError(validationErr as ValidationError);
                 setShowValidationError(true);
-                setIsApplying(false);
               } else {
                 // Other errors - show in status bar
                 setStatusMessage(error instanceof Error ? error.message : 'Apply failed');
                 setStatusType('error');
-                setIsApplying(false);
               }
             }
           }}

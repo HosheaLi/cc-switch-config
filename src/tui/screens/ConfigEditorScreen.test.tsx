@@ -118,6 +118,7 @@ describe('ConfigEditorScreen', () => {
   // Test fixtures
   const mockProject: ProjectEntry = {
     id: 'test-id-1',
+    name: 'my-app',
     path: '/Users/test/projects/my-app',
     activeConfig: null,
     lastModified: '2026-04-14T10:00:00Z',
@@ -451,9 +452,10 @@ describe('ConfigEditorScreen', () => {
       expect(screen.getByText(/no-tags-template/)).toBeDefined();
     });
 
-    it('extracts project name from path correctly', () => {
+    it('displays project name correctly', () => {
       const projectWithLongPath: ProjectEntry = {
         id: 'test-id-2',
+        name: 'project-name',
         path: '/Users/test/code/projects/very/deep/nested/project-name',
         activeConfig: 'test-config',
         lastModified: '2026-04-14T10:00:00Z',

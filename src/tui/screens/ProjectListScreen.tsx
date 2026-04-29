@@ -31,7 +31,6 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Box, Text, useApp, useInput } from 'ink';
 import TextInput from 'ink-text-input';
 import path from 'path';
-import { useKeyInput } from '../hooks/useKeyInput.js';
 import { useFuzzySearch } from '../hooks/useFuzzySearch.js';
 import { useNavigation } from '../hooks/useNavigation.js';
 import { PreviewPanel } from '../components/PreviewPanel.js';
@@ -123,21 +122,17 @@ export const ProjectListScreen: React.FC<ProjectListScreenProps> = ({
   };
 
   const handleEscape = () => {
+    if (query.length > 0) {
+      // Clear search first, then exit on next Esc
+      setQuery('');
+      return;
+    }
     if (isRoot) {
       onExit();
     } else {
       pop();
     }
   };
-
-  // Keyboard input handling (U3, U4, D-05, D-09)
-  useKeyInput({
-    onUp: handleUp,
-    onDown: handleDown,
-    onSelect: handleSelect,
-    onEscape: handleEscape,
-    isActive: true,
-  });
 
   /**
    * Handle undo operation for selected project (D-07, U2).
@@ -174,19 +169,46 @@ export const ProjectListScreen: React.FC<ProjectListScreenProps> = ({
     }
   };
 
-  // 'S' key handler for scan trigger (D-08, F10)
-  // 'U' key handler for undo trigger (D-07, U2)
+  // Unified keyboard handling — avoids conflict with TextInput during search (P0 bug)
   useInput((input, key) => {
-    // Capital 'S' triggers scan navigation
-    // Only when not in search mode (query empty or user not typing)
-    if (input === 'S' && query.length === 0) {
-      push('scan');
+    // When searching (query non-empty), only handle Escape (clear search) and Enter (select)
+    if (query.length > 0) {
+      if (key.escape) {
+        handleEscape();
+        return;
+      }
+      if (key.return) {
+        handleSelect();
+        return;
+      }
+      // Let TextInput handle all other keys (typing)
+      return;
     }
 
-    // Capital 'U' triggers undo for selected project (D-07)
-    // Only when not in search mode and a project is selected
-    if (input === 'U' && query.length === 0 && selectedProject) {
+    // Normal mode: full navigation support
+    if (key.upArrow || input === 'k') {
+      handleUp();
+      return;
+    }
+    if (key.downArrow || input === 'j') {
+      handleDown();
+      return;
+    }
+    if (key.return) {
+      handleSelect();
+      return;
+    }
+    if (key.escape) {
+      handleEscape();
+      return;
+    }
+    if (input === 'S') {
+      push('scan');
+      return;
+    }
+    if (input === 'U' && selectedProject) {
       handleUndo();
+      return;
     }
   }, { isActive: true });
 
@@ -240,12 +262,23 @@ export const ProjectListScreen: React.FC<ProjectListScreenProps> = ({
       {/* Status Bar (D-11) */}
       <StatusBar message={statusMessage} type={statusType} />
 
-      {/* Help Text */}
-      <Box marginTop={1}>
-        <Text dimColor>
-          ↑/k: up  ↓/j: down  Enter: select  S: scan  U: undo  Esc: exit  Type to search
-        </Text>
-      </Box>
+      {/* Help Text — contextual based on search mode */}
+      {query.length > 0 ? (
+        <Box marginTop={1} flexDirection="column">
+          <Text dimColor>
+            Enter: select  Esc: clear search
+          </Text>
+        </Box>
+      ) : (
+        <Box marginTop={1} flexDirection="column">
+          <Text dimColor>
+            ↑/k up  ↓/j down  Enter select  S scan  U undo  Esc exit
+          </Text>
+          <Text dimColor>
+            Type to filter projects
+          </Text>
+        </Box>
+      )}
     </Box>
   );
 };

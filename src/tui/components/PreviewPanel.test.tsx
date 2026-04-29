@@ -44,6 +44,7 @@ vi.mock('ink', () => ({
 describe('PreviewPanel', () => {
   const mockProject: ProjectEntry = {
     id: 'test-id',
+    name: 'project',
     path: '/Users/test/project',
     activeConfig: 'anthropic-config',
     lastModified: '2026-04-14T10:00:00Z',
@@ -51,6 +52,7 @@ describe('PreviewPanel', () => {
 
   const mockProjectNoConfig: ProjectEntry = {
     id: 'test-id-2',
+    name: 'another-project',
     path: '/Users/test/another-project',
     activeConfig: null,
     lastModified: '2026-04-14T10:00:00Z',

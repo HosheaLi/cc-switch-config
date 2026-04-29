@@ -31,29 +31,29 @@ interface StatusBarProps {
  * @param props - Component props
  * @returns Status bar or null if no message
  */
+const COLOR_MAP: Record<StatusType, string> = {
+  error: 'red',
+  success: 'green',
+  info: 'cyan',
+  warning: 'yellow',
+  none: 'white',
+};
+
+const ICON_MAP: Record<StatusType, string> = {
+  error: '⚠ ',
+  success: '✓ ',
+  info: '',
+  warning: '',
+  none: '',
+};
+
 export const StatusBar: React.FC<StatusBarProps> = ({ message, type }) => {
   if (!message || type === 'none') return null;
 
-  const colorMap: Record<StatusType, string> = {
-    error: 'red',
-    success: 'green',
-    info: 'cyan',
-    warning: 'yellow',
-    none: 'white',
-  };
-
-  const iconMap: Record<StatusType, string> = {
-    error: '⚠ ',
-    success: '✓ ',
-    info: '',
-    warning: '',
-    none: '',
-  };
-
   return (
     <Box borderStyle="single" borderColor="gray" marginTop={1}>
-      <Text color={colorMap[type]} bold={type === 'error'}>
-        {iconMap[type]}
+      <Text color={COLOR_MAP[type]} bold={type === 'error'}>
+        {ICON_MAP[type]}
         {message}
       </Text>
     </Box>

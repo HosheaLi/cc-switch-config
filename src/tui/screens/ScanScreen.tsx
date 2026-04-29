@@ -8,10 +8,10 @@
  * Displays scan results with new projects selectable and registered projects shown as gray.
  * Uses checkbox pattern for multi-select registration.
  */
-import React, { useState, useMemo } from 'react';
+import path from 'path';
+import React, { useState, useEffect } from 'react';
 import { Box, Text, useInput } from 'ink';
 import { useKeyInput } from '../hooks/useKeyInput.js';
-import { useNavigation } from '../hooks/useNavigation.js';
 import type { ScanResult } from '../../lib/services/project-service.js';
 
 /**
@@ -44,28 +44,20 @@ export const ScanScreen: React.FC<ScanScreenProps> = ({
   onConfirm,
   onCancel,
 }) => {
-  const { pop } = useNavigation('scan');
-
   // Separate new and registered projects
-  const newProjects = useMemo(
-    () => results.filter(r => r.isNew),
-    [results]
-  );
-  const registeredProjects = useMemo(
-    () => results.filter(r => !r.isNew),
-    [results]
-  );
+  const newProjects = results.filter(r => r.isNew);
+  const registeredProjects = results.filter(r => !r.isNew);
 
   // State: focus index (only for new projects), selected paths
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [selectedPaths, setSelectedPaths] = useState<Set<string>>(new Set<string>());
 
   // Reset selection when new projects change
-  useMemo(() => {
+  useEffect(() => {
     if (selectedIndex >= newProjects.length && newProjects.length > 0) {
       setSelectedIndex(newProjects.length - 1);
     }
-  }, [newProjects.length]);
+  }, [newProjects.length, selectedIndex]);
 
   // Navigation handlers
   const handleUp = () => {
@@ -103,7 +95,6 @@ export const ScanScreen: React.FC<ScanScreenProps> = ({
   // Cancel and return
   const handleEscape = () => {
     onCancel();
-    pop();
   };
 
   // Keyboard input via useKeyInput for navigation
@@ -121,10 +112,6 @@ export const ScanScreen: React.FC<ScanScreenProps> = ({
       handleToggle();
     }
   }, { isActive: true });
-
-  // Get focused project name
-  const focusedProject = newProjects[selectedIndex];
-  const focusedName = focusedProject?.path.split('/').pop() ?? '';
 
   // Empty state: no new projects found
   if (newProjects.length === 0) {
@@ -148,7 +135,7 @@ export const ScanScreen: React.FC<ScanScreenProps> = ({
 
   // Render project item
   const renderItem = (project: ScanResult, index: number, isNew: boolean) => {
-    const name = project.path.split('/').pop() ?? project.path;
+    const name = path.basename(project.path);
 
     if (isNew) {
       // New project - selectable with checkbox

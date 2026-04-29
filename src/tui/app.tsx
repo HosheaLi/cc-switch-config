@@ -8,9 +8,10 @@
  * Main Ink application that manages screen routing and data loading.
  * Provides entry point (runTUI) for CLI integration.
  */
+import path from 'path';
 import React, { useState, useEffect } from 'react';
 import { render, Box, Text, useApp } from 'ink';
-import { ProjectService, TemplateService, ConfigService, ExportService } from '../lib/services/index.js';
+import { ProjectService, TemplateService, ConfigService } from '../lib/services/index.js';
 import { ProjectIndex, TemplateStore, AppState, readConfig, writeConfig } from '../lib/store/index.js';
 import type { ProjectEntry } from '../lib/store/project.js';
 import type { TemplateConfig } from '../lib/types/provider.js';
@@ -76,6 +77,13 @@ export const TuiApp: React.FC<TuiAppProps> = ({
 
   // Import-conflict screen state (F13, D-07)
   const [importConflicts, setImportConflicts] = useState<ConflictField[]>([]);
+
+  // Prevent render-phase state updates: auto-return to list when editor has no selection
+  useEffect(() => {
+    if (navigation.current === 'editor' && !selected.project) {
+      navigation.pop();
+    }
+  }, [navigation.current, selected.project]);
 
   // Load projects on mount
   useEffect(() => {
@@ -194,8 +202,8 @@ export const TuiApp: React.FC<TuiAppProps> = ({
       );
     }
 
-    // Error state
-    if (error && navigation.current === 'list') {
+    // Error state — show on any screen so async errors in editor are visible
+    if (error) {
       return (
         <Box flexDirection="column" padding={2}>
           <Text bold color="red">Error: {error}</Text>
@@ -219,8 +227,6 @@ export const TuiApp: React.FC<TuiAppProps> = ({
 
       case 'editor':
         if (!selected.project) {
-          // No project selected, go back to list
-          navigation.pop();
           return null;
         }
 
@@ -229,12 +235,12 @@ export const TuiApp: React.FC<TuiAppProps> = ({
           return (
             <Box flexDirection="column" padding={2}>
               <Text bold color="yellow">No template configured</Text>
-              <Text dimColor>Project: {selected.project.path.split('/').pop()}</Text>
+              <Text dimColor>Project: {path.basename(selected.project.path)}</Text>
               <Box marginTop={1}>
-                <Text dimColor>Please select a template first using CLI:</Text>
+                <Text dimColor>Use CLI to apply a template to this project:</Text>
               </Box>
               <Box>
-                <Text dimColor>cc-config switch &lt;template-name&gt; --project {selected.project.path}</Text>
+                <Text dimColor>  cd {selected.project.path} && cc-config switch &lt;template-name&gt;</Text>
               </Box>
               <Box marginTop={1}>
                 <Text dimColor>Press Esc to go back</Text>

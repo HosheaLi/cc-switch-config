@@ -23,6 +23,8 @@ export interface ConfirmScreenProps {
   onConfirm: () => void;
   /** Callback when user cancels (presses 'n' or Escape) */
   onCancel: () => void;
+  /** Whether this screen is currently active (receives input) */
+  isActive?: boolean;
 }
 
 /**
@@ -36,6 +38,7 @@ export const ConfirmScreen: React.FC<ConfirmScreenProps> = ({
   actionDescription,
   onConfirm,
   onCancel,
+  isActive = true,
 }) => {
   // Custom useInput for y/n handling
   useInput((input, key) => {
@@ -53,7 +56,7 @@ export const ConfirmScreen: React.FC<ConfirmScreenProps> = ({
 
     // Enter is deliberately ignored - user must explicitly type y/n (U5)
     // Other keys are ignored as well
-  });
+  }, { isActive });
 
   return (
     <Box

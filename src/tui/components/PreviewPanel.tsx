@@ -42,8 +42,6 @@ export const PreviewPanel: React.FC<PreviewPanelProps> = ({
 }) => {
   if (!visible || !project) return null;
 
-  const projectName = project.path.split('/').pop() ?? project.path;
-
   return (
     <Box
       borderStyle="single"
@@ -53,7 +51,7 @@ export const PreviewPanel: React.FC<PreviewPanelProps> = ({
       flexDirection="column"
     >
       <Text bold color="cyan">
-        Preview: {projectName}
+        Preview: {project.name}
       </Text>
       <Box flexDirection="column" marginTop={1}>
         <Text dimColor>Path: {project.path}</Text>

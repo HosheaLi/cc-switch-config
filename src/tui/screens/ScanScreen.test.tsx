@@ -490,11 +490,9 @@ describe('ScanScreen', () => {
       expect(mockOnConfirm).not.toHaveBeenCalled();
     });
 
-    it('Escape calls onCancel and pop', async () => {
+    it('Escape calls onCancel', async () => {
       const { useKeyInput } = await import('../hooks/useKeyInput.js');
       const mockKeyInput = vi.mocked(useKeyInput);
-      const { useNavigation } = await import('../hooks/useNavigation.js');
-      const mockNavigation = vi.mocked(useNavigation);
 
       render(
         <ScanScreen
@@ -508,7 +506,6 @@ describe('ScanScreen', () => {
       keyOptions.onEscape();
 
       expect(mockOnCancel).toHaveBeenCalled();
-      expect(mockNavigation.mock.results[0].value.pop).toHaveBeenCalled();
     });
   });
 

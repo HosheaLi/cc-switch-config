@@ -81,6 +81,7 @@ describe('N4 Performance Tests', () => {
   function generateMockProjects(count: number): ProjectEntry[] {
     return Array.from({ length: count }, (_, i) => ({
       id: `project-${i}`,
+      name: `project-${i}`,
       path: `/Users/test/projects/project-${i}`,
       activeConfig: i % 3 === 0 ? `template-${i % 10}` : null,
       lastModified: new Date().toISOString(),

@@ -56,10 +56,7 @@ vi.mock('ink-text-input', () => ({
   }),
 }));
 
-// Mock hooks
-vi.mock('../hooks/useKeyInput.js', () => ({
-  useKeyInput: vi.fn(),
-}));
+// useKeyInput removed from ProjectListScreen — keyboard handled via useInput directly
 
 vi.mock('../hooks/useFuzzySearch.js', () => ({
   useFuzzySearch: vi.fn((items: ProjectEntry[], query: string) => {
@@ -110,18 +107,21 @@ describe('ProjectListScreen', () => {
   const mockProjects: ProjectEntry[] = [
     {
       id: 'proj-1',
+      name: 'project-alpha',
       path: '/Users/test/project-alpha',
       activeConfig: 'anthropic-config',
       lastModified: '2026-04-14T10:00:00Z',
     },
     {
       id: 'proj-2',
+      name: 'project-beta',
       path: '/Users/test/project-beta',
       activeConfig: null,
       lastModified: '2026-04-14T10:00:00Z',
     },
     {
       id: 'proj-3',
+      name: 'project-gamma',
       path: '/Users/test/project-gamma',
       activeConfig: 'openai-config',
       lastModified: '2026-04-14T10:00:00Z',
@@ -233,9 +233,15 @@ describe('ProjectListScreen', () => {
   });
 
   describe('navigation', () => {
-    it('upArrow/k decrements selectedIndex via useKeyInput callback', async () => {
-      const { useKeyInput } = await import('../hooks/useKeyInput.js');
-      const mockKeyInput = vi.mocked(useKeyInput);
+    const pressKey = (mockUseInput: any, input: string, key: Record<string, boolean>) => {
+      // Unified handler is the first useInput call
+      const handler = mockUseInput.mock.calls[0]?.[0];
+      if (handler) handler(input, key);
+    };
+
+    it('upArrow decrements selectedIndex via useInput handler', async () => {
+      const { useInput } = await import('ink');
+      const mockUseInput = vi.mocked(useInput);
 
       render(
         <ProjectListScreen
@@ -245,18 +251,13 @@ describe('ProjectListScreen', () => {
         />
       );
 
-      // Get the onUp callback passed to useKeyInput
-      const options = mockKeyInput.mock.calls[0][0];
-      expect(options.onUp).toBeDefined();
-
-      // Simulate pressing up - should wrap to top (stay at 0)
-      options.onUp();
+      pressKey(mockUseInput, '', { upArrow: true, downArrow: false, escape: false, return: false });
       // selectedIndex should stay at 0 (Math.max(0, 0-1) = 0)
     });
 
-    it('downArrow/j increments selectedIndex via useKeyInput callback', async () => {
-      const { useKeyInput } = await import('../hooks/useKeyInput.js');
-      const mockKeyInput = vi.mocked(useKeyInput);
+    it('downArrow increments selectedIndex via useInput handler', async () => {
+      const { useInput } = await import('ink');
+      const mockUseInput = vi.mocked(useInput);
 
       const { container, rerender } = render(
         <ProjectListScreen
@@ -266,14 +267,8 @@ describe('ProjectListScreen', () => {
         />
       );
 
-      // Get the onDown callback passed to useKeyInput
-      const options = mockKeyInput.mock.calls[0][0];
-      expect(options.onDown).toBeDefined();
+      pressKey(mockUseInput, '', { upArrow: false, downArrow: true, escape: false, return: false });
 
-      // Simulate pressing down - should increment to 1
-      options.onDown();
-
-      // Rerender to see state update
       rerender(
         <ProjectListScreen
           projects={mockProjects}
@@ -282,14 +277,13 @@ describe('ProjectListScreen', () => {
         />
       );
 
-      // Check that project-beta (index 1) is now selected
       const greenBoldText = container.querySelector('[data-color="green"][data-bold="true"]');
       expect(greenBoldText?.textContent).toContain('project-beta');
     });
 
     it('Enter calls onSelect with selected project', async () => {
-      const { useKeyInput } = await import('../hooks/useKeyInput.js');
-      const mockKeyInput = vi.mocked(useKeyInput);
+      const { useInput } = await import('ink');
+      const mockUseInput = vi.mocked(useInput);
 
       render(
         <ProjectListScreen
@@ -299,28 +293,22 @@ describe('ProjectListScreen', () => {
         />
       );
 
-      // Get the onSelect callback passed to useKeyInput
-      const options = mockKeyInput.mock.calls[0][0];
-      expect(options.onSelect).toBeDefined();
+      pressKey(mockUseInput, '', { upArrow: false, downArrow: false, escape: false, return: true });
 
-      // Simulate pressing Enter - should call onSelect with first project
-      options.onSelect();
-
-      // onSelect receives the project with an added 'name' field for SearchableItem
       expect(mockOnSelect).toHaveBeenCalledWith(
         expect.objectContaining({
           id: mockProjects[0].id,
           path: mockProjects[0].path,
           activeConfig: mockProjects[0].activeConfig,
           lastModified: mockProjects[0].lastModified,
-          name: expect.any(String), // Added for SearchableItem interface
+          name: expect.any(String),
         })
       );
     });
 
     it('Escape calls onExit when isRoot', async () => {
-      const { useKeyInput } = await import('../hooks/useKeyInput.js');
-      const mockKeyInput = vi.mocked(useKeyInput);
+      const { useInput } = await import('ink');
+      const mockUseInput = vi.mocked(useInput);
 
       render(
         <ProjectListScreen
@@ -330,19 +318,14 @@ describe('ProjectListScreen', () => {
         />
       );
 
-      // Get the onEscape callback passed to useKeyInput
-      const options = mockKeyInput.mock.calls[0][0];
-      expect(options.onEscape).toBeDefined();
-
-      // Simulate pressing Escape
-      options.onEscape();
+      pressKey(mockUseInput, '', { upArrow: false, downArrow: false, escape: true, return: false });
 
       expect(mockOnExit).toHaveBeenCalled();
     });
 
     it('navigation does not go below 0', async () => {
-      const { useKeyInput } = await import('../hooks/useKeyInput.js');
-      const mockKeyInput = vi.mocked(useKeyInput);
+      const { useInput } = await import('ink');
+      const mockUseInput = vi.mocked(useInput);
 
       const { container, rerender } = render(
         <ProjectListScreen
@@ -352,10 +335,7 @@ describe('ProjectListScreen', () => {
         />
       );
 
-      const options = mockKeyInput.mock.calls[0][0];
-
-      // Already at index 0, pressing up should stay at 0
-      options.onUp();
+      pressKey(mockUseInput, '', { upArrow: true, downArrow: false, escape: false, return: false });
 
       rerender(
         <ProjectListScreen
@@ -370,8 +350,8 @@ describe('ProjectListScreen', () => {
     });
 
     it('navigation does not go beyond last item', async () => {
-      const { useKeyInput } = await import('../hooks/useKeyInput.js');
-      const mockKeyInput = vi.mocked(useKeyInput);
+      const { useInput } = await import('ink');
+      const mockUseInput = vi.mocked(useInput);
 
       const { container, rerender } = render(
         <ProjectListScreen
@@ -381,11 +361,8 @@ describe('ProjectListScreen', () => {
         />
       );
 
-      const options = mockKeyInput.mock.calls[0][0];
-
-      // Go to last item (index 2)
-      options.onDown();
-      options.onDown();
+      pressKey(mockUseInput, '', { upArrow: false, downArrow: true, escape: false, return: false });
+      pressKey(mockUseInput, '', { upArrow: false, downArrow: true, escape: false, return: false });
 
       rerender(
         <ProjectListScreen
@@ -395,8 +372,7 @@ describe('ProjectListScreen', () => {
         />
       );
 
-      // Try to go down again - should stay at 2
-      options.onDown();
+      pressKey(mockUseInput, '', { upArrow: false, downArrow: true, escape: false, return: false });
 
       rerender(
         <ProjectListScreen
@@ -479,8 +455,8 @@ describe('ProjectListScreen', () => {
     });
 
     it('PreviewPanel updates when selection changes', async () => {
-      const { useKeyInput } = await import('../hooks/useKeyInput.js');
-      const mockKeyInput = vi.mocked(useKeyInput);
+      const { useInput } = await import('ink');
+      const mockUseInput = vi.mocked(useInput);
 
       const { container, rerender } = render(
         <ProjectListScreen
@@ -490,10 +466,8 @@ describe('ProjectListScreen', () => {
         />
       );
 
-      const options = mockKeyInput.mock.calls[0][0];
-
-      // Move selection to second item
-      options.onDown();
+      const handler = mockUseInput.mock.calls[0]?.[0];
+      handler('', { upArrow: false, downArrow: true, escape: false, return: false });
 
       rerender(
         <ProjectListScreen
@@ -525,7 +499,7 @@ describe('ProjectListScreen', () => {
   });
 
   describe('S key for scan (D-08, F10)', () => {
-    it('renders help text with S: scan', () => {
+    it('renders help text with S scan', () => {
       const { container } = render(
         <ProjectListScreen
           projects={mockProjects}
@@ -534,7 +508,7 @@ describe('ProjectListScreen', () => {
         />
       );
 
-      expect(container.textContent).toContain('S: scan');
+      expect(container.textContent).toContain('S scan');
     });
 
     it('S key calls push(scan) when query is empty', async () => {
@@ -551,27 +525,9 @@ describe('ProjectListScreen', () => {
         />
       );
 
-      // Find the useInput handler for 'S' key (second call, first is useKeyInput internally)
-      // Look for handler that checks input === 'S'
-      const inputCalls = mockUseInput.mock.calls;
-      let sKeyHandler: ((input: string, key: any) => void) | null = null;
+      const handler = mockUseInput.mock.calls[0]?.[0];
+      handler('S', { escape: false, return: false });
 
-      for (const call of inputCalls) {
-        const handler = call[0];
-        // Try to identify the 'S' key handler by checking if it handles 'S'
-        try {
-          handler('S', { escape: false, return: false });
-          if (mockNavigation.mock.results[0]?.value?.push?.mock.calls.length > 0) {
-            // Found the handler that pushes 'scan'
-            sKeyHandler = handler;
-            break;
-          }
-        } catch {
-          // Not this handler
-        }
-      }
-
-      // Verify push was called with 'scan'
       const navResult = mockNavigation.mock.results[0]?.value;
       if (navResult?.push) {
         expect(navResult.push).toHaveBeenCalledWith('scan');
@@ -580,7 +536,7 @@ describe('ProjectListScreen', () => {
   });
 
   describe('U key for undo (D-07, U2)', () => {
-    it('renders help text with U: undo', () => {
+    it('renders help text with U undo', () => {
       const { container } = render(
         <ProjectListScreen
           projects={mockProjects}
@@ -589,7 +545,7 @@ describe('ProjectListScreen', () => {
         />
       );
 
-      expect(container.textContent).toContain('U: undo');
+      expect(container.textContent).toContain('U undo');
     });
 
     it('U key handler is registered for undo when query is empty', async () => {
@@ -604,27 +560,14 @@ describe('ProjectListScreen', () => {
         />
       );
 
-      // Find the 'U' key handler in useInput calls
-      const inputCalls = mockUseInput.mock.calls;
-      // At least one useInput handler should exist for U key
-      expect(inputCalls.length).toBeGreaterThan(0);
-
-      // Check that a handler for 'U' input exists
-      for (const call of inputCalls) {
-        const handler = call[0];
-        if (typeof handler === 'function') {
-          // Handler should check for 'U' input
-          expect(handler).toBeDefined();
-        }
-      }
+      expect(mockUseInput.mock.calls.length).toBeGreaterThan(0);
     });
 
     it('successful undo shows restored message in StatusBar', async () => {
-      // Setup mock for successful undo
       const { UndoService } = await import('../../lib/services/undo-service.js');
       vi.mocked(UndoService).mockImplementation(() => ({
         undo: vi.fn().mockResolvedValue({
-          backupTime: new Date(Date.now() - 5 * 60 * 1000), // 5 minutes ago
+          backupTime: new Date(Date.now() - 5 * 60 * 1000),
           backupFilename: 'settings.json.2026-04-15T02-20-00-000Z',
           restored: true,
         }),
@@ -641,16 +584,11 @@ describe('ProjectListScreen', () => {
         />
       );
 
-      // Find and trigger the 'U' key handler
-      const inputCalls = mockUseInput.mock.calls;
-      for (const call of inputCalls) {
-        const handler = call[0];
-        await act(async () => {
-          handler('U', { escape: false, return: false });
-        });
-      }
+      const handler = mockUseInput.mock.calls[0]?.[0];
+      await act(async () => {
+        handler('U', { escape: false, return: false });
+      });
 
-      // Wait for async state update to show success message
       await waitFor(() => {
         const statusBar = container.querySelector('[data-testid="status-bar"]');
         if (statusBar) {
@@ -682,21 +620,15 @@ describe('ProjectListScreen', () => {
         />
       );
 
-      // Query is not empty - 'U' should not trigger undo
-      const inputCalls = mockUseInput.mock.calls;
-      for (const call of inputCalls) {
-        const handler = call[0];
-        await act(async () => {
-          handler('U', { escape: false, return: false });
-        });
-      }
+      const handler = mockUseInput.mock.calls[0]?.[0];
+      await act(async () => {
+        handler('U', { escape: false, return: false });
+      });
 
-      // Undo should NOT have been called when in search mode
       expect(mockUndoFn).not.toHaveBeenCalled();
     });
 
     it('NO_BACKUP error shows appropriate error message', async () => {
-      // Setup mock to throw NO_BACKUP error
       const { UndoService } = await import('../../lib/services/undo-service.js');
       vi.mocked(UndoService).mockImplementation(() => ({
         undo: vi.fn().mockRejectedValue(
@@ -715,20 +647,14 @@ describe('ProjectListScreen', () => {
         />
       );
 
-      // Trigger 'U' key
-      const inputCalls = mockUseInput.mock.calls;
-      for (const call of inputCalls) {
-        const handler = call[0];
-        await act(async () => {
-          handler('U', { escape: false, return: false });
-        });
-      }
+      const handler = mockUseInput.mock.calls[0]?.[0];
+      await act(async () => {
+        handler('U', { escape: false, return: false });
+      });
 
-      // Wait for error message to appear
       await waitFor(() => {
         const statusBar = container.querySelector('[data-testid="status-bar"]');
         if (statusBar) {
-          // Should contain "No backup" message
           expect(statusBar.textContent).toContain('No backup');
           expect(statusBar.getAttribute('data-type')).toBe('error');
         }

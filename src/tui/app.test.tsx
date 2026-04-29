@@ -74,6 +74,7 @@ describe('TuiApp', () => {
   const mockProjects: ProjectEntry[] = [
     {
       id: 'proj-1',
+      name: 'project-alpha',
       path: '/Users/test/project-alpha',
       activeConfig: 'test-template',
       lastModified: '2026-04-14T10:00:00Z',
