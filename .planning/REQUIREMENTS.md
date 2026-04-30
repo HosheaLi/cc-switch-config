@@ -85,7 +85,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | CFG-01 | Phase 10 | Pending |
 | CFG-02 | Phase 10 | Pending |
 | CFG-04 | Phase 10 | Pending |
-| CFG-03 | Phase 11 | Pending |
+| CFG-03 | Phase 11 | Complete ✓ |
 | CFG-05 | Phase 13 | Pending |
 | CFG-06 | Phase 15 | Pending |
 | ONB-01 | Phase 12 | Pending |
@@ -101,9 +101,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | UI-05 | Phase 14 | Pending |
 | UI-06 | Phase 14 | Pending |
 | SEC-01 | Phase 10 | Pending |
-| SEC-02 | Phase 11 | Pending |
+| SEC-02 | Phase 11 | Complete ✓ |
 | SEC-03 | Phase 10 | Pending |
-| SEC-04 | Phase 11 | Pending |
+| SEC-04 | Phase 11 | Complete ✓ |
 
 **Coverage:**
 - v1 requirements: 28 total

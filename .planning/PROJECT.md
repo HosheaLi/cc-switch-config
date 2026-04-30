@@ -33,6 +33,10 @@
 - ✓ 跨平台支持 (R4) — v1.0
 - ✓ 测试覆盖率 80%+ (M1) — v1.0
 
+### Validated (v2.0)
+
+- ✓ **CLI-01**: Config 命令 (add/list/remove API配置) — Phase 11
+
 ### Active (v2.0)
 
 - [ ] **TUI-01**: 使用 prompts 实现 npm 风格列表选择 (j/k + Enter)
@@ -45,7 +49,6 @@
 - [ ] **SCAN-02**: 扩展跳过目录列表 (node_modules, .git, dist, build, target, .venv)
 - [ ] **UI-01**: OpenCode Terminal Aesthetic (温暖色调 #201d1d/#fdfcfc, Apple HIG 语义色)
 - [ ] **UI-02**: 全 Monospace 排版，无阴影深度系统
-- [ ] **CLI-01**: 新增 config 命令 (add/list/remove API配置)
 
 ### Out of Scope (v2.0)
 
