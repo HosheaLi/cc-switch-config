@@ -37,5 +37,6 @@ export { detectConflicts } from './export-service.js';
 // Re-export types that services use (convenience for callers)
 export type { ClaudeSettings } from '../types/config.js';
 export type { TemplateConfig } from '../types/provider.js';
+export type { ApiConfig, MaskedApiConfig } from '../types/api-config.js';
 export type { ProjectEntry } from '../store/project.js';
 export type { ConflictField, ExportPayload, ExportMetadata, ExportPayloadSchema } from '../types/export-schema.js';
