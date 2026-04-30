@@ -92,7 +92,7 @@
 - [x] 05-03-PLAN.md - switch Command (optional argument + TUI fallback)
 - [x] 05-04-PLAN.md - current Command
 - [x] 05-05-PLAN.md - template Subcommand (nested CRUD)
-- [x] 05-06-PLAN.md - Barrel Export + Integration
+- [x] 05-06-PLAN.md - Barrel Export & Integration
 
 ### Phase 6: Core TUI
 
@@ -150,7 +150,7 @@
   3. User experiences linear wizard flow without multi-screen navigation
   4. User can search large project lists with autocomplete (>20 items)
   5. User sees graceful exit on Ctrl+C with onCancel handling
-**Plans**: TBD
+**Plans**: 4 plans
 
 #### Phase 10: Config Service
 **Goal**: Users can manage API configurations securely with precise field replacement
@@ -162,7 +162,7 @@
   3. User sees API key masked in all display contexts (preview/diff/logs)
   4. User's API key is never exposed in CLI args, logs, or screenshots
   5. System maintains atomic write and backup from v1.0 (R1/R2)
-**Plans**: 2 plans
+**Plans**: 4 plans
 
 Plans:
 - [x] 10-01-PLAN.md - Create ApiConfig types and replaceEnvModel function
@@ -196,7 +196,13 @@ Plans:
   3. System scans directories with Promise.all parallel traversal (not serial)
   4. System skips node_modules/.git/dist/build/target/.venv/__pycache__
   5. User sees progress indicator during scan operations
-**Plans**: TBD
+**Plans**: 4 plans
+
+Plans:
+- [ ] 12-01-PLAN.md - Create DEFAULT_SKIP_DIRS constant and AppState schema evolution (firstRunCompleted/skipDirectories fields)
+- [ ] 12-02-PLAN.md - Refactor walkDirectory to Promise.all parallel scan with skip directory filtering
+- [ ] 12-03-PLAN.md - Implement first-run detection at CLI entry with triple condition check
+- [ ] 12-04-PLAN.md - Manual verification of spinner visual display during wizard
 
 #### Phase 13: Switch Flow
 **Goal**: Users can switch project configs with diff preview before application
@@ -254,7 +260,7 @@ Phases execute in numeric order: 9 - 10 - 11 - 12 - 13 - 14 - 15
 | 9. Prompts Integration | v2.0 | 0/TBD | Not started | - |
 | 10. Config Service | v2.0 | 4/4 | Complete    | 2026-04-30 |
 | 11. Config CLI Commands | v2.0 | 1/2 | Complete    | 2026-04-30 |
-| 12. First-Run Wizard | v2.0 | 0/TBD | Not started | - |
+| 12. First-Run Wizard | v2.0 | 0/4 | Not started | - |
 | 13. Switch Flow | v2.0 | 0/TBD | Not started | - |
 | 14. Terminal Aesthetic | v2.0 | 0/TBD | Not started | - |
 | 15. Ink Removal | v2.0 | 0/TBD | Not started | - |
@@ -298,4 +304,4 @@ Phases execute in numeric order: 9 - 10 - 11 - 12 - 13 - 14 - 15
 
 *Roadmap for: CCAPISwitch*  
 *Created: 2026-04-13*  
-*Last updated: 2026-04-30 (Phase 11 plans created)*
+*Last updated: 2026-04-30 (Phase 12 plans created)*

@@ -3,7 +3,7 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Terminal-Native
 status: planning
-last_updated: "2026-04-30T13:52:10.133Z"
+last_updated: "2026-04-30T14:30:03.611Z"
 last_activity: 2026-04-30
 progress:
   total_phases: 7
