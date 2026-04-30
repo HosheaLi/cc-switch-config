@@ -18,6 +18,7 @@
 import os from 'os';
 import path from 'path';
 import fs from 'fs-extra';
+import { DEFAULT_SKIP_DIRS } from '../constants/skip-dirs.js';
 import { ServiceError } from './types.js';
 import type { ProjectEntry } from '../store/project.js';
 import type { AppState } from '../store/state.js';
@@ -61,6 +62,17 @@ export class ProjectService {
   ) {}
 
   /**
+   * Get merged skip directories list.
+   * Per D-10: Merge DEFAULT_SKIP_DIRS with user skipDirectories.
+   *
+   * @returns Array of directory names to skip during scanning
+   */
+  private getSkipDirectories(): string[] {
+    const userSkipDirs = this.appState.get('skipDirectories') ?? [];
+    return [...DEFAULT_SKIP_DIRS, ...userSkipDirs];
+  }
+
+  /**
    * Scan configured directories for .claude projects.
    * Per D-04: Auto scan user-configured roots with depth limit.
    *
@@ -72,13 +84,14 @@ export class ProjectService {
 
     const depth = maxDepth ?? this.defaultMaxDepth;
     const found: string[] = [];
+    const skipDirs = this.getSkipDirectories();
 
     // Default to current directory if no scan directories configured and no override
     const dirsToScan = rootDirs.length > 0 ? rootDirs : ['.'];
 
     for (const rootDir of dirsToScan) {
       const expanded = this.expandPath(rootDir);
-      await this.walkDirectory(expanded, 0, depth, found);
+      await this.walkDirectory(expanded, 0, depth, found, skipDirs);
     }
 
     // Mark which are new vs already registered
@@ -96,18 +109,22 @@ export class ProjectService {
 
   /**
    * Recursively walk a directory to find .claude projects.
-   * Skips hidden directories and node_modules.
+   * Per D-05: Uses Promise.all for parallel subdirectory scanning.
+   * Per D-06: Independent catch per subdirectory (partial failure continues).
+   * Per D-08/D-10: Skips DEFAULT_SKIP_DIRS + user skipDirectories.
    *
    * @param dir - Directory to scan
    * @param depth - Current depth level
    * @param maxDepth - Maximum depth limit
    * @param found - Accumulator for found project paths
+   * @param skipDirs - Directory names to skip (merged defaults + user)
    */
   private async walkDirectory(
     dir: string,
     depth: number,
     maxDepth: number,
-    found: string[]
+    found: string[],
+    skipDirs: string[]
   ): Promise<void> {
     if (depth > maxDepth) return;
 
@@ -122,14 +139,30 @@ export class ProjectService {
 
     try {
       const entries = await fs.readdir(dir, { withFileTypes: true });
-      for (const entry of entries) {
-        // Skip hidden dirs and node_modules
-        if (entry.isDirectory() && !entry.name.startsWith('.') && entry.name !== 'node_modules') {
-          await this.walkDirectory(path.join(dir, entry.name), depth + 1, maxDepth, found);
-        }
-      }
+
+      // Filter directories to scan using skip directories list
+      const subdirs = entries
+        .filter(e => e.isDirectory())
+        .filter(e => !skipDirs.includes(e.name))
+        .filter(e => !e.name.startsWith('.'))
+        .map(e => path.join(dir, e.name));
+
+      // D-05: Promise.all parallel scan
+      // D-06: Independent catch per subdirectory
+      await Promise.all(
+        subdirs.map(async (subdir) => {
+          try {
+            await this.walkDirectory(subdir, depth + 1, maxDepth, found, skipDirs);
+          } catch (err) {
+            // D-07: console.error log, continue others
+            if (err instanceof Error) {
+              console.error(`Scan skipped directory ${subdir}: ${err.message}`);
+            }
+          }
+        })
+      );
     } catch (err) {
-      // Permission errors or other issues - skip this directory
+      // Permission errors at this level - skip
       if (err instanceof Error) {
         console.error(`Scan skipped directory ${dir}: ${err.message}`);
       }

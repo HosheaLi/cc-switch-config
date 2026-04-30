@@ -408,4 +408,90 @@ describe('ProjectService', () => {
       expect(mockAppState.get('scanDirectories')).toEqual(['~/code']);
     });
   });
+
+  describe('walkDirectory parallel scanning', () => {
+    it('should scan subdirectories in parallel with Promise.all', async () => {
+      // Create multiple nested projects in separate branches
+      const project1 = path.join(tempDir, 'branch1', 'project1');
+      const project2 = path.join(tempDir, 'branch2', 'project2');
+      const project3 = path.join(tempDir, 'branch3', 'project3');
+
+      await fs.ensureDir(path.join(project1, '.claude'));
+      await fs.ensureDir(path.join(project2, '.claude'));
+      await fs.ensureDir(path.join(project3, '.claude'));
+
+      await fs.writeJSON(path.join(project1, '.claude', 'settings.json'), {});
+      await fs.writeJSON(path.join(project2, '.claude', 'settings.json'), {});
+      await fs.writeJSON(path.join(project3, '.claude', 'settings.json'), {});
+
+      mockAppState.set('scanDirectories', [tempDir]);
+
+      const results = await projectService.scanProjects();
+
+      // All projects should be found regardless of parallel execution
+      expect(results.length).toBeGreaterThanOrEqual(3);
+      expect(results.map(r => r.path)).toContain(project1);
+      expect(results.map(r => r.path)).toContain(project2);
+      expect(results.map(r => r.path)).toContain(project3);
+    });
+
+    it('should continue scanning when one subdirectory fails', async () => {
+      // Create valid project
+      const validProject = path.join(tempDir, 'valid-project');
+      await fs.ensureDir(path.join(validProject, '.claude'));
+      await fs.writeJSON(path.join(validProject, '.claude', 'settings.json'), {});
+
+      mockAppState.set('scanDirectories', [tempDir]);
+
+      const results = await projectService.scanProjects();
+      expect(results.map(r => r.path)).toContain(validProject);
+    });
+  });
+
+  describe('skip directories filtering', () => {
+    it('should skip DEFAULT_SKIP_DIRS entries', async () => {
+      // Create directories that should be skipped
+      const nodeModulesProject = path.join(tempDir, 'node_modules', 'package');
+      const distProject = path.join(tempDir, 'dist', 'output');
+
+      await fs.ensureDir(path.join(nodeModulesProject, '.claude'));
+      await fs.ensureDir(path.join(distProject, '.claude'));
+      await fs.writeJSON(path.join(nodeModulesProject, '.claude', 'settings.json'), {});
+      await fs.writeJSON(path.join(distProject, '.claude', 'settings.json'), {});
+
+      const validProject = path.join(tempDir, 'valid-project');
+      await fs.ensureDir(path.join(validProject, '.claude'));
+      await fs.writeJSON(path.join(validProject, '.claude', 'settings.json'), {});
+
+      mockAppState.set('scanDirectories', [tempDir]);
+
+      const results = await projectService.scanProjects();
+
+      expect(results.map(r => r.path)).not.toContain(nodeModulesProject);
+      expect(results.map(r => r.path)).not.toContain(distProject);
+      expect(results.map(r => r.path)).toContain(validProject);
+    });
+
+    it('should merge DEFAULT_SKIP_DIRS with user skipDirectories', async () => {
+      // Custom user skip directory
+      const customSkipProject = path.join(tempDir, 'my-custom-skip', 'project');
+      await fs.ensureDir(path.join(customSkipProject, '.claude'));
+      await fs.writeJSON(path.join(customSkipProject, '.claude', 'settings.json'), {});
+
+      const validProject = path.join(tempDir, 'valid-project');
+      await fs.ensureDir(path.join(validProject, '.claude'));
+      await fs.writeJSON(path.join(validProject, '.claude', 'settings.json'), {});
+
+      mockAppState.set('scanDirectories', [tempDir]);
+      mockAppState.set('skipDirectories', ['my-custom-skip']);
+
+      const results = await projectService.scanProjects();
+
+      expect(results.map(r => r.path)).not.toContain(customSkipProject);
+      expect(results.map(r => r.path)).toContain(validProject);
+
+      // Cleanup
+      mockAppState.set('skipDirectories', []);
+    });
+  });
 });
