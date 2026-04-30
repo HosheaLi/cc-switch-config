@@ -122,5 +122,47 @@ export function registerConfigCommand(program: Command): void {
       }
     });
 
-  // Placeholder for list and remove - will be added in Task 2 and Task 3
+  // config list - show all configs
+  config
+    .command('list')
+    .alias('l')  // D-04: subcommand alias
+    .description('List all API configurations')
+    .action(async () => {
+      try {
+        const apiConfigStore = new ApiConfigStore();
+        const service = new ApiService(apiConfigStore, readConfig, writeConfig);
+
+        const configs = await service.getAllConfigs();
+        const names = Object.keys(configs);
+
+        // D-07: Empty list handling
+        if (names.length === 0) {
+          console.log(chalk.yellow('没有保存的配置'));
+          console.log(chalk.gray('使用 cc-config config add 创建配置'));
+          process.exit(0);
+        }
+
+        // D-05: Table format output
+        console.log(chalk.cyan('\n可用配置'));
+        console.log(chalk.gray('─'.repeat(50)));
+
+        for (const [name, cfg] of Object.entries(configs)) {
+          const maskedKey = maskApiKey(cfg.apiKey); // CFG-04/SEC-01
+          const modelName = cfg.mode === 'unified'
+            ? (cfg.modelName ?? '未设置')
+            : 'granular';
+          console.log(chalk.white(
+            `  ${name.padEnd(16)} ${modelName.padEnd(20)} ${maskedKey}`
+          ));
+        }
+
+        console.log(chalk.gray('─'.repeat(50)));
+        console.log(chalk.gray(`共 ${names.length} 个配置\n`));
+
+      } catch (error) {
+        handleCLIError(error);
+      }
+    });
+
+  // Placeholder for remove - will be added in Task 3
 }

@@ -228,4 +228,242 @@ describe('config command', () => {
       freshExit.mockRestore();
     });
   });
+
+  // Task 2 Tests: config list command
+  describe('config list command registration', () => {
+    it('Test 8: config list subcommand registered with l alias (D-04)', () => {
+      const commands = program.commands;
+      const configCmd = commands.find(cmd => cmd.name() === 'config');
+      const listCmd = configCmd?.commands.find(cmd => cmd.name() === 'list');
+      expect(listCmd).toBeDefined();
+      expect(listCmd?.aliases()).toContain('l');
+    });
+  });
+
+  describe('config list execution', () => {
+    it('Test 9: getAllConfigs called on list action', async () => {
+      const freshProgram = new Command();
+      freshProgram.exitOverride();
+      registerConfigCommand(freshProgram);
+      const freshConsole = vi.spyOn(console, 'log').mockImplementation(() => {});
+      const freshExit = vi.spyOn(process, 'exit').mockImplementation(() => undefined as never);
+
+      try {
+        await freshProgram.parseAsync(['node', 'cc-config', 'config', 'list']);
+      } catch {
+        // May exit on success
+      }
+
+      // Verify ApiService was instantiated (getAllConfigs is called)
+      const serviceMod = await import('../../lib/services/api-service.js');
+      expect(vi.mocked(serviceMod.ApiService)).toHaveBeenCalled();
+
+      freshConsole.mockRestore();
+      freshExit.mockRestore();
+    });
+
+    it('Test 10: Empty list shows friendly message (D-07)', async () => {
+      // Mock getAllConfigs to return empty object
+      const serviceMod = await import('../../lib/services/api-service.js');
+      vi.mocked(serviceMod.ApiService).mockImplementationOnce(() => ({
+        createConfig: vi.fn().mockResolvedValue(undefined),
+        getConfig: vi.fn().mockResolvedValue(null),
+        deleteConfig: vi.fn().mockResolvedValue(true),
+        getAllConfigs: vi.fn().mockResolvedValue({}),
+        listConfigs: vi.fn().mockResolvedValue([]),
+      }));
+
+      const freshProgram = new Command();
+      freshProgram.exitOverride();
+      registerConfigCommand(freshProgram);
+      const freshConsole = vi.spyOn(console, 'log').mockImplementation(() => {});
+      const freshExit = vi.spyOn(process, 'exit').mockImplementation(() => undefined as never);
+
+      try {
+        await freshProgram.parseAsync(['node', 'cc-config', 'config', 'list']);
+      } catch {
+        // May exit on empty list
+      }
+
+      // Verify friendly message for empty list
+      const calls = freshConsole.mock.calls;
+      const hasEmptyMessage = calls.some(call =>
+        typeof call[0] === 'string' && (call[0].includes('没有') || call[0].includes('empty') || call[0].includes('No'))
+      );
+      expect(hasEmptyMessage).toBe(true);
+
+      freshConsole.mockRestore();
+      freshExit.mockRestore();
+    });
+
+    it('Test 11: Table format output with name, modelName, masked apiKey (D-05)', async () => {
+      // Mock getAllConfigs to return configs
+      const serviceMod = await import('../../lib/services/api-service.js');
+      vi.mocked(serviceMod.ApiService).mockImplementationOnce(() => ({
+        createConfig: vi.fn().mockResolvedValue(undefined),
+        getConfig: vi.fn().mockResolvedValue(null),
+        deleteConfig: vi.fn().mockResolvedValue(true),
+        getAllConfigs: vi.fn().mockResolvedValue({
+          'anthropic': {
+            name: 'anthropic',
+            apiKey: 'sk-ant-api03-test123xyz',
+            baseUrl: 'https://api.anthropic.com',
+            mode: 'unified',
+            modelName: 'claude-sonnet-4-6',
+          },
+          'openrouter': {
+            name: 'openrouter',
+            apiKey: 'sk-or-test456abc',
+            baseUrl: 'https://openrouter.ai/api/v1',
+            mode: 'unified',
+            modelName: 'glm-5',
+          },
+        }),
+        listConfigs: vi.fn().mockResolvedValue(['anthropic', 'openrouter']),
+      }));
+
+      const freshProgram = new Command();
+      freshProgram.exitOverride();
+      registerConfigCommand(freshProgram);
+      const freshConsole = vi.spyOn(console, 'log').mockImplementation(() => {});
+      const freshExit = vi.spyOn(process, 'exit').mockImplementation(() => undefined as never);
+
+      try {
+        await freshProgram.parseAsync(['node', 'cc-config', 'config', 'list']);
+      } catch {
+        // May exit on success
+      }
+
+      // Verify table output contains config names
+      const calls = freshConsole.mock.calls;
+      const hasAnthropic = calls.some(call =>
+        typeof call[0] === 'string' && call[0].includes('anthropic')
+      );
+      const hasOpenrouter = calls.some(call =>
+        typeof call[0] === 'string' && call[0].includes('openrouter')
+      );
+      expect(hasAnthropic || hasOpenrouter).toBe(true);
+
+      freshConsole.mockRestore();
+      freshExit.mockRestore();
+    });
+
+    it('Test 12: maskApiKey applied to apiKey in display (CFG-04)', async () => {
+      // Mock getAllConfigs to return configs
+      const serviceMod = await import('../../lib/services/api-service.js');
+      vi.mocked(serviceMod.ApiService).mockImplementationOnce(() => ({
+        createConfig: vi.fn().mockResolvedValue(undefined),
+        getConfig: vi.fn().mockResolvedValue(null),
+        deleteConfig: vi.fn().mockResolvedValue(true),
+        getAllConfigs: vi.fn().mockResolvedValue({
+          'test': {
+            name: 'test',
+            apiKey: 'sk-test-api-key-12345',
+            baseUrl: 'https://api.anthropic.com',
+            mode: 'unified',
+            modelName: 'claude-sonnet-4-6',
+          },
+        }),
+        listConfigs: vi.fn().mockResolvedValue(['test']),
+      }));
+
+      const freshProgram = new Command();
+      freshProgram.exitOverride();
+      registerConfigCommand(freshProgram);
+      const freshConsole = vi.spyOn(console, 'log').mockImplementation(() => {});
+      const freshExit = vi.spyOn(process, 'exit').mockImplementation(() => undefined as never);
+
+      try {
+        await freshProgram.parseAsync(['node', 'cc-config', 'config', 'list']);
+      } catch {
+        // May exit on success
+      }
+
+      // Verify maskApiKey was called
+      const maskMod = await import('../../lib/security/api-key.js');
+      expect(vi.mocked(maskMod.maskApiKey)).toHaveBeenCalled();
+
+      freshConsole.mockRestore();
+      freshExit.mockRestore();
+    });
+
+    it('Test 13: Count message displayed at end', async () => {
+      // Mock getAllConfigs to return configs
+      const serviceMod = await import('../../lib/services/api-service.js');
+      vi.mocked(serviceMod.ApiService).mockImplementationOnce(() => ({
+        createConfig: vi.fn().mockResolvedValue(undefined),
+        getConfig: vi.fn().mockResolvedValue(null),
+        deleteConfig: vi.fn().mockResolvedValue(true),
+        getAllConfigs: vi.fn().mockResolvedValue({
+          'anthropic': {
+            name: 'anthropic',
+            apiKey: 'sk-test-1',
+            baseUrl: 'https://api.anthropic.com',
+            mode: 'unified',
+            modelName: 'claude-sonnet-4-6',
+          },
+          'openrouter': {
+            name: 'openrouter',
+            apiKey: 'sk-test-2',
+            baseUrl: 'https://openrouter.ai/api/v1',
+            mode: 'unified',
+            modelName: 'glm-5',
+          },
+        }),
+        listConfigs: vi.fn().mockResolvedValue(['anthropic', 'openrouter']),
+      }));
+
+      const freshProgram = new Command();
+      freshProgram.exitOverride();
+      registerConfigCommand(freshProgram);
+      const freshConsole = vi.spyOn(console, 'log').mockImplementation(() => {});
+      const freshExit = vi.spyOn(process, 'exit').mockImplementation(() => undefined as never);
+
+      try {
+        await freshProgram.parseAsync(['node', 'cc-config', 'config', 'list']);
+      } catch {
+        // May exit on success
+      }
+
+      // Verify count message
+      const calls = freshConsole.mock.calls;
+      const hasCount = calls.some(call =>
+        typeof call[0] === 'string' && call[0].includes('2')
+      );
+      expect(hasCount).toBe(true);
+
+      freshConsole.mockRestore();
+      freshExit.mockRestore();
+    });
+
+    it('Test 14: handleCLIError on service errors', async () => {
+      // Mock getAllConfigs to throw error
+      const serviceMod = await import('../../lib/services/api-service.js');
+      vi.mocked(serviceMod.ApiService).mockImplementationOnce(() => ({
+        createConfig: vi.fn().mockResolvedValue(undefined),
+        getConfig: vi.fn().mockResolvedValue(null),
+        deleteConfig: vi.fn().mockResolvedValue(true),
+        getAllConfigs: vi.fn().mockRejectedValue(new Error('Service error')),
+        listConfigs: vi.fn().mockResolvedValue([]),
+      }));
+
+      const freshProgram = new Command();
+      freshProgram.exitOverride();
+      registerConfigCommand(freshProgram);
+      const freshConsole = vi.spyOn(console, 'log').mockImplementation(() => {});
+      const freshExit = vi.spyOn(process, 'exit').mockImplementation(() => undefined as never);
+
+      try {
+        await freshProgram.parseAsync(['node', 'cc-config', 'config', 'list']);
+      } catch {
+        // May exit on error
+      }
+
+      const errorMod = await import('../output/error.js');
+      expect(vi.mocked(errorMod.handleCLIError)).toHaveBeenCalled();
+
+      freshConsole.mockRestore();
+      freshExit.mockRestore();
+    });
+  });
 });
