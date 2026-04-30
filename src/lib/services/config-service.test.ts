@@ -322,7 +322,7 @@ describe('ConfigService', () => {
       expect(result?.env?.OLD_VAR).toBeUndefined();
       // Preserved fields unchanged (CFG-02)
       expect(result?.permissions?.length).toBe(2);
-      expect(result?.hooks?.PreToolUse?.length).toBe(1);
+      expect(result?.hooks?.length).toBe(1);
       expect(result?.mcpServers?.myServer).toBeDefined();
     });
 

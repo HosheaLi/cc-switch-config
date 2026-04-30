@@ -11,6 +11,7 @@
  * - writeProjectConfig: Write config with validation and backup
  * - mergeTemplateWithConfig: Deep merge template with existing config
  * - applyTemplate: Apply template to project (merge + write)
+ * - applyApiConfig: Apply ApiConfig with precise env/model replacement (CFG-02)
  *
  * Dependencies (constructor injected):
  * - readConfig function (from ConfigRepository)
@@ -20,7 +21,9 @@
 import path from 'path';
 import type { ClaudeSettings } from '../types/config.js';
 import type { TemplateConfig } from '../types/provider.js';
+import type { ApiConfig } from '../types/api-config.js';
 import { deepMergeConfig } from '../types/merge.js';
+import { replaceEnvModel } from '../types/replacement.js';
 import { ServiceError } from './types.js';
 import { ValidationError } from '../types/validation.js';
 import { getProjectConfigPath } from '../paths/claude.js';
@@ -149,6 +152,28 @@ export class ConfigService {
    */
   async applyTemplate(projectPath: string, template: TemplateConfig): Promise<void> {
     const merged = await this.mergeTemplateWithConfig(projectPath, template);
+    await this.writeProjectConfig(projectPath, merged);
+  }
+
+  /**
+   * Apply ApiConfig to project configuration.
+   *
+   * Per CFG-02: Precise field replacement - only env/model changed.
+   * Per D-13: Complete replacement of env/model (not merge).
+   * Preserves permissions, hooks, mcpServers.
+   *
+   * @param projectPath - Root path of the project
+   * @param apiConfig - ApiConfig to apply (takes config directly, not name)
+   * @throws ServiceError with code 'CONFIG_WRITE_FAILED' on write failure
+   */
+  async applyApiConfig(projectPath: string, apiConfig: ApiConfig): Promise<void> {
+    // Get existing config (null treated as empty for new configs)
+    const existing = await this.readProjectConfig(projectPath) ?? {};
+
+    // Per CFG-02/D-13: Precise env/model replacement (not deep merge)
+    const merged = replaceEnvModel(existing, apiConfig);
+
+    // Write config (validation and backup handled by writeProjectConfig)
     await this.writeProjectConfig(projectPath, merged);
   }
 
