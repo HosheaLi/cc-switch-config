@@ -2,15 +2,14 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Terminal-Native
-current_phase: 09
-current_plan: Not started
-status: ready_to_plan
-last_updated: "2026-04-30T00:00:00.000Z"
+status: planning
+last_updated: "2026-04-30T05:21:30.221Z"
+last_activity: 2026-04-30 — v2.0 roadmap created, ready to begin Phase 9
 progress:
-  total_phases: 15
-  completed_phases: 8
+  total_phases: 7
+  completed_phases: 0
   total_plans: 0
-  completed_plans: 33
+  completed_plans: 0
   percent: 53
 ---
 
