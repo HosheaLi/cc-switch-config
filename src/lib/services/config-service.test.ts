@@ -281,4 +281,115 @@ describe('ConfigService', () => {
       expect(result?.model).toBe('claude-3');
     });
   });
+
+  describe('applyApiConfig', () => {
+    it('should replace env/model fields, preserving permissions/hooks/mcpServers (CFG-02)', async () => {
+      // Create existing config with preserved fields
+      const existingConfig: ClaudeSettings = {
+        version: 1,
+        model: 'claude-3-old',
+        env: {
+          ANTHROPIC_MODEL: 'claude-3-old',
+          OLD_VAR: 'preserve-me',
+        },
+        permissions: [{ allow: 'Bash' }, { deny: 'Read' }],
+        hooks: [{ match: 'PreToolUse', run: 'some-hook' }],
+        mcpServers: { myServer: { command: 'node', args: ['server.js'] } },
+      };
+      await writeConfig(configPath, existingConfig);
+
+      // ApiConfig to apply (unified mode)
+      const apiConfig = {
+        name: 'test-config',
+        apiKey: 'sk-secret-key-123',
+        baseUrl: 'https://api.anthropic.com',
+        mode: 'unified' as const,
+        modelName: 'claude-4-new',
+      };
+
+      await service.applyApiConfig(tempDir, apiConfig);
+
+      // Verify: env/model replaced, other fields preserved
+      const result = await readConfig(configPath);
+      expect(result).not.toBeNull();
+      // Model replaced
+      expect(result?.model).toBe('claude-4-new');
+      // Env replaced (old env gone, new unified env present)
+      expect(result?.env?.ANTHROPIC_MODEL).toBe('claude-4-new');
+      expect(result?.env?.ANTHROPIC_AUTH_TOKEN).toBe('sk-secret-key-123');
+      expect(result?.env?.ANTHROPIC_BASE_URL).toBe('https://api.anthropic.com');
+      // OLD_VAR should NOT exist (complete replacement per D-13)
+      expect(result?.env?.OLD_VAR).toBeUndefined();
+      // Preserved fields unchanged (CFG-02)
+      expect(result?.permissions?.length).toBe(2);
+      expect(result?.hooks?.PreToolUse?.length).toBe(1);
+      expect(result?.mcpServers?.myServer).toBeDefined();
+    });
+
+    it('should handle empty existing config (create new with env/model)', async () => {
+      // No existing config (file doesn't exist)
+      const apiConfig = {
+        name: 'test-config',
+        apiKey: 'sk-new-key',
+        baseUrl: 'https://api.test.com',
+        mode: 'unified' as const,
+        modelName: 'claude-3-sonnet',
+      };
+
+      await service.applyApiConfig(tempDir, apiConfig);
+
+      const result = await readConfig(configPath);
+      expect(result).not.toBeNull();
+      expect(result?.env?.ANTHROPIC_MODEL).toBe('claude-3-sonnet');
+      expect(result?.env?.ANTHROPIC_AUTH_TOKEN).toBe('sk-new-key');
+      expect(result?.model).toBe('claude-3-sonnet');
+    });
+
+    it('should create backup before applying api config', async () => {
+      // Create initial config
+      const initialConfig: ClaudeSettings = { version: 1, model: 'claude-3' };
+      await writeConfig(configPath, initialConfig);
+
+      const apiConfig = {
+        name: 'test-config',
+        apiKey: 'sk-key',
+        baseUrl: 'https://api.test.com',
+        mode: 'unified' as const,
+        modelName: 'claude-4',
+      };
+
+      await service.applyApiConfig(tempDir, apiConfig);
+
+      // Check backup was created in .claude/.backups
+      const backupDir = path.join(tempDir, '.claude', '.backups');
+      const backupExists = await fs.pathExists(backupDir);
+      expect(backupExists).toBe(true);
+      const backups = await fs.readdir(backupDir);
+      expect(backups.length).toBeGreaterThan(0);
+    });
+
+    it('should throw ServiceError on write failure', async () => {
+      const mockReadConfig = async () => null;
+      const mockWriteConfig = async () => {
+        throw new Error('Disk full');
+      };
+      const mockService = new ConfigService(mockReadConfig, mockWriteConfig);
+
+      const apiConfig = {
+        name: 'test-config',
+        apiKey: 'sk-key',
+        baseUrl: 'https://api.test.com',
+        mode: 'unified' as const,
+        modelName: 'claude-4',
+      };
+
+      try {
+        await mockService.applyApiConfig(tempDir, apiConfig);
+        expect.fail('Should have thrown ServiceError');
+      } catch (error) {
+        expect(error).toBeInstanceOf(ServiceError);
+        expect((error as ServiceError).code).toBe('CONFIG_WRITE_FAILED');
+      }
+    });
+  });
 });
