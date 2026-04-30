@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Terminal-Native
-status: executing
-last_updated: "2026-04-30T13:16:59.871Z"
+status: planning
+last_updated: "2026-04-30T13:52:10.133Z"
 last_activity: 2026-04-30
 progress:
   total_phases: 7
   completed_phases: 1
   total_plans: 6
-  completed_plans: 4
-  percent: 67
+  completed_plans: 5
+  percent: 83
 ---
 
 # Project State
@@ -25,9 +25,9 @@ progress:
 Phase: 11 (config-cli-commands) — EXECUTING
 Plan: 1 of 2
 **Milestone:** v2.0 Terminal-Native
-**Phase:** 11 of 15 (config cli commands)
+**Phase:** 12 of 15 (first run wizard)
 **Plan:** Not started
-**Status:** Executing Phase 11
+**Status:** Ready to plan
 **Last activity:** 2026-04-30
 
 Progress: [████████░░░░░░░░░░░░] 53% (8/15 phases complete)
