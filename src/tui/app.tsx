@@ -154,14 +154,14 @@ export const TuiApp: React.FC<TuiAppProps> = ({
   // Handle scan trigger (F10, D-08)
   const handleTriggerScan = async () => {
     setIsScanning(true);
+    setError(null);
     try {
       const results = await projectService.scanProjects();
       setScanResults(results);
       navigation.push('scan');
     } catch (err) {
-      if (err instanceof Error) {
-        setError(err.message);
-      }
+      const message = err instanceof Error ? err.message : String(err);
+      setError(`Scan failed: ${message}`);
     }
     setIsScanning(false);
   };
@@ -216,6 +216,15 @@ export const TuiApp: React.FC<TuiAppProps> = ({
       return (
         <Box flexDirection="column" justifyContent="center" alignItems="center" padding={2}>
           <LoadingIndicator isLoading={true} message="Loading projects..." />
+        </Box>
+      );
+    }
+
+    // Scanning state — show loading overlay on any screen
+    if (isScanning) {
+      return (
+        <Box flexDirection="column" justifyContent="center" alignItems="center" padding={2}>
+          <LoadingIndicator isLoading={true} message="Scanning for projects..." />
         </Box>
       );
     }

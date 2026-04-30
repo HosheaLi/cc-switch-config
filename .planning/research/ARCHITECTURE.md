@@ -1,539 +1,545 @@
-# Architecture Research
+# Architecture Research: Prompts Integration with Clean Architecture
 
-**Domain:** CLI/TUI Configuration Management Tools
-**Researched:** 2026-04-13
+**Domain:** CLI/TUI Tool Architecture - Prompts Integration
+**Researched:** 2026-04-30
 **Confidence:** HIGH
 
 ## Standard Architecture
 
-### System Overview
-
-CLI/TUI configuration management tools follow a **layered architecture** with clear separation between interface, business logic, and data persistence.
+### System Overview (Current → Target)
 
 ```
-+------------------------------------------------------------------+
-|                        Presentation Layer                          |
-|  +----------------+  +----------------+  +------------------+     |
-|  |  CLI Interface |  |  TUI Components|  |  Interactive UI   |     |
-|  |  (commander)   |  |  (ink/React)   |  |  (prompts, forms)|     |
-|  +-------+--------+  +-------+--------+  +--------+---------+     |
-|          |                  |                    |                |
-+----------|------------------|--------------------|----------------+
-           |                  |                    |
-           v                  v                    v
-+------------------------------------------------------------------+
-|                        Application Layer                          |
-|  +----------------+  +----------------+  +------------------+     |
-|  | State Manager  |  |   Services     |  |   Validators     |     |
-|  | (React hooks)  |  | (config ops)   |  | (json schema)    |     |
-|  +-------+--------+  +-------+--------+  +--------+---------+     |
-|          |                  |                    |                |
-+----------|------------------|--------------------|----------------+
-           |                  |                    |
-           v                  v                    v
-+------------------------------------------------------------------+
-|                          Data Layer                                |
-|  +----------------+  +----------------+  +------------------+     |
-|  | Config Store   |  | Template Store |  |  Project Index   |     |
-|  | (settings.json)|  | (templates.json|  | (projects.json)  |     |
-|  +----------------+  +----------------+  +------------------+     |
-|  +----------------------------------------------------------------+
-|  |                    File System Layer                            |
-|  |  +-------------+  +-------------+  +-------------+              |
-|  |  | JSON Reader |  | JSON Writer |  | File Watcher|              |
-|  |  +-------------+  +-------------+  +-------------+              |
-+--+----------------------------------------------------------------+
+┌─────────────────────────────────────────────────────────────┐
+│                    CLI Layer (Entry Point)                   │
+├─────────────────────────────────────────────────────────────┤
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐    │
+│  │ Commands │  │ Prompts  │  │ Utils    │  │ Output   │    │
+│  │(Commander│  │ Wizards  │  │(launch)  │  │(chalk)   │    │
+│  │   .js)   │  │(prompts) │  │          │  │          │    │
+│  └────┬─────┘  └────┬─────┘  └────┬─────┘  └────┬─────┘    │
+│       │             │             │             │           │
+│       └─────────────┴─────────────┴─────────────┘           │
+│                     ↓ (Service Injection)                   │
+├─────────────────────────────────────────────────────────────┤
+│                   Service Layer (Business Logic)             │
+├─────────────────────────────────────────────────────────────┤
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐    │
+│  │ApiConfig │  │ Project  │  │  Config  │  │  Undo    │    │
+│  │ Service  │  │ Service  │  │ Service  │  │ Service  │    │
+│  │  (NEW)   │  │          │  │          │  │          │    │
+│  └────┬─────┘  └────┬─────┘  └────┬─────┘  └────┬─────┘    │
+│       └─────────────┴─────────────┴─────────────┘           │
+│                     ↓ (Store Injection)                     │
+├─────────────────────────────────────────────────────────────┤
+│                   Store Layer (Persistence)                  │
+├─────────────────────────────────────────────────────────────┤
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐    │
+│  │ApiConfig │  │ Project  │  │ AppState │  │  Config  │    │
+│  │  Store   │  │  Index   │  │          │  │  Files   │    │
+│  │  (NEW)   │  │          │  │(extended)│  │          │    │
+│  └──────────┘  └──────────┘  └──────────┘  └──────────┘    │
+└─────────────────────────────────────────────────────────────┘
+
+M4 Boundary: Prompts ONLY in CLI layer, NOT in lib/services
 ```
 
 ### Component Responsibilities
 
-| Component | Responsibility | Typical Implementation |
-|-----------|----------------|------------------------|
-| **CLI Interface** | Parse commands, flags, arguments | commander, yargs, oclif |
-| **TUI Components** | Interactive UI, forms, lists, tables | ink (React), blessed, @inquirer/prompts |
-| **State Manager** | Centralized state, reactive updates | React hooks (useState/useReducer), zustand |
-| **Services** | Business logic, config operations | Plain TypeScript modules |
-| **Validators** | Schema validation, type checking | zod, jsonschema, ajv |
-| **Config Store** | Persist settings, templates, projects | JSON files in XDG config dir |
-| **Template Store** | Provider presets, reusable configs | JSON files, embedded defaults |
-| **Project Index** | Track managed projects, their configs | JSON file with project paths |
-| **File System** | Read/write/watch config files | node:fs, chokidar, fs-extra |
+| Component | Responsibility | Implementation |
+|-----------|----------------|----------------|
+| **CLI Commands** | CLI argument parsing, command routing | Commander.js program with register*Command functions |
+| **Prompts Wizards** | Interactive flows, user input collection | prompts library with select/multiselect/autocomplete |
+| **CLI Utils** | Launch helpers, shared utilities | promptsLaunch(), selectProject(), selectApiConfig() |
+| **ApiConfigService** | API config CRUD, config application | Constructor DI with ApiConfigStore, read/writeConfig |
+| **ApiConfigStore** | API config persistence | XDG data storage, CRUD operations, schema validation |
+| **AppState (extended)** | Wizard state, first run flag | conf package, firstRunCompleted field |
+
+## Integration Points
+
+### New Components
+
+| Component | Location | Purpose | Dependencies |
+|-----------|----------|---------|--------------|
+| **src/cli/prompts//** | CLI layer | Prompts-based wizards (M4 safe) | prompts library, kleur for theme |
+| **ApiConfigStore** | lib/store/ | Replace TemplateStore, simpler 三元组 | lib/types/api-config.ts |
+| **ApiConfigService** | lib/services/ | Replace TemplateService | ApiConfigStore, read/writeConfig |
+| **config command** | cli/commands/ | CLI-01: add/list/remove API configs | ApiConfigService |
+
+### Modified Components
+
+| Component | Change | Impact |
+|-----------|--------|--------|
+| **tui-launch.ts** | Rename → interactive-launch.ts, use prompts | Entry point for no-args CLI |
+| **AppState** | Add firstRunCompleted field | ONB-02: first-time wizard detection |
+| **services barrel** | Replace TemplateService with ApiConfigService | All imports update |
+| **lib/types/** | Remove complex TemplateConfig, add simple ApiConfig | CFG-01: 三元组 simplification |
+
+### Removed Components
+
+| Component | Reason | Migration Path |
+|-----------|--------|----------------|
+| **src/tui/** (Ink) | TUI-02: Remove React TUI layer | Replace with prompts wizards |
+| **TemplateService** | CFG-01: Simplified to ApiConfigService | ApiConfigService.create/update/delete |
+| **TemplateStore** | CFG-01: Simplified to ApiConfigStore | ApiConfigStore (三元组 storage) |
+| **TemplateConfig type** | CFG-01: Complex config removed | ApiConfig (name + apiKey + baseUrl + modelName) |
 
 ## Recommended Project Structure
 
 ```
 src/
-+-- cli/                    # CLI entry point and command routing
-|   +-- index.ts            # Main entry, program setup
-|   +-- commands/           # Command handlers
-|   |   +-- list.ts         # List projects command
-|   |   +-- add.ts          # Add project command
-|   |   +-- switch.ts       # Switch config command
-|   |   +-- template.ts     # Template management commands
-|   |   +-- config.ts       # Config preview/edit commands
-|   +-- middlewares/        # CLI middleware (validation, logging)
-|
-+-- tui/                    # TUI components (ink/React)
-|   +-- App.tsx             # Main app component
-|   +-- screens/            # Screen-level components
-|   |   +-- ProjectList.tsx # Project list screen
-|   |   +-- ProjectDetail.tsx# Project detail screen
-|   |   +-- TemplateList.tsx # Template management screen
-|   |   +-- ConfigEditor.tsx # Config editor screen
-|   +-- components/         # Reusable UI components
-|   |   +-- Select.tsx      # Dropdown select
-|   |   +-- Input.tsx       # Text input
-|   |   +-- Table.tsx       # Table display
-|   |   +-- StatusBadge.tsx # Status indicator
-|   |   +-- JsonPreview.tsx # JSON previewer
-|   +-- hooks/              # TUI-specific hooks
-|   |   +-- useNavigation.ts# Navigation state
-|   |   +-- useKeyInput.ts  # Keyboard handling
-|
-+-- services/               # Business logic layer
-|   +-- config/             # Configuration services
-|   |   +-- reader.ts       # Read config files
-|   |   +-- writer.ts       # Write config files
-|   |   +-- merger.ts       # Merge config layers
-|   |   +-- validator.ts    # Validate config schema
-|   +-- project/            # Project management
-|   |   +-- scanner.ts      # Scan for projects
-|   |   +-- index.ts        # Project index CRUD
-|   |   +-- detector.ts     # Detect project type
-|   +-- template/           # Template management
-|   |   +-- store.ts        # Template CRUD
-|   |   +-- apply.ts        # Apply template to project
-|   +-- provider/           # API provider logic
-|   |   +-- test.ts         # Test API connectivity
-|   |   +-- defaults.ts     # Built-in provider presets
-|
-+-- store/                  # State management
-|   +-- index.ts            # Central store
-|   +-- slices/             # State slices
-|   |   +-- projects.ts     # Projects state
-|   |   +-- templates.ts    # Templates state
-|   |   +-- settings.ts     # App settings
-|   +-- middleware/          # Store middleware
-|   |   +-- persistence.ts  # Auto-save to disk
-|
-+-- lib/                    # Core utilities
-|   +-- file-system/        # File operations
-|   |   +-- json.ts         # JSON read/write with comments
-|   |   +-- watcher.ts      # File watching
-|   |   +-- backup.ts       # Backup/restore
-|   +-- validation/         # Validation utilities
-|   |   +-- schema.ts        # JSON schemas
-|   |   +-- types.ts         # TypeScript types
-|   +-- paths/              # Path resolution
-|   |   +-- xdg.ts          # XDG base directory
-|   |   +-- claude.ts       # Claude Code paths
-|
-+-- types/                  # TypeScript definitions
-|   +-- config.ts           # Config types
-|   +-- project.ts          # Project types
-|   +-- template.ts         # Template types
-|   +-- provider.ts         # Provider types
-|
-+-- constants/              # Constants and defaults
-|   +-- providers.ts        # Built-in provider templates
-|   +-- schema.ts           # Default config schema
-|
-+-- index.ts                # Package exports
+├── cli/                        # CLI Layer (Entry Point)
+│   ├── prompts/                # NEW: Prompts-based wizards (M4 safe)
+│   │   ├── wizards/            # Multi-step wizard flows
+│   │   │   ├── first-run.ts    # ONB-01: First-time onboarding
+│   │   │   ├── switch-flow.ts  # Project + API config selection
+│   │   │   └── config-wizard.ts # CLI-01: Add/list/remove configs
+│   │   ├── components/         # Reusable prompt wrappers
+│   │   │   ├── select-project.ts    # Project selection prompt
+│   │   │   ├── select-api-config.ts # API config selection prompt
+│   │   │   └── confirm-action.ts    # Confirmation prompt
+│   │   ├── theme/              # UI-01: OpenCode Terminal Aesthetic
+│   │   │   ├── colors.ts       # Warm palette (#201d1d/#fdfcfc)
+│   │   │   ├── styles.ts       # Monospace, semantic colors
+│   │   │   └── onRender.ts     # kleur styling helpers
+│   │   └── index.ts            # Barrel export for prompts
+│   ├── commands/               # Commander.js command registrations
+│   │   ├── config.ts           # NEW: CLI-01 config command
+│   │   ├── switch.ts           # Modified: use prompts wizard
+│   │   └── [existing commands] # Other Phase 05/07/08 commands
+│   ├── utils/                  # CLI utilities
+│   │   ├── interactive-launch.ts # Modified: launch prompts wizards
+│   │   ├── [existing utils]    # diff, auto-switch, etc.
+│   ├── output/                 # Output formatting
+│   │   └── [existing]          # table, error, chalk styling
+│   └── index.ts                # CLI entry point
+│
+├── lib/                        # Library Layer (Business Logic + Data)
+│   ├── services/               # Service Layer (Business Logic)
+│   │   ├── api-config-service.ts # NEW: Replace TemplateService
+│   │   ├── project-service.ts  # Existing: Project management
+│   │   ├── config-service.ts   # Existing: Config read/write
+│   │   ├── undo-service.ts     # Existing: Undo operations
+│   │   ├── [existing]          # provider, export services
+│   │   └ index.ts              # Modified: ApiConfigService export
+│   │
+│   ├── store/                  # Store Layer (Persistence)
+│   │   ├── api-config-store.ts # NEW: Replace TemplateStore
+│   │   ├── project.ts          # Existing: ProjectIndex
+│   │   ├── state.ts            # Modified: AppState + firstRunCompleted
+│   │   ├── config.ts           # Existing: Config read/write
+│   │   └ index.ts              # Modified: ApiConfigStore export
+│   │
+│   ├── types/                  # Type definitions
+│   │   ├── api-config.ts       # NEW: 三元组 (name + apiKey + baseUrl + modelName)
+│   │   ├── [existing]          # config, export-schema, validation
+│   │   └ index.ts              # Modified: ApiConfig type export
+│   │
+│   ├── file-system/            # File utilities
+│   │   └── [existing]          # json, backup utilities
+│   ├── paths/                  # Path resolution
+│   │   └── [existing]          # xdg, claude paths
+│   └── index.ts                # Library barrel
+│
+└── tui/                        # DELETED: Remove Ink React TUI (TUI-02)
+    └ [Delete entire folder]
 ```
 
 ### Structure Rationale
 
-- **cli/**: Separate from TUI allows non-interactive usage and clear command routing
-- **tui/**: Ink components organized by screens (routes) and reusable components
-- **services/**: Core business logic independent of UI, easily testable
-- **store/**: Centralized state for reactive UI updates
-- **lib/**: Low-level utilities with no business logic dependencies
-- **types/**: Shared TypeScript definitions, single source of truth
+- **cli/prompts/:** NEW folder for prompts-based wizards. All UI code in CLI layer (M4 boundary respected)
+- **cli/prompts/wizards/:** Multi-step flows for first-run, switch, config management
+- **cli/prompts/components/:** Reusable prompt wrappers for consistent UX
+- **cli/prompts/theme/:** OpenCode Terminal Aesthetic styling (UI-01/02)
+- **lib/services/api-config-service.ts:** NEW service replacing TemplateService (simplified logic)
+- **lib/store/api-config-store.ts:** NEW store replacing TemplateStore (三元组 storage)
+- **lib/types/api-config.ts:** NEW type for simplified configuration (CFG-01)
+- **lib/store/state.ts:** MODIFIED to add firstRunCompleted field (ONB-02)
+- **tui/:** DELETE entire Ink React TUI layer (TUI-02)
 
 ## Architectural Patterns
 
-### Pattern 1: Repository Pattern for Config Access
+### Pattern 1: Constructor Injection (D-01)
 
-**What:** Abstract file system operations behind a repository interface
-**When to use:** When you need to swap storage backends or simplify testing
-**Trade-offs:** Slight indirection, but enables easy mocking and future migrations
-
-**Example:**
-```typescript
-// lib/file-system/json.ts
-interface ConfigRepository {
-  read(path: string): Promise<Config>;
-  write(path: string, config: Config): Promise<void>;
-  exists(path: string): Promise<boolean>;
-  backup(path: string): Promise<string>;
-}
-
-class JsonConfigRepository implements ConfigRepository {
-  async read(path: string): Promise<Config> {
-    const content = await fs.readFile(path, 'utf-8');
-    return JSON.parse(stripJsonComments(content));
-  }
-
-  async write(path: string, config: Config): Promise<void> {
-    await fs.mkdir(dirname(path), { recursive: true });
-    await fs.writeFile(path, JSON.stringify(config, null, 2));
-  }
-}
-```
-
-### Pattern 2: Service Layer for Business Logic
-
-**What:** Encapsulate all business logic in service modules, keep components thin
-**When to use:** Always - ensures logic is testable and UI-agnostic
-**Trade-offs:** More files, but cleaner separation and easier testing
+**What:** Services receive dependencies via constructor, enabling testability and flexibility.
+**When to use:** All service instantiation (existing pattern, maintain for new services).
+**Trade-offs:** More verbose than direct imports, but enables mocking in tests.
 
 **Example:**
 ```typescript
-// services/project/index.ts
-class ProjectService {
+// api-config-service.ts
+export class ApiConfigService {
   constructor(
-    private configRepo: ConfigRepository,
-    private projectIndex: ProjectIndex
+    private apiConfigStore: ApiConfigStore,
+    private readConfigFn: (filepath: string) => Promise<ClaudeSettings | null>,
+    private writeConfigFn: (filepath: string, config: ClaudeSettings) => Promise<void>
   ) {}
 
-  async addProject(path: string): Promise<Project> {
-    const configPath = join(path, '.claude', 'settings.json');
-    const existing = await this.configRepo.exists(configPath);
-
-    if (existing) {
-      const config = await this.configRepo.read(configPath);
-      // Validate and index the project
-    }
-
-    return this.projectIndex.add({ path, configPath, status: 'active' });
-  }
-
-  async applyTemplate(project: Project, template: Template): Promise<void> {
-    const config = await this.configRepo.read(project.configPath);
-    const merged = this.mergeConfig(config, template.config);
-    await this.configRepo.backup(project.configPath);
-    await this.configRepo.write(project.configPath, merged);
+  async applyConfig(projectPath: string, configName: string): Promise<void> {
+    const config = await this.apiConfigStore.get(configName);
+    if (!config) throw new ServiceError('Config not found', 'CONFIG_NOT_FOUND');
+    // ... precise field replacement (CFG-02)
   }
 }
 ```
 
-### Pattern 3: React Hooks for TUI State
+### Pattern 2: Prompts Wizard Flow
 
-**What:** Use custom hooks to encapsulate stateful logic, share across components
-**When to use:** For any stateful operation (navigation, forms, async data)
-**Trade-offs:** Learning curve for React patterns, but excellent composability
+**What:** Multi-step wizard using sequential prompts with state accumulation.
+**When to use:** First-time onboarding (ONB-01), switch flow, config management (CLI-01).
+**Trade-offs:** More complex than single prompts, but provides guided UX for complex flows.
 
 **Example:**
 ```typescript
-// tui/hooks/useProjects.ts
-function useProjects() {
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
+// first-run.ts
+export async function runFirstRunWizard(): Promise<FirstRunResult> {
+  // Step 1: API Configuration
+  const apiConfig = await prompts([
+    { type: 'text', name: 'name', message: 'Configuration name:' },
+    { type: 'text', name: 'apiKey', message: 'API Key:' },
+    { type: 'text', name: 'baseUrl', message: 'Base URL:', initial: 'https://api.anthropic.com' },
+    { type: 'text', name: 'modelName', message: 'Model name:', initial: 'claude-3-5-sonnet-20241022' }
+  ]);
 
-  useEffect(() => {
-    projectService.listAll()
-      .then(setProjects)
-      .catch(setError)
-      .finally(() => setLoading(false));
-  }, []);
+  // Step 2: Directory Selection
+  const scanDirs = await prompts({
+    type: 'list',
+    name: 'directories',
+    message: 'Directories to scan (comma-separated):',
+    separator: ','
+  });
 
-  const refresh = useCallback(() => {
-    setLoading(true);
-    projectService.listAll()
-      .then(setProjects)
-      .catch(setError)
-      .finally(() => setLoading(false));
-  }, []);
+  // Step 3: Execute Scan
+  const scanResults = await projectService.scanProjects(scanDirs.directories);
 
-  return { projects, loading, error, refresh };
-}
+  // Step 4: Select Projects to Register
+  const selectedProjects = await prompts({
+    type: 'multiselect',
+    name: 'projects',
+    message: 'Select projects to register:',
+    choices: scanResults.map(r => ({ title: r.path, value: r.path }))
+  });
 
-// tui/screens/ProjectList.tsx
-function ProjectList() {
-  const { projects, loading, error } = useProjects();
-
-  if (loading) return <Text>Loading...</Text>;
-  if (error) return <Text color="red">{error.message}</Text>;
-
-  return (
-    <Box flexDirection="column">
-      {projects.map(p => (
-        <ProjectRow key={p.path} project={p} />
-      ))}
-    </Box>
-  );
+  return { apiConfig, scanDirs, selectedProjects };
 }
 ```
 
-### Pattern 4: Configuration Layering (Precedence Chain)
+### Pattern 3: Theme Injection via onRender
 
-**What:** Support multiple config sources with clear precedence
-**When to use:** When users need flexibility in how they configure
-**Trade-offs:** More complexity in resolution logic, but matches user expectations
-
-**Precedence Order (highest to lowest):**
-1. CLI flags (immediate override)
-2. Environment variables (session-level)
-3. Local config (`settings.local.json` - not in git)
-4. Project config (`settings.json` - in git)
-5. User config (`~/.claude/settings.json` - global)
-6. Default values (built-in)
+**What:** Dynamic styling injection using prompts onRender(kleur) callback.
+**When to use:** All prompt rendering (UI-01: OpenCode Terminal Aesthetic).
+**Trade-offs:** Slightly more complex, but enables consistent branding across all prompts.
 
 **Example:**
 ```typescript
-// services/config/merger.ts
-function resolveConfig(projectPath: string, options: CliOptions): ResolvedConfig {
-  const defaults = loadDefaults();
-  const userConfig = loadUserConfig();
-  const projectConfig = loadProjectConfig(projectPath);
-  const localConfig = loadLocalConfig(projectPath);
-  const envConfig = loadFromEnv();
-  const cliConfig = parseCliOptions(options);
+// theme/onRender.ts
+import kleur from 'kleur';
 
-  return {
-    ...defaults,
-    ...userConfig,
-    ...projectConfig,
-    ...localConfig,
-    ...envConfig,
-    ...cliConfig
-  };
+export const openCodeTheme = {
+  primary: '#201d1d',  // Warm dark background
+  secondary: '#fdfcfc', // Warm light foreground
+  accent: '#ff6b6b',   // Apple HIG Red
+  success: '#4caf50',  // Apple HIG Green
+  warning: '#ff9800',  // Apple HIG Orange
+};
+
+export function styleMessage(msg: string, type: 'default' | 'success' | 'warning' = 'default') {
+  const k = kleur;
+  switch (type) {
+    case 'success': return k.green(msg);
+    case 'warning': return k.orange(msg);
+    default: return k.cyan(msg);
+  }
 }
+
+// Usage in prompt
+{
+  type: 'select',
+  message: 'Select a project',
+  onRender(kleur) {
+    this.msg = styleMessage(this.msg, 'default');
+  }
+}
+```
+
+### Pattern 4: Barrel Exports (D-01)
+
+**What:** Single entry point per layer for clean imports and dependency management.
+**When to use:** All layers (existing pattern, extend for new components).
+**Trade-offs:** Requires maintaining barrel files, but enables clean imports.
+
+**Example:**
+```typescript
+// cli/prompts/index.ts
+export { runFirstRunWizard } from './wizards/first-run.js';
+export { runSwitchFlow } from './wizards/switch-flow.js';
+export { selectProject } from './components/select-project.js';
+export { selectApiConfig } from './components/select-api-config.js';
+
+// Usage in cli/commands/switch.ts
+import { runSwitchFlow } from '../prompts/index.js';
 ```
 
 ## Data Flow
 
-### Request Flow (Config Switch)
+### Request Flow (First-Time Wizard)
 
 ```
-User Input (select provider)
-    |
-    v
-+----------------+
-| TUI Component  |  <- User clicks "Apply"
-+-------+--------+
-        |
-        v
-+----------------+
-| useAction Hook |  <- Hook handles async operation
-+-------+--------+
-        |
-        v
-+----------------+
-| ProjectService |  <- Business logic
-+-------+--------+
-        |
-        v
-+----------------+
-| ConfigRepository| <- Read current config
-+-------+--------+
-        |
-        v
-+----------------+
-| ConfigMerger   |  <- Merge template with current
-+-------+--------+
-        |
-        v
-+----------------+
-| ConfigRepository| <- Write new config (with backup)
-+-------+--------+
-        |
-        v
-+----------------+
-| File System    |  <- Atomic write to disk
-+----------------+
-        |
-        v
-    TUI Update (success message)
+User runs CLI (no args)
+    ↓
+interactiveLaunch() checks AppState.firstRunCompleted
+    ↓ (false)
+runFirstRunWizard() [cli/prompts/wizards/first-run.ts]
+    ↓
+Step 1: prompts (API config input) → ApiConfigStore.set()
+    ↓
+Step 2: prompts (directory selection) → AppState.set('scanDirectories')
+    ↓
+Step 3: ProjectService.scanProjects() → ScanResult[]
+    ↓
+Step 4: prompts (multiselect) → ProjectService.registerProject() for each
+    ↓
+AppState.set('firstRunCompleted', true)
+    ↓
+Return to main menu
 ```
 
-### State Management Flow
+### Request Flow (Switch Wizard)
 
 ```
-+------------------+
-|   User Action    |
-+--------+---------+
-         |
-         v
-+------------------+     +------------------+
-|   Action Hook    |---->|  Service Layer   |
-+--------+---------+     +--------+---------+
-         |                        |
-         v                        v
-+------------------+     +------------------+
-|   Local State    |     |   File System    |
-|   (useState)     |     |   (persist)      |
-+--------+---------+     +------------------+
-         |
-         v
-+------------------+
-|  UI Re-render    |
-+------------------+
+User runs 'cc-config switch' (no arg)
+    ↓
+switchCommand checks for argument
+    ↓ (no arg)
+runSwitchFlow() [cli/prompts/wizards/switch-flow.ts]
+    ↓
+Step 1: selectProject() [cli/prompts/components/select-project.ts]
+    ↓
+ProjectService.listProjects() → ProjectEntry[]
+    ↓
+prompts({ type: 'select', choices: projects })
+    ↓
+Step 2: selectApiConfig() [cli/prompts/components/select-api-config.ts]
+    ↓
+ApiConfigService.listConfigs() → ApiConfig[]
+    ↓
+prompts({ type: 'select', choices: configs })
+    ↓
+Step 3: confirmApply() [cli/prompts/components/confirm-action.ts]
+    ↓
+prompts({ type: 'confirm', message: 'Apply this config?' })
+    ↓
+ApiConfigService.applyConfig(projectPath, configName)
+    ↓
+ConfigService.writeConfig() (precise field replacement CFG-02)
+    ↓
+UndoService.createBackup()
+    ↓
+Success message → Return
+```
+
+### State Management
+
+```
+AppState (conf package)
+    ↓ (subscribe via get/set)
+┌─────────────────────────────────────────┐
+│ AppStateData                             │
+├─────────────────────────────────────────┤
+│ - activeProjectId: string | null         │
+│ - lastUsedConfig: string | null (NEW)    │
+│ - firstRunCompleted: boolean (NEW)       │
+│ - uiPreferences: { theme, showPreview }  │
+│ - recentProjects: string[]               │
+│ - scanDirectories: string[]              │
+└─────────────────────────────────────────┘
+    ↓ (read on launch)
+interactiveLaunch() → determines wizard flow
+    ↓ (write after wizard)
+AppState.set('firstRunCompleted', true)
 ```
 
 ### Key Data Flows
 
-1. **Project Discovery Flow:**
-   - Scan directory → Detect `.claude/` → Read `settings.json` → Index project → Display in list
+1. **First-time wizard:** User → prompts (4 steps) → ApiConfigStore + ProjectService + AppState → Persist
+2. **Switch wizard:** User → prompts (select project → select config → confirm) → ApiConfigService.applyConfig → Config write + Undo backup
+3. **Config management:** User → config command (add/list/remove) → ApiConfigService CRUD → ApiConfigStore persistence
+4. **Project registration:** Scan → prompts (multiselect) → ProjectService.registerProject() → ProjectIndex persistence
 
-2. **Template Application Flow:**
-   - Select template → Read project config → Merge template values → Backup original → Write new config → Verify success
+## M4 Boundary Verification
 
-3. **Config Validation Flow:**
-   - Read config → Validate against schema → Check API connectivity → Report errors/warnings → Allow save with warnings
+### Boundary Rules (Strict)
 
-4. **Settings Synchronization Flow:**
-   - File watcher detects change → Reload config → Validate → Update state → Re-render affected components
+| Rule | Verification | Consequence |
+|------|--------------|-------------|
+| **Prompts ONLY in CLI layer** | Check imports: lib/services must NOT import prompts | If violated: move to cli/prompts/ |
+| **Services do NOT import UI libraries** | Check imports: lib/services must NOT import ink, prompts, chalk | If violated: refactor to pure business logic |
+| **Stores do NOT import UI libraries** | Check imports: lib/store must NOT import ink, prompts, chalk | If violated: refactor to pure persistence |
+| **Wizard flows in CLI layer** | All wizard code in cli/prompts/wizards/ | Enables Clean Architecture separation |
 
-## Integration Points
+### Verification Example
 
-### External Services
-
-| Service | Integration Pattern | Notes |
-|---------|---------------------|-------|
-| Claude Code | File system only | Read/write `.claude/settings.json` |
-| API Providers | HTTP connectivity test | Verify API key and endpoint work |
-| Git | File system detection | Detect if project uses git for warnings |
-
-### Internal Boundaries
-
-| Boundary | Communication | Notes |
-|----------|---------------|-------|
-| CLI → TUI | Function call, shared state | CLI flags can pre-select TUI state |
-| TUI → Services | Direct function call | Services are stateless, pass all data |
-| Services → Store | Return data, don't modify | Store handles persistence |
-| Services → File System | Repository pattern | Abstract for testability |
-
-## Build Order Implications
-
-Based on dependencies between components, recommended build sequence:
-
-### Phase 1: Foundation (No Dependencies)
-1. **types/** - Define all TypeScript interfaces first
-2. **constants/** - Provider defaults, schemas
-3. **lib/paths/** - Path resolution utilities
-
-### Phase 2: Data Layer (Depends on Foundation)
-4. **lib/file-system/** - JSON read/write, backup
-5. **lib/validation/** - Schema validation
-6. **store/** - State management setup
-
-### Phase 3: Services (Depends on Data)
-7. **services/config/** - Config read/write/merge
-8. **services/project/** - Project indexing
-9. **services/template/** - Template management
-10. **services/provider/** - API testing
-
-### Phase 4: Interface Layer (Depends on Services)
-11. **tui/components/** - Reusable UI components
-12. **tui/hooks/** - Custom hooks
-13. **tui/screens/** - Screen components
-14. **tui/App.tsx** - Main app composition
-
-### Phase 5: CLI Entry (Depends on Everything)
-15. **cli/commands/** - Command handlers
-16. **cli/index.ts** - Entry point
-
-### Dependency Graph
-```
-types, constants, paths
-        |
-        v
-file-system, validation
-        |
-        v
-     store
-        |
-        v
-services (config, project, template, provider)
-        |
-        v
-tui (components, hooks, screens)
-        |
-        v
-    cli/commands
-        |
-        v
-    cli/index (entry)
-```
-
-## Anti-Patterns
-
-### Anti-Pattern 1: Mixing UI and Business Logic in Components
-
-**What people do:** Put file I/O and business logic directly in React components
-**Why it's wrong:** Untestable, hard to modify, business logic changes require UI changes
-**Do this instead:**
 ```typescript
-// BAD: Business logic in component
-function ProjectList() {
-  const [projects, setProjects] = useState([]);
-  useEffect(() => {
-    fs.readFile('projects.json').then(data => setProjects(JSON.parse(data)));
-  }, []);
-}
+// CORRECT: Service layer (lib/services/api-config-service.ts)
+import { ApiConfigStore } from '../store/api-config-store.js';
+import { readConfig, writeConfig } from '../store/config.js';
+// NO prompts imports here ✓
 
-// GOOD: Business logic in service, component is thin
-function ProjectList() {
-  const { projects } = useProjects(); // Hook calls service
-}
+// CORRECT: CLI layer (cli/prompts/wizards/switch-flow.ts)
+import prompts from 'prompts';
+import { ApiConfigService } from '../../lib/services/index.js';
+// Prompts in CLI layer ✓
 
-// services/project/index.ts
-export async function listProjects(): Promise<Project[]> {
-  const data = await fs.readFile('projects.json', 'utf-8');
-  return JSON.parse(data);
-}
+// INCORRECT: Would violate M4
+// lib/services/api-config-service.ts importing prompts ✗
 ```
 
-### Anti-Pattern 2: Direct File Access Throughout Codebase
+### Component Classification (M4 Compliance)
 
-**What people do:** Call `fs.readFile` directly in multiple places
-**Why it's wrong:** Hard to mock in tests, changes to file format require multiple edits
-**Do this instead:** Use repository pattern with single point of file access
-
-### Anti-Pattern 3: Storing Sensitive Data in Project Config
-
-**What people do:** Put API tokens in `settings.json` (committed to git)
-**Why it's wrong:** Tokens leak to git history, visible to anyone with repo access
-**Do this instead:** Always use `settings.local.json` for tokens, add to `.gitignore`
-
-### Anti-Pattern 4: Monolithic State Object
-
-**What people do:** Single large state object for all app data
-**Why it's wrong:** Re-renders entire app on any change, hard to reason about updates
-**Do this instead:** Split state by domain (projects, templates, settings)
-
-### Anti-Pattern 5: Ignoring Claude Code's Config Precedence
-
-**What people do:** Write config without respecting Claude Code's layering
-**Why it's wrong:** Config won't work correctly when combined with other sources
-**Do this instead:** Follow Claude Code's precedence: user < project < local
+| Component | Layer | M4 Status | Notes |
+|-----------|-------|-----------|-------|
+| **cli/prompts/** | CLI | ✓ SAFE | Prompts allowed in CLI layer |
+| **cli/commands/** | CLI | ✓ SAFE | Commands can use prompts wizards |
+| **lib/services/api-config-service.ts** | Service | ✓ SAFE | Pure business logic, no UI |
+| **lib/store/api-config-store.ts** | Store | ✓ SAFE | Pure persistence, no UI |
+| **lib/types/api-config.ts** | Types | ✓ SAFE | Type definitions, no code |
+| **lib/store/state.ts** | Store | ✓ SAFE | AppState extension, no UI |
 
 ## Scaling Considerations
 
 | Scale | Architecture Adjustments |
 |-------|--------------------------|
-| 1-10 projects | Simple in-memory store, file-based persistence sufficient |
-| 10-100 projects | Add project indexing, lazy loading of configs |
-| 100+ projects | Consider SQLite for project index, caching layer |
+| **1-10 projects** | Current architecture optimal (single prompts wizard, no caching needed) |
+| **10-100 projects** | Add in-memory caching for ApiConfigStore, ProjectIndex (lazy load) |
+| **100+ projects** | Add pagination for project list prompts, search optimization |
 
 ### Scaling Priorities
 
-1. **First bottleneck:** Config file I/O becomes slow with many projects
-   - Solution: Implement lazy loading, cache resolved configs in memory
+1. **First bottleneck:** Project list grows > 50 → Add autocomplete prompts with fuzzy search (existing fuzzy search logic migrate to prompts)
+2. **Second bottleneck:** Config files grow > 20 → Add config grouping/categories, pagination in prompts
 
-2. **Second bottleneck:** TUI re-renders on every keystroke
-   - Solution: Debounce inputs, memoize components, virtualize long lists
+**Note:** CLI/TUI tools rarely need scaling beyond 100s of items. Premature optimization NOT recommended.
+
+## Anti-Patterns
+
+### Anti-Pattern 1: Prompts in Service Layer
+
+**What people do:** Import prompts directly in service files for convenience.
+**Why it's wrong:** Violates M4 boundary, mixes UI with business logic, prevents testing without UI.
+**Do this instead:** Keep prompts in cli/prompts/, services call services with data, prompts call services.
+
+**Example:**
+```typescript
+// WRONG: lib/services/api-config-service.ts
+import prompts from 'prompts'; // ✗ M4 violation
+export class ApiConfigService {
+  async promptForConfig() { ... } // ✗ UI in service
+}
+
+// RIGHT: cli/prompts/wizards/config-wizard.ts
+import prompts from 'prompts'; // ✓ CLI layer
+import { ApiConfigService } from '../../lib/services/index.js';
+
+export async function runConfigWizard() {
+  const input = await prompts([...]);
+  await apiConfigService.createConfig(input);
+}
+```
+
+### Anti-Pattern 2: Giant Monolithic Wizard
+
+**What people do:** One giant wizard function handling all flows in a single file.
+**Why it's wrong:** Hard to test, hard to reuse, hard to maintain, violates single responsibility.
+**Do this instead:** Break into components (select-project, select-config, confirm-action) and compose wizards.
+
+**Example:**
+```typescript
+// WRONG: cli/prompts/wizards/all-in-one.ts
+export async function runGiantWizard() {
+  // 100+ lines mixing project selection, config selection, scan, register, etc.
+}
+
+// RIGHT: cli/prompts/components/select-project.ts + switch-flow.ts
+export async function selectProject(projects: ProjectEntry[]) {
+  return await prompts({ type: 'select', choices: projects });
+}
+
+export async function runSwitchFlow() {
+  const project = await selectProject(projects);
+  const config = await selectApiConfig(configs);
+  await confirmAndApply(project, config);
+}
+```
+
+### Anti-Pattern 3: Over-Complex Type Definitions
+
+**What people do:** Keep complex nested types (TemplateConfig with provider, tags, timestamps, description).
+**Why it's wrong:** CFG-01 goal is simplification, complex types increase maintenance burden, user confusion.
+**Do this instead:** Use simple 三元组 (name + apiKey + baseUrl + modelName), remove nested structures.
+
+**Example:**
+```typescript
+// WRONG: lib/types/provider.ts (keeping complex)
+export const TemplateConfigSchema = z.object({
+  name: z.string(),
+  description: z.string().optional(),
+  provider: ApiProviderConfigSchema, // nested
+  tags: z.array(z.string()).optional(),
+  createdAt: z.string().datetime().optional(),
+  updatedAt: z.string().datetime().optional(),
+}).strict();
+
+// RIGHT: lib/types/api-config.ts (simple 三元组)
+export const ApiConfigSchema = z.object({
+  name: z.string().min(1, 'Config name required'),
+  apiKey: z.string().min(1, 'API key required'),
+  baseUrl: z.string().url('Valid URL required'),
+  modelName: z.string().min(1, 'Model name required'),
+}).strict();
+
+export type ApiConfig = z.infer<typeof ApiConfigSchema>;
+```
+
+## Integration Points
+
+### External Dependencies
+
+| Library | Integration Pattern | Notes |
+|---------|---------------------|-------|
+| **prompts** | npm install prompts, import in CLI layer | M4: Only import in cli/prompts/ |
+| **kleur** | npm install kleur, use in onRender | UI-01: Theme injection for OpenCode aesthetic |
+| **Commander.js** | Existing, extend with config command | CLI-01: Add registerConfigCommand |
+| **conf** | Existing, extend AppState schema | ONB-02: Add firstRunCompleted field |
+
+### Internal Boundaries
+
+| Boundary | Communication | Notes |
+|----------|---------------|-------|
+| **CLI ↔ Service** | Service injection via constructor | ApiConfigService injected into prompts wizards |
+| **Service ↔ Store** | Store injection via constructor | ApiConfigStore injected into ApiConfigService |
+| **Service ↔ Config Files** | readConfig/writeConfig functions | CFG-02: Precise field replacement |
+| **AppState ↔ Wizard** | AppState.get/set for state checks | firstRunCompleted determines wizard flow |
+
+### Migration Path (Template → ApiConfig)
+
+| Old Component | New Component | Migration Action |
+|---------------|---------------|------------------|
+| **TemplateStore** | ApiConfigStore | Rename file, simplify schema to 三元组 |
+| **TemplateService** | ApiConfigService | Rename file, simplify methods (create/update/delete/list/apply) |
+| **TemplateConfig type** | ApiConfig type | Replace in lib/types/, update all imports |
+| **template command** | config command | Rename command, adjust to ApiConfigService |
+| **src/tui/ screens** | cli/prompts/ wizards | Delete Ink screens, create prompts wizards |
 
 ## Sources
 
-- [cc-switch Repository](https://github.com/farion1231/cc-switch) - Reference implementation (HIGH confidence, analyzed directly)
-- [Ink - React for CLI](https://github.com/vadimdemedes/ink) - TUI framework (HIGH confidence, official docs)
-- [Ink UI Components](https://github.com/sindresorhus/ink-ui) - Interactive components (HIGH confidence)
-- [CLI Architecture Patterns](https://12factor.net/) - Configuration methodology (HIGH confidence)
-- [JSON Config Best Practices](https://www.npmjs.com/package/cosmiconfig) - Config loading patterns (MEDIUM confidence, npm docs)
+- Context7 prompts documentation: /terkelg/prompts (list selection, autocomplete, onRender, onSubmit, onCancel)
+- Project architecture: .planning/PROJECT.md (Clean Architecture: CLI → Services → Repositories)
+- Current CLI entry: src/cli/index.ts (Commander.js setup)
+- Current TUI app: src/tui/app.tsx (Ink React TUI, to be removed)
+- Current services: src/lib/services/index.ts (barrel exports)
+- Current stores: src/lib/store/ (TemplateStore, ProjectIndex, AppState)
+- M4 verification: src/cli/m4-verification.test.ts (boundary tests)
 
 ---
-*Architecture research for: CLI/TUI Configuration Management Tools*
-*Researched: 2026-04-13*
+*Architecture research for: prompts integration with existing Clean Architecture*
+*Researched: 2026-04-30*
+*Confidence: HIGH (based on existing architecture analysis and prompts library docs)*

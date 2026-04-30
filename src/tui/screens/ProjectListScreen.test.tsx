@@ -583,6 +583,26 @@ describe('ProjectListScreen', () => {
 
       expect(mockOnScan).toHaveBeenCalled();
     });
+
+    it('s (lowercase) key also calls onScan callback', async () => {
+      const { useInput } = await import('ink');
+      const mockUseInput = vi.mocked(useInput);
+
+      render(
+        <ProjectListScreen
+          projects={mockProjects}
+          onSelect={mockOnSelect}
+          onExit={mockOnExit}
+          onScan={mockOnScan}
+          onUndo={mockOnUndo}
+        />
+      );
+
+      const handler = mockUseInput.mock.calls[0]?.[0];
+      handler('s', { escape: false, return: false });
+
+      expect(mockOnScan).toHaveBeenCalled();
+    });
   });
 
   describe('U key for undo (D-07, U2)', () => {
@@ -633,6 +653,28 @@ describe('ProjectListScreen', () => {
 
       const handler = mockUseInput.mock.calls[0]?.[0];
       handler('U', { escape: false, return: false });
+
+      expect(mockOnUndo).toHaveBeenCalledWith(
+        expect.objectContaining({ id: mockProjects[0].id })
+      );
+    });
+
+    it('u (lowercase) key also calls onUndo with selected project', async () => {
+      const { useInput } = await import('ink');
+      const mockUseInput = vi.mocked(useInput);
+
+      render(
+        <ProjectListScreen
+          projects={mockProjects}
+          onSelect={mockOnSelect}
+          onExit={mockOnExit}
+          onScan={mockOnScan}
+          onUndo={mockOnUndo}
+        />
+      );
+
+      const handler = mockUseInput.mock.calls[0]?.[0];
+      handler('u', { escape: false, return: false });
 
       expect(mockOnUndo).toHaveBeenCalledWith(
         expect.objectContaining({ id: mockProjects[0].id })

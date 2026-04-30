@@ -151,11 +151,11 @@ export const ProjectListScreen: React.FC<ProjectListScreenProps> = ({
         setQuery('');
         return;
       }
-      if (key.upArrow || input === 'k') {
+      if (key.upArrow || input === 'k' || input === 'K') {
         handleUp();
         return;
       }
-      if (key.downArrow || input === 'j') {
+      if (key.downArrow || input === 'j' || input === 'J') {
         handleDown();
         return;
       }
@@ -168,11 +168,11 @@ export const ProjectListScreen: React.FC<ProjectListScreenProps> = ({
     }
 
     // Normal mode: full navigation support
-    if (key.upArrow || input === 'k') {
+    if (key.upArrow || input === 'k' || input === 'K') {
       handleUp();
       return;
     }
-    if (key.downArrow || input === 'j') {
+    if (key.downArrow || input === 'j' || input === 'J') {
       handleDown();
       return;
     }
@@ -184,15 +184,15 @@ export const ProjectListScreen: React.FC<ProjectListScreenProps> = ({
       handleEscape();
       return;
     }
-    if (input === '/' || input === 'f') {
+    if (input === '/' || input === 'f' || input === 'F') {
       setIsSearchMode(true);
       return;
     }
-    if (input === 'S') {
+    if (input === 'S' || input === 's') {
       onScan();
       return;
     }
-    if (input === 'U' && selectedProject) {
+    if ((input === 'U' || input === 'u') && selectedProject) {
       handleUndo();
       return;
     }

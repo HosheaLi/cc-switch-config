@@ -1,179 +1,238 @@
 # Stack Research
 
-**Domain:** CLI/TUI Configuration Management Tool
-**Researched:** 2026-04-13
+**Domain:** Terminal UI prompts (replacing Ink React TUI)
+**Researched:** 2026-04-30
 **Confidence:** HIGH
 
 ## Recommended Stack
 
-### Core Technologies
+### Core Technology: prompts (terkelg/prompts)
 
 | Technology | Version | Purpose | Why Recommended |
 |------------|---------|---------|-----------------|
-| **ink** | 7.0.0 | React-based TUI framework | Industry standard for modern CLI apps. Component model familiar to React developers. Uses Yoga flexbox for layout. Powers tools like Parcel, webpack CLI, and many others. Active maintenance, TypeScript-first. |
-| **react** | 19.2.5 | UI component library | Required peer dependency of ink. React 19 brings concurrent features and improved performance. Component-based architecture ideal for complex TUI with multiple views. |
-| **commander** | 14.0.3 | CLI argument parser | Most popular CLI framework (40M+ weekly downloads). Simple API, auto-generated help, subcommand support. Perfect for initial command routing before handing off to TUI. Well-documented, battle-tested. |
-| **typescript** | 6.0.2 | Type safety | Standard for modern Node.js projects. Provides compile-time error catching, excellent IDE support, self-documenting code. Essential for configuration-heavy tools where type mismatches cause runtime errors. |
-| **tsup** | 8.5.1 | Build/bundle tool | Zero-config TypeScript bundler powered by esbuild. Builds ESM + CJS dual output automatically. Handles shebang, executable permissions, and type declarations. Much faster than tsc for CLI bundling. |
+| prompts | 2.4.2 | Terminal interactive prompts | npm-style navigation (j/k + Enter), lightweight (2 deps), Node >=6 compatible |
 
-### Supporting Libraries
+**Why prompts over alternatives:**
 
-| Library | Version | Purpose | When to Use |
-|---------|---------|---------|-------------|
-| **@inkjs/ui** | 2.0.0 | Pre-built Ink components | For all Ink projects. Provides Select, TextInput, Spinner, Table, Box components. Reduces boilerplate significantly. |
-| **ink-text-input** | 6.0.0 | Text input component | Use for configuration value entry (API keys, model names). Supports placeholders, masking for secrets, validation. |
-| **ink-select** | 1.2.0 | Selection component | Use for project selection, API provider selection, model selection. Keyboard navigation, single/multi-select. |
-| **ink-spinner** | 5.0.0 | Loading indicator | Use during async operations (API validation, config loading). Multiple spinner styles. |
-| **ink-table** | 3.1.0 | Table display | Use for displaying project list with config status. Clean columnar output. |
-| **chalk** | 5.6.2 | Terminal styling | Use for colorful output in non-interactive mode. ESM-native, no runtime dependencies. |
-| **zod** | 4.3.6 | Schema validation | Use for validating configuration files, API responses, user input. TypeScript inference eliminates duplicate types. |
-| **conf** | 15.1.0 | Config persistence | Use for storing tool preferences (not project configs). XDG-compliant paths, atomic writes, migrations support. |
-| **fs-extra** | 11.3.4 | Enhanced file operations | Use for JSON file reading/writing with atomic operations. Promise-based, includes recursive mkdir/copy. |
-| **execa** | 9.6.1 | Process execution | Use for running Claude Code commands, testing API connectivity. Improved child_process API, graceful termination. |
-| **env-paths** | 4.0.0 | XDG paths | Use for storing global tool config. Returns standard paths for data, config, cache directories per OS. |
-| **update-notifier** | 7.3.1 | Update notifications | Use to notify users of new versions. Non-blocking, caches check results. Improves user experience. |
+1. **Exact UX match** - The project explicitly wants "npm 风格列表选择 (j/k + Enter)". prompts uses the same navigation pattern as npm CLI.
+2. **Node.js compatibility** - Works with Node >=6. Project requires >=18.17. No version conflict.
+3. **Lightweight footprint** - Only `kleur` + `sisteransi` dependencies. No React overhead.
+4. **Commander.js friendly** - Prompts can be called directly within command handlers:
+   ```typescript
+   program.command('select')
+     .action(async () => {
+       const response = await prompts({
+         type: 'select',
+         name: 'project',
+         message: 'Select a project',
+         choices: [...]
+       });
+     });
+   ```
+5. **Testing support** - `prompts.inject()` for automated testing without mocking frameworks.
 
-### Development Tools
+### Supporting Libraries (Keep Existing)
 
-| Tool | Purpose | Notes |
-|------|---------|-------|
-| **vitest** | Unit testing | Fast, Vite-powered. Native ESM, TypeScript support. Use with ink-testing-library for component tests. |
-| **@types/node** | Node.js type definitions | Essential for TypeScript. Version matches Node.js LTS. |
-| **tsx** | Development runner | Replaces ts-node. Faster, ESM-native. Use with `tsx watch` for hot reload during development. |
+| Library | Version | Purpose | Notes |
+|---------|---------|---------|-------|
+| commander | 14.0.3 | CLI framework | Keep - prompts integrates directly in command handlers |
+| zod | 4.3.6 | Validation | Keep - validates prompt inputs |
+| chalk | 5.6.2 | Terminal colors | Keep - prompts uses kleur internally, chalk for custom output |
+| cli-table3 | 0.6.5 | Table display | Keep - for non-interactive output |
+| fuse.js | 7.3.0 | Fuzzy search | Keep - combine with prompts autocomplete |
+| conf | 15.1.0 | Config persistence | Keep - stores app state |
+| fs-extra | 11.3.4 | File operations | Keep |
+| execa | 9.6.1 | Process execution | Keep |
+
+### Development Tools (Keep Existing)
+
+| Tool | Version | Purpose | Notes |
+|------|---------|---------|-------|
+| vitest | 3.2.4 | Testing framework | Keep - prompts.inject() works with vitest |
+| tsup | 8.5.1 | Build | Keep - no changes needed |
+| typescript | 6.0.2 | Compiler | Keep - prompts has TypeScript support |
 
 ## Installation
 
 ```bash
-# Core
-npm install ink react commander
+# Add prompts
+npm install prompts@2.4.2
 
-# Ink UI Components
-npm install @inkjs/ui ink-text-input ink-select ink-spinner ink-table
-
-# Utilities
-npm install chalk zod conf fs-extra execa env-paths update-notifier
-
-# Dev dependencies
-npm install -D typescript tsup vitest @types/node tsx
+# Remove Ink + React (v2.0 cleanup)
+npm uninstall ink ink-confirm-input ink-select-input ink-spinner ink-text-input react
+npm uninstall -D @testing-library/react @types/react ink-testing-library
 ```
+
+## Prompt Types Needed
+
+| Type | Use Case | Example |
+|------|----------|---------|
+| `select` | Project/API selection (single) | TUI-01: npm-style list |
+| `multiselect` | Project scan (multi) | ScanScreen: select multiple projects |
+| `text` | API key input | ONB-01: fill API config |
+| `confirm` | Apply confirmation | U5: y/n confirmation |
+| `autocomplete` | Fuzzy search (optional) | F14: project search |
 
 ## Alternatives Considered
 
 | Recommended | Alternative | When to Use Alternative |
 |-------------|-------------|-------------------------|
-| **ink** | **blessed** | When building complex dashboard-style TUI with multiple panels, charts, and mouse interactions. Blessed is lower-level but more powerful for dashboards. |
-| **ink** | **@clack/prompts** | When building simple linear prompts without complex UI. @clack is lighter weight and has beautiful defaults, but less flexible for interactive apps. |
-| **ink** | **terminal-kit** | When needing comprehensive terminal API (colors, input, screen buffers, animations). More low-level, larger bundle. |
-| **commander** | **yargs** | When needing advanced features like command completion, extensive validation. Commander is simpler; yargs is more feature-rich but heavier. |
-| **commander** | **oclif** | When building enterprise CLI with plugins, hooks, auto-documentation. Oclif is framework-level; commander is library-level. |
-| **tsup** | **esbuild** | When needing fine-grained build control. tsup provides zero-config defaults for libraries; esbuild requires more setup. |
-| **zod** | **ajv** | When validating against existing JSON Schema specs. Zod is TypeScript-first with inference; ajv is JSON Schema compliant. |
-| **vitest** | **jest** | When team is already using Jest. Vitest is faster and ESM-native; Jest has larger ecosystem. |
+| prompts | inquirer@9.3.8 | If need richer TypeScript types or more prompt varieties (editor, password, expand). Requires Node >=18 (compatible). Last publish Sep 2025. |
+| prompts | @inquirer/prompts@8.4.2 | **NOT COMPATIBLE** - Requires Node >=20.12.0, project uses >=18.17 |
+| prompts | enquirer@2.4.1 | **NOT RECOMMENDED** - Last publish Jul 2023, not maintained |
+
+### inquirer@9.3.8 as Alternative
+
+If the team prefers better TypeScript support:
+
+```bash
+npm install inquirer@9.3.8
+```
+
+**Pros:**
+- More prompt types (select, checkbox, confirm, input, password, editor, expand, number, rawlist, search)
+- Active maintenance (Sep 2025 publish)
+- Better TS type inference
+
+**Cons:**
+- Heavier dependency tree
+- Different UX pattern (arrow keys default, not j/k)
+
+**Decision:** Use prompts for npm-style UX. inquirer if TypeScript types priority.
 
 ## What NOT to Use
 
 | Avoid | Why | Use Instead |
 |-------|-----|-------------|
-| **ts-node** | Slow, ESM support issues, being superseded by tsx | **tsx** — Faster, native ESM, better DX |
-| **inquirer (v8)** | Legacy callbacks API, larger bundle. v9+ is ESM-only which causes compatibility issues | **@inquirer/prompts** or **@inkjs/ui** |
-| **blessed-contrib** | Abandoned, complex dashboard widget system | **ink + ink-table** for simpler approach |
-| **CommonJS (`require`)** | Node.js ESM is now standard. Most CLI tools require ESM | **ESM (`import`)** with `"type": "module"` in package.json |
-| **JSON.parse/JSON.stringify directly** | No validation, silent failures, no type safety | **zod + fs-extra** for validated, typed config handling |
-| **process.env direct access** | No validation, undefined values cause silent errors | **zod schema + validation** for environment variables |
+| ink + react | Heavy React overhead for simple prompts, v1.0 feedback "逻辑混乱样式难看" | prompts (declarative async functions) |
+| @inquirer/prompts v8+ | Node >=20.12.0 required, project uses >=18.17 | prompts or inquirer@9 |
+| enquirer | Last update Jul 2023, unmaintained | prompts (active) |
+| ink-testing-library | Ink-specific, unnecessary with prompts.inject() | vitest + prompts.inject() |
 
-## Stack Patterns by Variant
+## Integration Pattern with Commander.js
 
-**Simple Linear CLI (prompts only):**
-- Use: commander + @clack/prompts
-- Because: Minimal dependencies, beautiful output, linear flow
+```typescript
+// src/cli/commands/select.ts
+import prompts from 'prompts';
+import { Command } from 'commander';
 
-**Interactive TUI (like this project):**
-- Use: commander + ink + @inkjs/ui
-- Because: Full React component model, complex state management, multiple views
+export function registerSelectCommand(program: Command) {
+  program.command('select')
+    .description('Select project and apply configuration')
+    .action(async () => {
+      // Step 1: Select project
+      const { project } = await prompts({
+        type: 'select',
+        name: 'project',
+        message: 'Select a project',
+        choices: projects.map(p => ({
+          title: p.name,
+          value: p.path,
+          description: p.description
+        }))
+      });
 
-**Dashboard-style TUI:**
-- Use: blessed + blessed-contrib
-- Because: Multiple panels, charts, mouse interactions, lower-level control
+      if (!project) return; // User cancelled
 
-**Enterprise CLI with plugins:**
-- Use: oclif
-- Because: Plugin architecture, hooks, auto-generated docs, SaaS CLI standard
+      // Step 2: Select API config
+      const { config } = await prompts({
+        type: 'select',
+        name: 'config',
+        message: 'Select API configuration',
+        choices: configs.map(c => ({
+          title: c.name,
+          value: c.id
+        }))
+      });
 
-## Version Compatibility
+      // Step 3: Confirm
+      const { confirm } = await prompts({
+        type: 'confirm',
+        name: 'confirm',
+        message: 'Apply configuration?',
+        initial: false
+      });
 
-| Package A | Compatible With | Notes |
-|-----------|-----------------|-------|
-| ink 7.x | react 18.x, 19.x | React 19 recommended for concurrent features |
-| ink 7.x | Node.js 18.17+ | Requires Node.js 18.17 or higher for ESM |
-| @inkjs/ui 2.x | ink 7.x | Built for Ink 7, may have issues with Ink 5-6 |
-| tsup 8.x | typescript 5.x, 6.x | Type declaration generation works with both |
-| zod 4.x | typescript 5.x, 6.x | Type inference works seamlessly |
-| vitest 4.x | Node.js 18.x+ | ESM-native, no tsconfig path mapping needed |
-
-## Architecture Recommendations
-
-### Entry Point Structure
-```
-src/
-├── index.ts          # CLI entry point (shebang, commander setup)
-├── commands/         # Commander subcommand handlers
-│   ├── list.ts       # List projects
-│   ├── add.ts        # Add project
-│   └── config.ts     # Configure project
-├── components/       # Ink React components
-│   ├── App.tsx       # Main TUI container
-│   ├── ProjectList.tsx
-│   └── ConfigEditor.tsx
-├── services/         # Business logic
-│   ├── config.ts     # Config file operations
-│   ├── validation.ts # API validation
-│   └── templates.ts  # Template management
-├── types/            # TypeScript types
-│   └── config.ts     # Zod schemas + inferred types
-└── utils/            # Helper functions
-```
-
-### Package.json Configuration
-```json
-{
-  "type": "module",
-  "bin": {
-    "cc-config": "./dist/index.js"
-  },
-  "exports": {
-    ".": "./dist/index.js"
-  },
-  "engines": {
-    "node": ">=18.17"
-  }
+      if (confirm) {
+        // Apply configuration
+      }
+    });
 }
 ```
 
-### tsup.config.ts
-```typescript
-import { defineConfig } from 'tsup';
+## Testing Pattern
 
-export default defineConfig({
-  entry: ['src/index.ts'],
-  format: ['esm'],
-  platform: 'node',
-  target: 'node18',
-  clean: true,
-  dts: true,
-  minify: false,
-  banner: { js: '#!/usr/bin/env node' },
+```typescript
+// src/cli/commands/select.test.ts
+import prompts from 'prompts';
+import { describe, it, expect, vi } from 'vitest';
+
+describe('select command', () => {
+  it('should select project and config', async () => {
+    // Inject answers for testing
+    prompts.inject(['project-a', 'config-1', true]);
+
+    const result = await runSelectCommand();
+
+    expect(result.project).toBe('project-a');
+    expect(result.config).toBe('config-1');
+  });
+
+  it('should handle cancel', async () => {
+    // Inject undefined (cancel)
+    prompts.inject([undefined]);
+
+    const result = await runSelectCommand();
+
+    expect(result).toBeUndefined();
+  });
 });
 ```
 
+## Migration Impact
+
+### Files to DELETE (Ink TUI)
+
+```
+src/tui/app.tsx
+src/tui/app.test.tsx
+src/tui/performance.test.tsx
+src/tui/components/*.tsx (7 files)
+src/tui/screens/*.tsx (7 files)
+src/tui/hooks/*.tsx (4 files)
+```
+
+### Files to CREATE (prompts TUI)
+
+```
+src/tui/prompts.ts          - Main prompts orchestration
+src/tui/prompts.test.ts     - Tests with prompts.inject()
+```
+
+### No changes needed
+
+- `src/cli/` - Commander commands (add prompts calls)
+- `src/services/` - Business logic (unchanged)
+- `src/repositories/` - Data access (unchanged)
+- `src/utils/` - Utilities (unchanged)
+
+## Version Compatibility
+
+| Package | Version | Node Required | Compatible |
+|---------|---------|---------------|------------|
+| prompts | 2.4.2 | >=6 | YES (project >=18.17) |
+| inquirer | 9.3.8 | >=18 | YES (project >=18.17) |
+| @inquirer/prompts | 8.4.2 | >=20.12.0 | NO (project >=18.17) |
+| commander | 14.0.3 | >=18 | YES |
+| zod | 4.3.6 | - | YES |
+
 ## Sources
 
-- **npm registry** — Version verification for all packages (2026-04-13)
-- **Ink GitHub** — https://github.com/vadimdemedes/ink — React for CLI framework documentation
-- **Commander.js docs** — https://github.com/tj/commander.js — CLI framework patterns
-- **tsup documentation** — https://tsup.egoist.dev — Build configuration patterns
-- **Zod documentation** — https://zod.dev — Schema validation patterns
-- **Node.js CLI best practices** — Project structure, ESM, TypeScript recommendations (2025)
+- Context7 `/terkelg/prompts` — Usage, select/multiselect/autocomplete, inject for testing
+- Context7 `/sboudrias/inquirer.js` — Select API, theming, Commander integration patterns
+- npm registry — Version checks, Node engine requirements, publish dates
+- GitHub terkelg/prompts — Lightweight, npm-style navigation, kleur/sisteransi deps
 
 ---
-*Stack research for: CLI/TUI Configuration Management Tool*
-*Researched: 2026-04-13*
+*Stack research for: prompts TUI replacing Ink React*
+*Researched: 2026-04-30*

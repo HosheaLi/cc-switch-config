@@ -1,8 +1,8 @@
-# Feature Research
+# Feature Research: Prompts-Based Terminal UI
 
-**Domain:** CLI/TUI Configuration Management Tools
-**Researched:** 2026-04-13
-**Confidence:** MEDIUM (based on web search results, competitor analysis, and common CLI tool patterns)
+**Domain:** Terminal list selection and wizard flows
+**Researched:** 2026-04-30
+**Confidence:** HIGH (prompts library docs verified via Context7, OpenCode design reference available)
 
 ## Feature Landscape
 
@@ -12,15 +12,15 @@ Features users assume exist. Missing these = product feels incomplete.
 
 | Feature | Why Expected | Complexity | Notes |
 |---------|--------------|------------|-------|
-| **Profile CRUD Operations** | Core functionality - all config managers have this | MEDIUM | Create, list, switch, delete profiles/configurations |
-| **Interactive TUI Selector** | Modern CLI tools use TUI (fzf-style) for selection | MEDIUM | Arrow-key navigation, fuzzy search, visual feedback |
-| **Configuration Preview** | Users need to see what will change before applying | LOW | Show generated/modified config content |
-| **List All Projects/Profiles** | Basic visibility into managed configurations | LOW | Display current status for each project |
-| **Quick Switch Command** | Efficiency - switching should be one command | LOW | `tool switch <name>` or interactive selection |
-| **Current Status Display** | Show active configuration at a glance | LOW | `tool current` or `tool status` command |
-| **JSON Config Support** | Settings files are JSON format | LOW | Read/write JSON configuration files |
-| **Error Messages** | Users need feedback when things go wrong | LOW | Clear, actionable error messages |
-| **Help Documentation** | All CLI tools need `--help` | LOW | Command reference and usage examples |
+| **j/k navigation** | Vim-style navigation is standard in npm tools (npm init, create-react-app). Terminal users expect j/k as alternative to arrows. | LOW | Built into prompts select/autocomplete via arrow keys. j/k mapping requires custom key handling or user retraining. |
+| **Arrow key navigation** | Universal accessibility. Users unfamiliar with vim expect up/down arrows. | LOW | Native in prompts select, multiselect, autocomplete. |
+| **Enter to select** | Standard confirmation action. Universal expectation across all terminal UIs. | LOW | Native in prompts - Enter confirms selection. |
+| **Escape to cancel** | Standard cancel action. Users expect Esc to abort current operation or go back. | MEDIUM | Prompts supports onCancel callback. Need to implement graceful exit flow (return to previous step or abort wizard). |
+| **Visual selection feedback** | User needs to see which item is selected. Invisible selection = unusable UI. | LOW | Native in prompts - selected item highlighted. |
+| **Help text** | User needs to know available actions. Missing help text = user confusion. | LOW | Prompts shows hint text. Can customize via `hint` property. |
+| **Preview before action** | Especially for destructive operations. Users expect to see what will change before confirming. | MEDIUM | Not native in prompts. Requires separate preview step or custom implementation. |
+| **Autocomplete for large lists** | When lists exceed 10-15 items, users expect search/filter capability. Without it, navigation is tedious. | LOW | Native via prompts `autocomplete` type - type to filter, arrows to navigate. |
+| **Confirmation for destructive actions** | Delete, overwrite, apply config - users expect explicit y/n confirmation. Missing this = accidental data loss. | LOW | Native via prompts `confirm` type. |
 
 ### Differentiators (Competitive Advantage)
 
@@ -28,18 +28,14 @@ Features that set the product apart. Not required, but valuable.
 
 | Feature | Value Proposition | Complexity | Notes |
 |---------|-------------------|------------|-------|
-| **Auto-Switch by Directory** | Hands-free context switching when cd-ing into projects | MEDIUM | Detect project directory, auto-apply correct config |
-| **Project Directory Scan** | Discover existing projects automatically vs manual add | MEDIUM | Scan specified paths for Claude Code projects |
-| **API Connectivity Validation** | Verify API is reachable before committing config | MEDIUM | Test API endpoint with current credentials |
-| **Provider Templates** | Quick setup for common API providers (OpenRouter, etc.) | MEDIUM | Pre-configured templates, user can create custom |
-| **MCP Server Management** | Manage MCP servers alongside API/model config | HIGH | List, add, remove, configure MCP servers |
-| **Import/Export Configs** | Backup, share, migrate configurations between machines | MEDIUM | Export to file, import from file |
-| **Diff Before Apply** | Show what will change before applying new config | MEDIUM | Side-by-side comparison, confirmation prompt |
-| **Config Validation** | Syntax check + semantic validation before save | MEDIUM | Catch errors early, provide suggestions |
-| **Multi-level Config Hierarchy** | Support user/project/local override layers | HIGH | Match Claude Code's config priority system |
-| **Token Security Handling** | Keep tokens out of git, use settings.local.json | MEDIUM | Auto-detect git, prevent token commits |
-| **Fuzzy Search** | Quick navigation with fuzzy matching | LOW | Filter projects/configs by partial match |
-| **Bulk Operations** | Apply template to multiple projects at once | MEDIUM | Select multiple, batch apply configuration |
+| **Warm terminal aesthetic** | OpenCode's #201d1d/#fdfcfc palette feels sophisticated vs generic black/white. Creates cohesive "terminal-native" identity. | LOW | Apply color palette via chalk or terminal color codes. Berkeley Mono font if available. |
+| **Unified monospace typography** | Single typeface throughout (headings, body, buttons) creates "everything is code" philosophy. Distinctive visual identity. | LOW | Terminal naturally uses monospace. Ensure no mixed fonts in output. |
+| **Multi-step wizard flow** | First-run experience: fill API config → scan directories → select projects → apply config. Guided setup vs manual CLI commands. | MEDIUM | Use prompts array with conditional prompts. State management via prompts `values` object. |
+| **Diff preview before config apply** | Show exactly what will change in settings.json before user confirms. Prevents accidental modifications. | MEDIUM | Requires diff generation (project has existing implementation). Show as separate screen or formatted output. |
+| **Graceful cancel with state preservation** | User cancels mid-wizard → resume from last step (not start over). Reduces frustration. | HIGH | Requires AppState persistence. Prompts onCancel needs custom handling. |
+| **Progress indicators for scans** | Long-running project scans need visual feedback. Without it, user thinks tool is frozen. | MEDIUM | Prompts doesn't have built-in progress. Use console.log with spinner or separate progress prompt. |
+| **Contextual help** | Show help specific to current prompt state. More useful than generic help text. | LOW | Customize `hint` property per prompt. Dynamic via `message: (prev, values) => string`. |
+| **Fuzzy search built-in** | Autocomplete with fuzzy matching (like v1.0 fuzzy search). More forgiving than exact prefix match. | MEDIUM | Prompts autocomplete uses prefix match. Fuzzy requires custom implementation or wrapper. |
 
 ### Anti-Features (Commonly Requested, Often Problematic)
 
@@ -47,151 +43,245 @@ Features that seem good but create problems.
 
 | Feature | Why Requested | Why Problematic | Alternative |
 |---------|---------------|-----------------|-------------|
-| **Pre-defined Provider Templates (v1)** | Quick start for common providers | Maintenance burden, quickly outdated, scope creep | Support custom templates only; add pre-defined later |
-| **Cloud Sync** | Access configs from multiple machines | Introduces cloud dependency, auth complexity, security concerns | Keep local-only; import/export for manual sync |
-| **Token Encryption** | Security concern for stored tokens | Claude Code itself uses plaintext; adds complexity without benefit | Store in settings.local.json, rely on file permissions, .gitignore |
-| **Desktop GUI (v1)** | Easier for non-technical users | Doubles development effort, different UX paradigm | Start with TUI; consider Tauri desktop in v2 |
-| **Real-time Config Watch** | Auto-reload when files change externally | Race conditions, complex state management | Manual refresh or explicit reload command |
-| **Version History / Undo** | Recover from mistakes | Complex state management, storage overhead | Users can use git for version control |
-| **Config Merge / Conflict Resolution** | Handle conflicting configs | Edge-case complexity, rarely needed | Explicit overwrite; warn before destructive actions |
-| **Multi-User Collaboration** | Share configs across team | Requires cloud, auth, permissions - massive scope | Single-user tool; share configs via git or export files |
+| **Complex multi-screen navigation** | "I want to jump between screens freely like a GUI app" | Terminal UIs are linear flows. Multi-screen navigation (like v1.0 Ink implementation) creates complexity: state management, back button, screen stack. Users get lost in navigation hierarchy. | **Linear wizard flow**: Step 1 → Step 2 → Step 3 → Done. No arbitrary jumps. Back only returns to previous step. |
+| **Real-time preview updates** | "Show preview as I type/navigate" | Continuous preview updates cause visual noise and performance overhead in terminal. Ink's real-time preview was criticized as "chaotic style hard to see". | **Preview on demand**: Show preview when user pauses on item for 500ms+ or presses dedicated preview key. Or show preview as separate confirmation step. |
+| **Mouse support in terminal** | "I want to click items like a GUI" | Mouse support in terminal is fragile, inconsistent across terminals, adds dependency complexity. Most terminal users prefer keyboard navigation. | **Full keyboard support**: j/k + arrows + Enter + Escape + search. No mouse needed. |
+| **Animated transitions** | "Add animations for screen transitions" | Terminal animations are slow, cause flicker, break rendering on some terminals. Ink animations were criticized as "logic messy style hard to see". | **Instant transitions**: Immediate screen changes. Clean, fast, reliable across all terminals. |
+| **Complex component architecture** | "Build reusable component library like React" | Ink's React-style components (10+ components, 7 screens, 4 hooks) created maintenance overhead. Prompts is simpler - focus on prompt sequences, not components. | **Prompt sequences**: Array of prompt objects. Conditional logic via `type: prev => ...`. No complex component tree. |
 
 ## Feature Dependencies
 
 ```
-Project Directory Management
-    └──requires──> Config File Read/Write
+[Wizard Flow]
+    └──requires──> [AppState persistence]
+                       └──requires──> [Config file storage]
 
-Auto-Switch by Directory
-    ├──requires──> Project Directory Management
-    └──requires──> Config Apply Mechanism
+[Diff Preview]
+    └──requires──> [Diff generation utility]
+                       └──requires──> [Config read utility]
 
-MCP Server Management
-    └──requires──> Config File Read/Write
-    └──requires──> JSON Schema Validation
+[Autocomplete Search]
+    └──enhances──> [List selection prompt]
 
-Provider Templates
-    ├──requires──> Config Apply Mechanism
-    └──enhances──> Profile CRUD Operations
+[Progress Indicator]
+    └──conflicts──> [Simple prompt flow]
+    └──requires──> [Async operation tracking]
 
-API Connectivity Validation
-    └──requires──> HTTP Client
-    └──requires──> Credential Access
-
-Config Validation
-    ├──requires──> JSON Schema
-    └──enhances──> Config Preview
-
-Diff Before Apply
-    └──requires──> Config Preview
-    └──requires──> Config Apply Mechanism
-
-Bulk Operations
-    └──requires──> Project Directory Management
-    └──requires──> Provider Templates
-
-Token Security Handling
-    └──conflicts──> Pre-defined Provider Templates (tokens in templates)
+[Graceful Cancel]
+    └──requires──> [AppState persistence]
+    └──requires──> [OnCancel callback handling]
 ```
 
 ### Dependency Notes
 
-- **Auto-Switch requires Project Directory Management:** Need to know which projects exist and their locations to detect and switch contexts
-- **Provider Templates enhances Profile CRUD:** Templates make profile creation faster but aren't required for basic CRUD
-- **Token Security Handling conflicts with Pre-defined Provider Templates:** Pre-defined templates might contain example tokens that users accidentally commit; custom-only approach avoids this
+- **Wizard Flow requires AppState persistence**: Multi-step wizard needs to save progress. If user cancels at step 3, must resume from step 3 (not start over). AppState provides `firstRunCompleted` flag and intermediate state storage.
+
+- **Diff Preview requires Diff generation utility**: To show what will change before user confirms, need diff utility. Project has existing implementation (`src/cli/utils/diff.ts`).
+
+- **Autocomplete Search enhances List selection prompt**: For large project lists, autocomplete (type to filter) improves navigation. Prompts `autocomplete` type provides this.
+
+- **Progress Indicator conflicts with Simple prompt flow**: Progress indicators interrupt the linear prompt flow. Consider showing progress as separate step or console output outside prompt sequence.
+
+- **Graceful Cancel requires AppState + OnCancel handling**: Prompts `onCancel` callback can prevent abort (return true), but need AppState to track current step. If user cancels, save state to resume later.
+
+## Prompts Library Capabilities
+
+### Prompt Types Available
+
+| Type | Purpose | Built-in Features | Use Case in This Project |
+|------|---------|-------------------|-------------------------|
+| `select` | Single item selection | Arrow navigation, Enter confirm, visual highlight | Project selection, API config selection |
+| `multiselect` | Multiple items selection | Space toggle, Enter submit, max limit, visual feedback | Scan result selection (multiple projects) |
+| `autocomplete` | Filterable list | Type to filter, arrows to navigate, Enter select | Project selection with search |
+| `confirm` | Yes/No confirmation | y/n keys, default value | Destructive action confirmation |
+| `text` | Free text input | Validation, formatting | API key input, config name input |
+| `number` | Numeric input | Min/max validation | Numeric configuration values |
+| `password`/`invisible` | Masked input | Characters hidden | API token input (sensitive) |
+
+### Wizard Flow Features
+
+| Feature | How to Implement | Example |
+|---------|------------------|---------|
+| **Conditional prompts** | `type: prev => prev ? 'text' : null` (null skips prompt) | Skip API config if user chooses "use existing" |
+| **Dynamic messages** | `message: (prev, values) => 'string'` | Show previous answers in current prompt message |
+| **State accumulation** | `values` object contains all previous answers | Access `values.projectName` in later prompts |
+| **Cancellation handling** | `onCancel: prompt => { return true }` | Prevent abort, show message, let user retry |
+| **Submission callback** | `onSubmit: (prompt, answer) => ...` | Log progress, validate intermediate state |
+| **Testing support** | `prompts.inject(['answer1', 'answer2'])` | Pre-fill answers for automated testing |
+
+### Key Patterns from Research
+
+**Pattern 1: Linear Wizard Flow (npm init style)**
+```javascript
+const questions = [
+  { type: 'text', name: 'apiKey', message: 'API Key:' },
+  { type: 'text', name: 'baseUrl', message: 'API Base URL:' },
+  { type: 'text', name: 'modelName', message: 'Model Name:' },
+  { type: 'select', name: 'project', message: 'Select project:', choices: [...] },
+  { type: 'confirm', name: 'apply', message: 'Apply config?' }
+];
+const answers = await prompts(questions, { onCancel });
+```
+
+**Pattern 2: Conditional Prompt Sequence**
+```javascript
+const questions = [
+  {
+    type: 'select',
+    name: 'configSource',
+    message: 'Config source:',
+    choices: [
+      { title: 'Create new', value: 'new' },
+      { title: 'Use existing', value: 'existing' }
+    ]
+  },
+  {
+    // Only show if user chose 'new'
+    type: prev => prev === 'new' ? 'text' : null,
+    name: 'apiKey',
+    message: 'API Key:'
+  },
+  {
+    // Only show if user chose 'existing'
+    type: prev => prev === 'existing' ? 'select' : null,
+    name: 'config',
+    message: 'Select config:',
+    choices: [...]
+  }
+];
+```
+
+**Pattern 3: Preview Before Confirm**
+```javascript
+// Show preview as formatted output, then confirm
+console.log('\nPreview of changes:');
+console.log(chalk.dim('  API Key: [HIDDEN]'));
+console.log(chalk.dim('  Base URL: https://api.example.com'));
+console.log(chalk.dim('  Model: claude-3-5-sonnet'));
+
+const confirm = await prompts({
+  type: 'confirm',
+  name: 'apply',
+  message: 'Apply this configuration?',
+  initial: false
+});
+```
+
+**Pattern 4: Graceful Cancel**
+```javascript
+const onCancel = (prompt) => {
+  console.log(chalk.yellow('Cancelled. You can resume later.'));
+  // Save state for resumption
+  saveWizardState(currentStep);
+  // Return true to prevent process abort
+  return true;
+};
+
+const answers = await prompts(questions, { onCancel });
+```
 
 ## MVP Definition
 
-### Launch With (v1)
+### Launch With (v2.0)
 
-Minimum viable product - what's needed to validate the concept.
+Minimum viable product - what's needed to validate the prompts-based approach.
 
-- [ ] **Profile CRUD Operations** - Core value: manage multiple configurations
-- [ ] **Interactive TUI Selector** - Modern UX expected by users
-- [ ] **Configuration Preview** - Show what will change
-- [ ] **List All Projects/Profiles** - Visibility into managed state
-- [ ] **Quick Switch Command** - Efficiency for common operation
-- [ ] **Current Status Display** - Know active configuration
-- [ ] **Custom Provider Templates** - Flexibility without maintenance burden
-- [ ] **Token Security Handling** - Keep tokens in settings.local.json, warn on potential git commits
+- [x] **j/k + arrow navigation** — Essential for list selection. Users expect both vim-style and standard navigation.
+- [x] **Enter to select, Escape to cancel** — Core interaction model. Universal expectation.
+- [x] **Autocomplete search** — For project selection from potentially large lists. Built into prompts.
+- [x] **Confirmation for destructive actions** — Config apply, delete. Prevent accidental changes.
+- [x] **Help text per prompt** — Show available actions. Customize via `hint` property.
+- [x] **Text/password input for API config** — API key, base URL, model name inputs.
+- [x] **Linear wizard flow** — First-run: API config → scan → select → apply. Simple sequence.
+- [x] **Diff preview before apply** — Show what will change. Use existing diff utility.
 
-### Add After Validation (v1.x)
+### Add After Validation (v2.1+)
 
 Features to add once core is working.
 
-- [ ] **Auto-Switch by Directory** - Popular differentiator; add when users request hands-free switching
-- [ ] **Project Directory Scan** - Convenience feature; add when manual management becomes tedious
-- [ ] **Config Validation** - Error prevention; add when users report config errors
-- [ ] **Diff Before Apply** - Confidence feature; add when users request preview improvements
-- [ ] **Import/Export Configs** - Portability; add when users need to migrate or backup
+- [ ] **Progress indicators for scans** — Long-running scans need visual feedback. Add spinner or progress bar.
+- [ ] **Graceful cancel with state preservation** — Resume wizard from last step. Requires AppState enhancement.
+- [ ] **Contextual hints based on previous answers** — Show personalized help. Dynamic `message` function.
+- [ ] **Warm OpenCode aesthetic** — Apply color palette (#201d1d/#fdfcfc). Better visual identity.
 
-### Future Consideration (v2+)
+### Future Consideration (v3+)
 
 Features to defer until product-market fit is established.
 
-- [ ] **MCP Server Management** - Complex feature; defer until core is stable
-- [ ] **API Connectivity Validation** - Quality-of-life; requires HTTP implementation
-- [ ] **Pre-defined Provider Templates** - Maintenance overhead; add when user demand is clear
-- [ ] **Bulk Operations** - Power user feature; add when single-project workflow is validated
-- [ ] **Desktop GUI (Tauri)** - Platform expansion; only if TUI shows traction
-- [ ] **Multi-level Config Hierarchy** - Advanced feature; add when users need granular control
+- [ ] **Fuzzy search** — More forgiving than prefix match. Requires custom wrapper over autocomplete.
+- [ ] **Multi-config CRUD via prompts** — Add/list/remove API configs. Extends wizard to management.
+- [ ] **Undo within wizard** — Allow "back to previous step" without aborting entire wizard.
 
 ## Feature Prioritization Matrix
 
 | Feature | User Value | Implementation Cost | Priority |
 |---------|------------|---------------------|----------|
-| Profile CRUD Operations | HIGH | MEDIUM | P1 |
-| Interactive TUI Selector | HIGH | MEDIUM | P1 |
-| Configuration Preview | HIGH | LOW | P1 |
-| List All Projects/Profiles | HIGH | LOW | P1 |
-| Quick Switch Command | HIGH | LOW | P1 |
-| Current Status Display | HIGH | LOW | P1 |
-| Custom Provider Templates | MEDIUM | MEDIUM | P1 |
-| Token Security Handling | HIGH | MEDIUM | P1 |
-| Auto-Switch by Directory | MEDIUM | MEDIUM | P2 |
-| Project Directory Scan | MEDIUM | MEDIUM | P2 |
-| Config Validation | MEDIUM | MEDIUM | P2 |
-| Diff Before Apply | MEDIUM | MEDIUM | P2 |
-| Import/Export Configs | MEDIUM | MEDIUM | P2 |
-| MCP Server Management | MEDIUM | HIGH | P3 |
-| API Connectivity Validation | MEDIUM | MEDIUM | P3 |
-| Pre-defined Provider Templates | LOW | MEDIUM | P3 |
-| Bulk Operations | LOW | MEDIUM | P3 |
+| j/k + arrow navigation | HIGH | LOW | P1 |
+| Enter/Esc interaction | HIGH | LOW | P1 |
+| Autocomplete search | HIGH | LOW | P1 |
+| Confirmation prompts | HIGH | LOW | P1 |
+| Text/password input | HIGH | LOW | P1 |
+| Linear wizard flow | HIGH | MEDIUM | P1 |
+| Diff preview | HIGH | MEDIUM | P1 |
+| Help text per prompt | MEDIUM | LOW | P2 |
+| Progress indicators | MEDIUM | MEDIUM | P2 |
+| Graceful cancel | MEDIUM | HIGH | P2 |
+| OpenCode aesthetic | MEDIUM | LOW | P2 |
+| Contextual hints | LOW | LOW | P3 |
+| Fuzzy search | LOW | MEDIUM | P3 |
+| Multi-config CRUD | LOW | MEDIUM | P3 |
 
 **Priority key:**
-- P1: Must have for launch
-- P2: Should have, add when possible
-- P3: Nice to have, future consideration
+- P1: Must have for launch (v2.0)
+- P2: Should have, add when possible (v2.1+)
+- P3: Nice to have, future consideration (v3+)
 
 ## Competitor Feature Analysis
 
-| Feature | cc-switch | nvm-style tools | direnv | Our Approach |
-|---------|-----------|-----------------|--------|--------------|
-| Profile Management | Full CRUD | Version CRUD | N/A (env-based) | Full CRUD for configs |
-| Auto-Switch | Yes (directory-based) | Yes (.nvmrc) | Yes (.envrc) | Yes (directory detection) |
-| Interactive TUI | Desktop GUI | CLI args / shell | Shell hooks | TUI selector (ink/React) |
-| Import/Export | Yes | No | No | Yes |
-| Templates | Pre-defined providers | N/A | N/A | Custom templates first |
-| Validation | Basic | No | No | Config + API validation |
-| Token Security | Unknown | N/A | File-based | settings.local.json |
+| Feature | npm init | create-react-app | cc-switch (Desktop) | Our Approach (v2.0) |
+|---------|----------|------------------|---------------------|---------------------|
+| **Navigation** | Arrows + Enter | Arrows + Enter | Mouse + buttons | Arrows + j/k + Enter |
+| **Cancel** | Ctrl+C abort | Ctrl+C abort | Back button | Esc to cancel, graceful abort |
+| **Preview** | None (blind install) | Options list | Full preview panel | Diff preview before apply |
+| **Search** | None | None | Search box | Autocomplete (type to filter) |
+| **Wizard flow** | Linear prompts | Linear prompts | Multi-screen GUI | Linear prompts (npm style) |
+| **Aesthetic** | Standard terminal | Standard terminal | Desktop GUI | OpenCode warm terminal aesthetic |
+| **First-run** | Package name prompt | App name prompt | Setup wizard | API config → scan → select → apply |
 
-### Key Differentiation Opportunities
+**Our differentiation:**
+1. **j/k navigation** — Vim users get familiar navigation (npm/init use only arrows)
+2. **Diff preview** — Users see what will change before confirming (npm/init have no preview)
+3. **Autocomplete search** — Filter large project lists quickly (npm/init have no search)
+4. **Warm terminal aesthetic** — OpenCode's sophisticated palette vs generic terminal colors
 
-1. **TUI-first approach** - cc-switch has desktop GUI, we have TUI (faster, more scriptable)
-2. **Custom templates** - Others hardcode providers; we let users define their own
-3. **Validation** - Most tools don't validate; we can validate config + API reachability
-4. **Project-centric view** - Focus on managing multi-project configurations, not just profiles
+## Comparison with v1.0 Ink Implementation
+
+| Aspect | v1.0 (Ink React) | v2.0 (Prompts) | Improvement |
+|--------|------------------|----------------|-------------|
+| **Architecture** | 10+ components, 7 screens, 4 hooks | Array of prompt objects | Simpler, less code |
+| **Navigation** | Screen stack with push/pop | Linear prompt sequence | Less state management |
+| **Preview** | Real-time preview panel | Diff preview as separate step | Less visual noise |
+| **Search** | Fuzzy search hook | Autocomplete (prefix match) | Built-in, simpler |
+| **Lines of code** | ~22,700 LOC | Target: ~10,000 LOC reduction | Less maintenance |
+| **Dependencies** | ink, react, ink-* packages | Single prompts package | Fewer dependencies |
+| **Rendering** | React virtual DOM | Direct terminal output | Faster, more reliable |
+
+**Why prompts is better for this use case:**
+1. **Simpler architecture** - Array of prompts vs component tree
+2. **Built-in features** - Navigation, search, confirmation are native
+3. **Less code** - No need for custom components
+4. **NPM-style UX** - Familiar pattern from npm init, create-react-app
+5. **Reliability** - Ink had rendering issues ("logic messy style hard to see")
 
 ## Sources
 
-- [cc-switch GitHub Repository](https://github.com/farion1231/cc-switch) - Reference implementation for Claude Code config management
-- [nvm (Node Version Manager)](https://github.com/nvm-sh/nvm) - CLI profile/switching patterns
-- [direnv](https://direnv.net/) - Auto-switch directory-based configuration
-- [AWS CLI Profile Manager](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-profiles.html) - Profile management patterns
-- [TUI Design Patterns](https://github.com/charmbracelet/bubbletea) - Terminal UI patterns
-- [Claude Code Settings Documentation](https://docs.anthropic.com/en/docs/claude-code/settings-json) - Configuration format reference
-- Project Context: /Users/lihaoxuan/code/P07_CCAPISwitch/.planning/PROJECT.md
+- **Prompts library documentation** — Context7 lookup verified. Library ID: `/terkelg/prompts`. Version 2.4.2. https://github.com/terkelg/prompts
+- **OpenCode design reference** — `.planning/PROJECT.md` and `opencode.ai-DESIGN.md`. Warm palette #201d1d/#fdfcfc, Berkeley Mono font, no shadows.
+- **Terminal UI best practices** — https://clig.dev (CLI design principles). Confirmed preview before destructive actions, clear confirmation prompts.
+- **Competitor analysis** — npm init, create-react-app, create-next-app patterns. Linear wizard flows.
+- **Inquirer/Enquirer/Clack comparison** — Web search results. Prompts chosen for simplicity (v1.0 used Ink React).
+- **Project context** — `/Users/lihaoxuan/code/P07_CCAPISwitch/.planning/PROJECT.md` - v2.0 milestone requirements (TUI-01, CFG-01, ONB-01, UI-01)
 
 ---
-*Feature research for: CLI/TUI Configuration Management Tools*
-*Researched: 2026-04-13*
+*Feature research for: Prompts-based terminal list selection*
+*Researched: 2026-04-30*

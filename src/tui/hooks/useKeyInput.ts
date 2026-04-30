@@ -41,10 +41,10 @@ export function useKeyInput(options: KeyInputOptions): void {
     }
 
     // Vim-style j/k navigation (U3 requirement)
-    if (input === 'k') {
+    if (input === 'k' || input === 'K') {
       onUp?.();
     }
-    if (input === 'j') {
+    if (input === 'j' || input === 'J') {
       onDown?.();
     }
 
