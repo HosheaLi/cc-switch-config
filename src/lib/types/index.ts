@@ -23,3 +23,9 @@ export * from './provider.js';
 
 // Export/import schemas
 export * from './export-schema.js';
+
+// API configuration types
+export * from './api-config.js';
+
+// Field replacement utilities
+export * from './replacement.js';
