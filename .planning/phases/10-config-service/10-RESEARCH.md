@@ -584,17 +584,19 @@ export class ServiceError extends Error {
 
 **If this table is empty:** All claims in this research were verified or cited.
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Migration strategy for v1.0 templates.json**
    - What we know: v1.0 has templates.json in XDG config dir
    - What's unclear: Should v2.0 auto-migrate or require manual action?
    - Recommendation: Claude's discretion - consider automatic migration with user notification
+   - **RESOLVED:** Deferred to execution — fresh start approach per D-08 (ApiConfigStore 新建，不依赖 v1.0 templates)
 
 2. **Unified mode env field count**
    - What we know: D-14 specifies 6 model variables + apiKey + baseUrl
    - What's unclear: Are all 6 model vars required for Claude Code?
    - Recommendation: Verify with Claude Code documentation, may simplify to ANTHROPIC_MODEL only
+   - **RESOLVED:** D-14 locked in CONTEXT.md — implement 6 model vars (ANTHROPIC_MODEL, SONNET, HAIKU, OPUS, REASONING, TOOL_USE) per Claude Code standard env format
 
 ## Environment Availability
 
