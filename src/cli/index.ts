@@ -14,6 +14,7 @@ import { registerExportCommand } from './commands/export.js';
 import { registerImportCommand } from './commands/import.js';
 import { registerUndoCommand } from './commands/undo.js';
 import { registerRegisterCommand } from './commands/register.js';
+import { registerConfigCommand } from './commands/config.js';
 
 const VERSION = '0.1.0';
 
@@ -30,6 +31,9 @@ export async function runCLI(argv: string[] = process.argv): Promise<void> {
   registerSwitchCommand(program);
   registerCurrentCommand(program);
   registerTemplateCommand(program);
+
+  // Phase 11 commands
+  registerConfigCommand(program);
 
   // Phase 07 commands
   registerAutoCheckCommand(program);
