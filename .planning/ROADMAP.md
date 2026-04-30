@@ -253,7 +253,7 @@ Phases execute in numeric order: 9 - 10 - 11 - 12 - 13 - 14 - 15
 | 8. Quality & Polish | v1.0 | 5/5 | Complete | 2026-04-15 |
 | 9. Prompts Integration | v2.0 | 0/TBD | Not started | - |
 | 10. Config Service | v2.0 | 4/4 | Complete    | 2026-04-30 |
-| 11. Config CLI Commands | v2.0 | 0/4 | Planned | - |
+| 11. Config CLI Commands | v2.0 | 0/2 | Planned    |  |
 | 12. First-Run Wizard | v2.0 | 0/TBD | Not started | - |
 | 13. Switch Flow | v2.0 | 0/TBD | Not started | - |
 | 14. Terminal Aesthetic | v2.0 | 0/TBD | Not started | - |
