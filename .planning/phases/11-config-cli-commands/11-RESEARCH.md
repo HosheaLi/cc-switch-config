@@ -561,19 +561,19 @@ function displayValidationErrors(error: ValidationError): void {
 
 **All other claims verified via code inspection or package registry check.**
 
-## Open Questions
+## Open Questions (RESOLVED)
 
-1. **Confirmation Flow Pattern**
+RESOLVED: 1. **Confirmation Flow Pattern**
    - What we know: Template.ts uses process.exit(0) before action, U5 pattern requires confirmation
    - What's unclear: Should config remove use prompts.confirm() and proceed, or follow template.ts exit pattern?
    - Recommendation: Use prompts.confirm() for interactive confirmation, proceed on yes, exit on no. Template.ts pattern seems defensive (force re-run), config remove should be more user-friendly.
 
-2. **ValidationError Grouping Logic**
+RESOLVED: 2. **ValidationError Grouping Logic**
    - What we know: ValidationError.issues have path arrays like ['name'] or ['apiKey']
    - What's unclear: Exact path format for nested fields or mode-specific validation
    - Recommendation: Test with actual Zod validation errors from ApiConfigSchema, adjust grouping logic based on observed paths.
 
-3. **Deprecation vs Immediate Removal**
+RESOLVED: 3. **Deprecation vs Immediate Removal**
    - What we know: D-02 says mark deprecated, Phase 15 removes
    - What's unclear: Should config-wizard.ts remain functional during deprecation period?
    - Recommendation: Keep functional, add @deprecated JSDoc, document migration path. Users may have workflows depending on wizard until Phase 15.

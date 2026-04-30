@@ -162,7 +162,7 @@
   3. User sees API key masked in all display contexts (preview/diff/logs)
   4. User's API key is never exposed in CLI args, logs, or screenshots
   5. System maintains atomic write and backup from v1.0 (R1/R2)
-**Plans**: 4 plans
+**Plans**: 2 plans
 
 Plans:
 - [x] 10-01-PLAN.md - Create ApiConfig types and replaceEnvModel function
@@ -180,13 +180,11 @@ Plans:
   3. User can remove API configs via `cc-config config remove` command
   4. User sees validation error messages for invalid inputs (prompts validate pattern)
   5. User sees password-type input for API key that auto-clears
-**Plans**: 4 plans
+**Plans**: 2 plans
 
 Plans:
-- [ ] 11-01-PLAN.md - Create config add command with password-type input (SEC-04)
-- [ ] 11-02-PLAN.md - Create config list command with masked API key display
-- [ ] 11-03-PLAN.md - Create config remove command with confirmation flow + grouped validation errors
-- [ ] 11-04-PLAN.md - Integrate config commands into CLI + deprecate config-wizard
+- [ ] 11-01-PLAN.md - Create config add/list/remove commands with password-type input, masked display, confirmation flow, and grouped validation errors
+- [ ] 11-02-PLAN.md - Integrate config commands into CLI + deprecate config-wizard
 
 #### Phase 12: First-Run Wizard
 **Goal**: New users experience guided onboarding flow
