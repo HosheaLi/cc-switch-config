@@ -180,7 +180,13 @@ Plans:
   3. User can remove API configs via `cc-config config remove` command
   4. User sees validation error messages for invalid inputs (prompts validate pattern)
   5. User sees password-type input for API key that auto-clears
-**Plans**: TBD
+**Plans**: 4 plans
+
+Plans:
+- [ ] 11-01-PLAN.md - Create config add command with password-type input (SEC-04)
+- [ ] 11-02-PLAN.md - Create config list command with masked API key display
+- [ ] 11-03-PLAN.md - Create config remove command with confirmation flow + grouped validation errors
+- [ ] 11-04-PLAN.md - Integrate config commands into CLI + deprecate config-wizard
 
 #### Phase 12: First-Run Wizard
 **Goal**: New users experience guided onboarding flow
@@ -249,7 +255,7 @@ Phases execute in numeric order: 9 - 10 - 11 - 12 - 13 - 14 - 15
 | 8. Quality & Polish | v1.0 | 5/5 | Complete | 2026-04-15 |
 | 9. Prompts Integration | v2.0 | 0/TBD | Not started | - |
 | 10. Config Service | v2.0 | 4/4 | Complete    | 2026-04-30 |
-| 11. Config CLI Commands | v2.0 | 0/TBD | Not started | - |
+| 11. Config CLI Commands | v2.0 | 0/4 | Planned | - |
 | 12. First-Run Wizard | v2.0 | 0/TBD | Not started | - |
 | 13. Switch Flow | v2.0 | 0/TBD | Not started | - |
 | 14. Terminal Aesthetic | v2.0 | 0/TBD | Not started | - |
@@ -294,4 +300,4 @@ Phases execute in numeric order: 9 - 10 - 11 - 12 - 13 - 14 - 15
 
 *Roadmap for: CCAPISwitch*  
 *Created: 2026-04-13*  
-*Last updated: 2026-04-30 (Phase 10 plans created)*
+*Last updated: 2026-04-30 (Phase 11 plans created)*
