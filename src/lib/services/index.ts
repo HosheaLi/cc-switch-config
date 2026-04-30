@@ -20,6 +20,7 @@ export { TemplateService } from './template-service.js';
 export { ProviderService } from './provider-service.js';
 export { ExportService } from './export-service.js';
 export { UndoService } from './undo-service.js';
+export { ApiService } from './api-service.js';
 
 // Service error handling
 export { ServiceError } from './types.js';
