@@ -6,9 +6,12 @@
  * Per D-08: scan command with --tui launches ScanScreen.
  *
  * This module connects CLI to the Ink-based TUI screens.
+ *
+ * Phase 09: Added prompts-based TUI launch (terminal-native mode).
  */
 
 import { runTUI } from '../../tui/index.js';
+import { launchPromptsTUI } from '../prompts/index.js';
 import { TemplateService, ProjectService } from '../../lib/services/index.js';
 import type { ScanResult } from '../../lib/services/index.js';
 import { TemplateStore } from '../../lib/store/index.js';
@@ -19,9 +22,22 @@ import chalk from 'chalk';
  * Launch the main TUI application.
  * Per D-02: Called when no CLI arguments provided.
  *
+ * Phase 09: Now uses prompts-based TUI (terminal-native mode).
+ *
  * @returns Promise that resolves when TUI exits
  */
 export async function launchTUI(): Promise<void> {
+  // Phase 09: Use prompts-based TUI (terminal-native)
+  await launchPromptsTUI();
+}
+
+/**
+ * Launch Ink-based TUI (legacy mode).
+ * Phase 09: Kept for backward compatibility, Phase 15 will remove.
+ *
+ * @returns Promise that resolves when TUI exits
+ */
+export async function launchInkTUI(): Promise<void> {
   await runTUI();
 }
 

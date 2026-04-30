@@ -4,6 +4,8 @@
  * Tests launchTUI calls runTUI from TUI module (D-02).
  * Tests selectTemplateInTUI lists templates (D-06).
  *
+ * Phase 09: launchTUI now calls launchPromptsTUI.
+ *
  * Note: Uses vi.mock with factory functions for proper hoisting.
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
@@ -13,16 +15,28 @@ vi.mock('../../tui/index.js', () => ({
   runTUI: vi.fn().mockResolvedValue(undefined),
 }));
 
+// Mock prompts module - Phase 09
+vi.mock('../prompts/index.js', () => ({
+  launchPromptsTUI: vi.fn().mockResolvedValue(undefined),
+}));
+
 // Mock services - hoisted to top, returns object with listTemplates method
 vi.mock('../../lib/services/index.js', () => ({
   TemplateService: vi.fn().mockImplementation(() => ({
     listTemplates: vi.fn().mockResolvedValue(['anthropic-template', 'openai-template']),
   })),
+  ProjectService: vi.fn().mockImplementation(() => ({
+    listProjects: vi.fn().mockResolvedValue([]),
+    scanProjects: vi.fn().mockResolvedValue([]),
+    registerProject: vi.fn().mockResolvedValue(undefined),
+  })),
 }));
 
-// Mock store - hoisted to top
+// Mock store - hoisted to top (Phase 09: added ProjectIndex, AppState)
 vi.mock('../../lib/store/index.js', () => ({
   TemplateStore: vi.fn().mockImplementation(() => {}),
+  ProjectIndex: vi.fn().mockImplementation(() => {}),
+  AppState: vi.fn().mockImplementation(() => {}),
 }));
 
 // Mock config - hoisted to top
@@ -52,11 +66,11 @@ describe('TUI launch utility', () => {
   });
 
   describe('launchTUI', () => {
-    it('calls runTUI from tui module (D-02)', async () => {
+    it('calls launchPromptsTUI from prompts module (Phase 09)', async () => {
       await launchTUI();
 
-      const { runTUI } = await import('../../tui/index.js');
-      expect(vi.mocked(runTUI)).toHaveBeenCalled();
+      const { launchPromptsTUI } = await import('../prompts/index.js');
+      expect(vi.mocked(launchPromptsTUI)).toHaveBeenCalled();
     });
 
     it('resolves without error', async () => {
