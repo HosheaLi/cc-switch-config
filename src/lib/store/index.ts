@@ -18,6 +18,10 @@ export { readConfig, writeConfig, configExists } from './config.js';
 export { TemplateStore } from './template.js';
 export type { TemplateStoreData } from './template.js';
 
+// API Config Store (class)
+export { ApiConfigStore } from './api-config.js';
+export type { ApiConfigStoreData } from './api-config.js';
+
 // Project Index (class)
 export { ProjectIndex } from './project.js';
 export type { ProjectEntry, ProjectIndexData } from './project.js';
