@@ -13,6 +13,23 @@ import { inputFullApiConfig, inputConfigName } from '../components/input-api-key
 import { styleSuccess, styleError, styleWarning, separator } from '../utils/theme.js';
 
 /**
+ * @deprecated
+ *
+ * 此 wizard 已废弃，将在 Phase 15 移除。
+ * 请使用 CLI 命令替代：
+ * - `cc-config config add` 创建配置
+ * - `cc-config config list` 查看配置
+ * - `cc-config config remove` 删除配置
+ *
+ * 迁移说明：
+ * - 新 CLI 命令使用 ApiService (Phase 10)
+ * - 配置存储为 ApiConfig (unified/granular 模式)
+ * - API Key 输入使用 password 类型 (SEC-04)
+ *
+ * 详见 ROADMAP.md Phase 11。
+ */
+
+/**
  * Run the config add wizard.
  *
  * Flow:
