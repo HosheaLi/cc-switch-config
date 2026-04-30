@@ -3,7 +3,11 @@
  */
 import { Command } from 'commander';
 import chalk from 'chalk';
+import { AppState } from '../lib/store/state.js';
+import { ApiConfigStore } from '../lib/store/api-config.js';
+import { ProjectIndex } from '../lib/store/project.js';
 import { launchTUI } from './utils/tui-launch.js';
+import { launchPromptsTUI } from './prompts/wizards/main-wizard.js';
 import { registerListCommand } from './commands/list.js';
 import { registerSwitchCommand } from './commands/switch.js';
 import { registerCurrentCommand } from './commands/current.js';
@@ -46,8 +50,27 @@ export async function runCLI(argv: string[] = process.argv): Promise<void> {
   registerUndoCommand(program);
 
   const args = argv.slice(2);
+
   if (args.length === 0) {
-    await launchTUI();
+    // D-01: Trigger at no-args invocation
+    // D-02: Triple condition check for first-run detection
+    const appState = new AppState();
+    const apiConfigStore = new ApiConfigStore();
+    const projectIndex = new ProjectIndex();
+
+    const firstRunCompleted = appState.get('firstRunCompleted');
+    const hasConfigs = (await apiConfigStore.list()).length > 0;
+    const hasProjects = (await projectIndex.getAll()).length > 0;
+
+    if (!firstRunCompleted && !hasConfigs && !hasProjects) {
+      // Launch first-run wizard
+      await launchPromptsTUI();
+      // D-04: Set flag after wizard completes
+      appState.set('firstRunCompleted', true);
+    } else {
+      // Normal TUI launch
+      await launchTUI();
+    }
   } else {
     await program.parseAsync(argv);
   }
