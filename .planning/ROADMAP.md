@@ -15,15 +15,15 @@
 
 ## Milestones
 
-- ✅ **v1.0 MVP** - Phases 1-8 (shipped 2026-04-15)
-- 🚧 **v2.0 Terminal-Native** - Phases 9-15 (in progress)
+- **v1.0 MVP** - Phases 1-8 (shipped 2026-04-15)
+- **v2.0 Terminal-Native** - Phases 9-15 (in progress)
 
 ---
 
 ## Phases
 
 <details>
-<summary>✅ v1.0 MVP (Phases 1-8) - SHIPPED 2026-04-15</summary>
+<summary>v1.0 MVP (Phases 1-8) - SHIPPED 2026-04-15</summary>
 
 ### Phase 1: Foundation & Safety
 
@@ -32,13 +32,13 @@
 **Plans:** 7 plans
 
 **Plans:**
-- [x] 01-01-PLAN.md — Project Setup (package.json, tsconfig, build, test configs)
-- [x] 01-02-PLAN.md — Cross-Platform Paths (env-paths, XDG directories)
-- [x] 01-03-PLAN.md — Atomic File Operations (write-rename pattern)
-- [x] 01-04-PLAN.md — Backup System (timestamped backups before modifications)
-- [x] 01-05-PLAN.md — JSON Error Enhancement (line numbers, context)
-- [x] 01-06-PLAN.md — Config Versioning & Migration (version field, migration framework)
-- [x] 01-07-PLAN.md — Token Security (git tracking detection, token masking)
+- [x] 01-01-PLAN.md - Project Setup (package.json, tsconfig, build, test configs)
+- [x] 01-02-PLAN.md - Cross-Platform Paths (env-paths, XDG directories)
+- [x] 01-03-PLAN.md - Atomic File Operations (write-rename pattern)
+- [x] 01-04-PLAN.md - Backup System (timestamped backups before modifications)
+- [x] 01-05-PLAN.md - JSON Error Enhancement (line numbers, context)
+- [x] 01-06-PLAN.md - Config Versioning & Migration (version field, migration framework)
+- [x] 01-07-PLAN.md - Token Security (git tracking detection, token masking)
 
 ### Phase 2: Types & Validation
 
@@ -47,11 +47,11 @@
 **Plans:** 5 plans
 
 **Plans:**
-- [x] 02-01-PLAN.md — Core Config Schemas (ClaudeSettingsSchema, EnvConfig, etc.)
-- [x] 02-02-PLAN.md — Validation Utilities (ValidationError class, validateConfig)
-- [x] 02-03-PLAN.md — Merge Algorithm (deepMergeConfig, ConfigLayer type)
-- [x] 02-04-PLAN.md — Provider Types (ApiProviderConfig, TemplateConfig, AuthType)
-- [x] 02-05-PLAN.md — Barrel Export & Integration (index.ts, DEFAULT_CONFIG)
+- [x] 02-01-PLAN.md - Core Config Schemas (ClaudeSettingsSchema, EnvConfig, etc.)
+- [x] 02-02-PLAN.md - Validation Utilities (ValidationError class, validateConfig)
+- [x] 02-03-PLAN.md - Merge Algorithm (deepMergeConfig, ConfigLayer type)
+- [x] 02-04-PLAN.md - Provider Types (ApiProviderConfig, TemplateConfig, AuthType)
+- [x] 02-05-PLAN.md - Barrel Export & Integration (index.ts, DEFAULT_CONFIG)
 
 ### Phase 3: Data Layer
 
@@ -60,11 +60,11 @@
 **Plans:** 5 plans
 
 **Plans:**
-- [x] 03-01-PLAN.md — ConfigRepository (read/write/exists functions)
-- [x] 03-02-PLAN.md — TemplateStore (templates.json CRUD)
-- [x] 03-03-PLAN.md — ProjectIndex (projects.json, ProjectEntry)
-- [x] 03-04-PLAN.md — FileWatcher (chokidar, debounce)
-- [x] 03-05-PLAN.md — AppState + Barrel Export
+- [x] 03-01-PLAN.md - ConfigRepository (read/write/exists functions)
+- [x] 03-02-PLAN.md - TemplateStore (templates.json CRUD)
+- [x] 03-03-PLAN.md - ProjectIndex (projects.json, ProjectEntry)
+- [x] 03-04-PLAN.md - FileWatcher (chokidar, debounce)
+- [x] 03-05-PLAN.md - AppState + Barrel Export
 
 ### Phase 4: Services Layer
 
@@ -73,12 +73,12 @@
 **Plans:** 6 plans
 
 **Plans:**
-- [x] 04-01-PLAN.md — ServiceError + Test Stubs
-- [x] 04-02-PLAN.md — ConfigService (config CRUD, merge, apply)
-- [x] 04-03-PLAN.md — ProjectService (scan, register, list)
-- [x] 04-04-PLAN.md — TemplateService (template CRUD, apply)
-- [x] 04-05-PLAN.md — ProviderService (connectivity test)
-- [x] 04-06-PLAN.md — Barrel Export + M4 Verification
+- [x] 04-01-PLAN.md - ServiceError + Test Stubs
+- [x] 04-02-PLAN.md - ConfigService (config CRUD, merge, apply)
+- [x] 04-03-PLAN.md - ProjectService (scan, register, list)
+- [x] 04-04-PLAN.md - TemplateService (template CRUD, apply)
+- [x] 04-05-PLAN.md - ProviderService (connectivity test)
+- [x] 04-06-PLAN.md - Barrel Export + M4 Verification
 
 ### Phase 5: CLI Interface
 
@@ -87,12 +87,12 @@
 **Plans:** 6 plans
 
 **Plans:**
-- [x] 05-01-PLAN.md — CLI Test Infrastructure + Error Handling
-- [x] 05-02-PLAN.md — CLI Entry Point + list Command
-- [x] 05-03-PLAN.md — switch Command (optional argument + TUI fallback)
-- [x] 05-04-PLAN.md — current Command
-- [x] 05-05-PLAN.md — template Subcommand (nested CRUD)
-- [x] 05-06-PLAN.md — Barrel Export + Integration
+- [x] 05-01-PLAN.md - CLI Test Infrastructure + Error Handling
+- [x] 05-02-PLAN.md - CLI Entry Point + list Command
+- [x] 05-03-PLAN.md - switch Command (optional argument + TUI fallback)
+- [x] 05-04-PLAN.md - current Command
+- [x] 05-05-PLAN.md - template Subcommand (nested CRUD)
+- [x] 05-06-PLAN.md - Barrel Export + Integration
 
 ### Phase 6: Core TUI
 
@@ -101,13 +101,13 @@
 **Plans:** 7 plans
 
 **Plans:**
-- [x] 06-01-PLAN.md — Dependencies + Hooks (useKeyInput, useNavigation)
-- [x] 06-02-PLAN.md — Reusable Components (StatusBar, LoadingIndicator)
-- [x] 06-03-PLAN.md — ProjectListScreen (fuzzy search, navigation)
-- [x] 06-04-PLAN.md — ConfigEditorScreen (template preview)
-- [x] 06-05-PLAN.md — ConfirmScreen (y/n confirmation)
-- [x] 06-06-PLAN.md — TUI App Container (screen routing)
-- [x] 06-07-PLAN.md — CLI Integration + M4 Verification
+- [x] 06-01-PLAN.md - Dependencies + Hooks (useKeyInput, useNavigation)
+- [x] 06-02-PLAN.md - Reusable Components (StatusBar, LoadingIndicator)
+- [x] 06-03-PLAN.md - ProjectListScreen (fuzzy search, navigation)
+- [x] 06-04-PLAN.md - ConfigEditorScreen (template preview)
+- [x] 06-05-PLAN.md - ConfirmScreen (y/n confirmation)
+- [x] 06-06-PLAN.md - TUI App Container (screen routing)
+- [x] 06-07-PLAN.md - CLI Integration + M4 Verification
 
 ### Phase 7: Project Management Features
 
@@ -116,10 +116,10 @@
 **Plans:** 4 plans
 
 **Plans:**
-- [x] 07-01-PLAN.md — Auto-Switch Shell Hook
-- [x] 07-02-PLAN.md — Project Directory Scan
-- [x] 07-03-PLAN.md — Import/Export Configs
-- [x] 07-04-PLAN.md — Integration & Barrel Exports
+- [x] 07-01-PLAN.md - Auto-Switch Shell Hook
+- [x] 07-02-PLAN.md - Project Directory Scan
+- [x] 07-03-PLAN.md - Import/Export Configs
+- [x] 07-04-PLAN.md - Integration & Barrel Exports
 
 ### Phase 8: Quality & Polish
 
@@ -128,15 +128,15 @@
 **Plans:** 5 plans
 
 **Plans:**
-- [x] 08-01-PLAN.md — Diff Utilities + UnifiedDiff Component
-- [x] 08-02-PLAN.md — DiffScreen + ConfigEditorScreen Integration
-- [x] 08-03-PLAN.md — ValidationErrorScreen + Undo Service
-- [x] 08-04-PLAN.md — TUI Undo Integration
-- [x] 08-05-PLAN.md — Performance Benchmarks + Documentation
+- [x] 08-01-PLAN.md - Diff Utilities + UnifiedDiff Component
+- [x] 08-02-PLAN.md - DiffScreen + ConfigEditorScreen Integration
+- [x] 08-03-PLAN.md - ValidationErrorScreen + Undo Service
+- [x] 08-04-PLAN.md - TUI Undo Integration
+- [x] 08-05-PLAN.md - Performance Benchmarks + Documentation
 
 </details>
 
-### 🚧 v2.0 Terminal-Native (In Progress)
+### v2.0 Terminal-Native (In Progress)
 
 **Milestone Goal:** Terminal-Native 体验重构 - npm 风格列表选择，简化配置管理，首次引导流程，OpenCode Terminal Aesthetic
 
@@ -162,7 +162,13 @@
   3. User sees API key masked in all display contexts (preview/diff/logs)
   4. User's API key is never exposed in CLI args, logs, or screenshots
   5. System maintains atomic write and backup from v1.0 (R1/R2)
-**Plans**: TBD
+**Plans**: 4 plans
+
+Plans:
+- [ ] 10-01-PLAN.md - Create ApiConfig types and replaceEnvModel function
+- [ ] 10-02-PLAN.md - Create ApiConfigStore and ApiService for CRUD operations
+- [ ] 10-03-PLAN.md - Create API key security utilities (masking + CLI enforcement)
+- [ ] 10-04-PLAN.md - Integrate modules via barrel exports, add applyApiConfig method
 
 #### Phase 11: Config CLI Commands
 **Goal**: Users can manage API configurations via CLI with secure input
@@ -181,7 +187,7 @@
 **Depends on**: Phase 11
 **Requirements**: ONB-01, ONB-02, ONB-03, ONB-04, ONB-05
 **Success Criteria** (what must be TRUE):
-  1. User experiences first-run wizard (API config → scan directory → scan → main interface)
+  1. User experiences first-run wizard (API config - scan directory - scan - main interface)
   2. System detects firstRunCompleted flag in AppState
   3. System scans directories with Promise.all parallel traversal (not serial)
   4. System skips node_modules/.git/dist/build/target/.venv/__pycache__
@@ -229,7 +235,7 @@
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 9 → 10 → 11 → 12 → 13 → 14 → 15
+Phases execute in numeric order: 9 - 10 - 11 - 12 - 13 - 14 - 15
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
@@ -242,7 +248,7 @@ Phases execute in numeric order: 9 → 10 → 11 → 12 → 13 → 14 → 15
 | 7. Project Management | v1.0 | 4/4 | Complete | 2026-04-14 |
 | 8. Quality & Polish | v1.0 | 5/5 | Complete | 2026-04-15 |
 | 9. Prompts Integration | v2.0 | 0/TBD | Not started | - |
-| 10. Config Service | v2.0 | 0/TBD | Not started | - |
+| 10. Config Service | v2.0 | 0/4 | Ready to execute | - |
 | 11. Config CLI Commands | v2.0 | 0/TBD | Not started | - |
 | 12. First-Run Wizard | v2.0 | 0/TBD | Not started | - |
 | 13. Switch Flow | v2.0 | 0/TBD | Not started | - |
@@ -288,4 +294,4 @@ Phases execute in numeric order: 9 → 10 → 11 → 12 → 13 → 14 → 15
 
 *Roadmap for: CCAPISwitch*  
 *Created: 2026-04-13*  
-*Last updated: 2026-04-30 (v2.0 roadmap created)*
+*Last updated: 2026-04-30 (Phase 10 plans created)*
