@@ -34,6 +34,10 @@ export interface AppStateData {
   recentProjects: string[];
   /** D-05: User-configured scan directories for project discovery */
   scanDirectories: string[];
+  /** D-03: First-run wizard completion flag */
+  firstRunCompleted: boolean;
+  /** D-09: User override for skip directories (merged with DEFAULT_SKIP_DIRS) */
+  skipDirectories: string[];
 }
 
 /**
@@ -49,6 +53,8 @@ const DEFAULT_STATE: AppStateData = {
   },
   recentProjects: [],
   scanDirectories: [],
+  firstRunCompleted: false,  // D-03 default
+  skipDirectories: [],       // D-09 default
 };
 
 /**

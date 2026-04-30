@@ -205,4 +205,44 @@ describe('AppState', () => {
       newInstance.clear();
     });
   });
+
+  describe('firstRunCompleted', () => {
+    it('should default to false', () => {
+      expect(appState.get('firstRunCompleted')).toBe(false);
+    });
+
+    it('should store and retrieve completion flag', () => {
+      appState.set('firstRunCompleted', true);
+      expect(appState.get('firstRunCompleted')).toBe(true);
+    });
+
+    it('should persist completion flag across instances', () => {
+      appState.set('firstRunCompleted', true);
+
+      const newInstance = new AppState(TEST_PROJECT_NAME);
+      expect(newInstance.get('firstRunCompleted')).toBe(true);
+
+      newInstance.clear();
+    });
+  });
+
+  describe('skipDirectories', () => {
+    it('should default to empty array', () => {
+      expect(appState.get('skipDirectories')).toEqual([]);
+    });
+
+    it('should store and retrieve skip directories', () => {
+      appState.set('skipDirectories', ['custom-skip']);
+      expect(appState.get('skipDirectories')).toEqual(['custom-skip']);
+    });
+
+    it('should persist skip directories across instances', () => {
+      appState.set('skipDirectories', ['my-dir']);
+
+      const newInstance = new AppState(TEST_PROJECT_NAME);
+      expect(newInstance.get('skipDirectories')).toEqual(['my-dir']);
+
+      newInstance.clear();
+    });
+  });
 });
