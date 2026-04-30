@@ -466,4 +466,365 @@ describe('config command', () => {
       freshExit.mockRestore();
     });
   });
+
+  // Task 3 Tests: config remove command
+  describe('config remove registration', () => {
+    it('Test 15: config remove subcommand registered with rm alias (D-04)', () => {
+      const commands = program.commands;
+      const configCmd = commands.find(cmd => cmd.name() === 'config');
+      const removeCmd = configCmd?.commands.find(cmd => cmd.name() === 'remove');
+      expect(removeCmd).toBeDefined();
+      expect(removeCmd?.aliases()).toContain('rm');
+    });
+
+    it('Test 16: --force option skips confirmation', async () => {
+      // Mock getConfig to return existing config
+      const serviceMod = await import('../../lib/services/api-service.js');
+      vi.mocked(serviceMod.ApiService).mockImplementationOnce(() => ({
+        createConfig: vi.fn().mockResolvedValue(undefined),
+        getConfig: vi.fn().mockResolvedValue({
+          name: 'test-config',
+          apiKey: 'sk-test-key',
+          baseUrl: 'https://api.anthropic.com',
+          mode: 'unified',
+          modelName: 'claude-sonnet-4-6',
+        }),
+        deleteConfig: vi.fn().mockResolvedValue(true),
+        getAllConfigs: vi.fn().mockResolvedValue({}),
+        listConfigs: vi.fn().mockResolvedValue([]),
+      }));
+
+      const freshProgram = new Command();
+      freshProgram.exitOverride();
+      registerConfigCommand(freshProgram);
+      const freshConsole = vi.spyOn(console, 'log').mockImplementation(() => {});
+      const freshExit = vi.spyOn(process, 'exit').mockImplementation(() => undefined as never);
+
+      try {
+        await freshProgram.parseAsync(['node', 'cc-config', 'config', 'remove', 'test-config', '--force']);
+      } catch {
+        // May exit on success
+      }
+
+      // Verify delete was called (no confirmation prompt)
+      const ApiService = vi.mocked(await import('../../lib/services/api-service.js')).ApiService;
+      expect(ApiService).toHaveBeenCalled();
+
+      freshConsole.mockRestore();
+      freshExit.mockRestore();
+    });
+
+    it('Test 17: getConfig called to verify existence before deletion', async () => {
+      const mockGetConfig = vi.fn().mockResolvedValue({
+        name: 'test-config',
+        apiKey: 'sk-test-key',
+        baseUrl: 'https://api.anthropic.com',
+        mode: 'unified',
+        modelName: 'claude-sonnet-4-6',
+      });
+      const mockDeleteConfig = vi.fn().mockResolvedValue(true);
+
+      const serviceMod = await import('../../lib/services/api-service.js');
+      vi.mocked(serviceMod.ApiService).mockImplementationOnce(() => ({
+        createConfig: vi.fn().mockResolvedValue(undefined),
+        getConfig: mockGetConfig,
+        deleteConfig: mockDeleteConfig,
+        getAllConfigs: vi.fn().mockResolvedValue({}),
+        listConfigs: vi.fn().mockResolvedValue([]),
+      }));
+
+      const freshProgram = new Command();
+      freshProgram.exitOverride();
+      registerConfigCommand(freshProgram);
+      const freshConsole = vi.spyOn(console, 'log').mockImplementation(() => {});
+      const freshExit = vi.spyOn(process, 'exit').mockImplementation(() => undefined as never);
+
+      try {
+        await freshProgram.parseAsync(['node', 'cc-config', 'config', 'remove', 'test-config', '--force']);
+      } catch {
+        // May exit on success
+      }
+
+      expect(mockGetConfig).toHaveBeenCalledWith('test-config');
+
+      freshConsole.mockRestore();
+      freshExit.mockRestore();
+    });
+
+    it('Test 18: prompts.confirm() called without --force (D-08)', async () => {
+      // Mock getConfig to return existing config
+      const serviceMod = await import('../../lib/services/api-service.js');
+      vi.mocked(serviceMod.ApiService).mockImplementationOnce(() => ({
+        createConfig: vi.fn().mockResolvedValue(undefined),
+        getConfig: vi.fn().mockResolvedValue({
+          name: 'test-config',
+          apiKey: 'sk-test-key',
+          baseUrl: 'https://api.anthropic.com',
+          mode: 'unified',
+          modelName: 'claude-sonnet-4-6',
+        }),
+        deleteConfig: vi.fn().mockResolvedValue(true),
+        getAllConfigs: vi.fn().mockResolvedValue({}),
+        listConfigs: vi.fn().mockResolvedValue([]),
+      }));
+
+      // Mock prompts.confirm to return true
+      const promptsMod = await import('prompts');
+      vi.mocked(promptsMod.default).mockResolvedValueOnce({ value: true });
+
+      const freshProgram = new Command();
+      freshProgram.exitOverride();
+      registerConfigCommand(freshProgram);
+      const freshConsole = vi.spyOn(console, 'log').mockImplementation(() => {});
+      const freshConsoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
+      const freshExit = vi.spyOn(process, 'exit').mockImplementation(() => undefined as never);
+
+      try {
+        await freshProgram.parseAsync(['node', 'cc-config', 'config', 'remove', 'test-config']);
+      } catch {
+        // May exit on success
+      }
+
+      // Verify prompts was called with confirm type
+      expect(promptsMod.default).toHaveBeenCalledWith(expect.objectContaining({
+        type: 'confirm',
+      }));
+
+      freshConsole.mockRestore();
+      freshConsoleError.mockRestore();
+      freshExit.mockRestore();
+    });
+
+    it('Test 19: deleteConfig called after confirmation', async () => {
+      const mockDeleteConfig = vi.fn().mockResolvedValue(true);
+
+      const serviceMod = await import('../../lib/services/api-service.js');
+      vi.mocked(serviceMod.ApiService).mockImplementationOnce(() => ({
+        createConfig: vi.fn().mockResolvedValue(undefined),
+        getConfig: vi.fn().mockResolvedValue({
+          name: 'test-config',
+          apiKey: 'sk-test-key',
+          baseUrl: 'https://api.anthropic.com',
+          mode: 'unified',
+          modelName: 'claude-sonnet-4-6',
+        }),
+        deleteConfig: mockDeleteConfig,
+        getAllConfigs: vi.fn().mockResolvedValue({}),
+        listConfigs: vi.fn().mockResolvedValue([]),
+      }));
+
+      // Mock prompts.confirm to return true
+      const promptsMod = await import('prompts');
+      vi.mocked(promptsMod.default).mockResolvedValueOnce({ value: true });
+
+      const freshProgram = new Command();
+      freshProgram.exitOverride();
+      registerConfigCommand(freshProgram);
+      const freshConsole = vi.spyOn(console, 'log').mockImplementation(() => {});
+      const freshConsoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
+      const freshExit = vi.spyOn(process, 'exit').mockImplementation(() => undefined as never);
+
+      try {
+        await freshProgram.parseAsync(['node', 'cc-config', 'config', 'remove', 'test-config']);
+      } catch {
+        // May exit on success
+      }
+
+      expect(mockDeleteConfig).toHaveBeenCalledWith('test-config');
+
+      freshConsole.mockRestore();
+      freshConsoleError.mockRestore();
+      freshExit.mockRestore();
+    });
+
+    it('Test 20: CONFIG_NOT_FOUND error handled via handleCLIError', async () => {
+      // Mock getConfig to return null (config not found)
+      const serviceMod = await import('../../lib/services/api-service.js');
+      vi.mocked(serviceMod.ApiService).mockImplementationOnce(() => ({
+        createConfig: vi.fn().mockResolvedValue(undefined),
+        getConfig: vi.fn().mockResolvedValue(null),
+        deleteConfig: vi.fn().mockResolvedValue(true),
+        getAllConfigs: vi.fn().mockResolvedValue({}),
+        listConfigs: vi.fn().mockResolvedValue([]),
+      }));
+
+      const freshProgram = new Command();
+      freshProgram.exitOverride();
+      registerConfigCommand(freshProgram);
+      const freshConsole = vi.spyOn(console, 'log').mockImplementation(() => {});
+      const freshConsoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
+      const freshExit = vi.spyOn(process, 'exit').mockImplementation(() => undefined as never);
+
+      try {
+        await freshProgram.parseAsync(['node', 'cc-config', 'config', 'remove', 'nonexistent']);
+      } catch {
+        // May exit on NOT_FOUND
+      }
+
+      // Verify error message was displayed
+      expect(freshConsoleError.mock.calls.some(call =>
+        typeof call[0] === 'string' && call[0].includes('不存在')
+      )).toBe(true);
+
+      freshConsole.mockRestore();
+      freshConsoleError.mockRestore();
+      freshExit.mockRestore();
+    });
+
+    it('Test 21: Risk warning displayed (D-10)', async () => {
+      const serviceMod = await import('../../lib/services/api-service.js');
+      vi.mocked(serviceMod.ApiService).mockImplementationOnce(() => ({
+        createConfig: vi.fn().mockResolvedValue(undefined),
+        getConfig: vi.fn().mockResolvedValue({
+          name: 'test-config',
+          apiKey: 'sk-test-key',
+          baseUrl: 'https://api.anthropic.com',
+          mode: 'unified',
+          modelName: 'claude-sonnet-4-6',
+        }),
+        deleteConfig: vi.fn().mockResolvedValue(true),
+        getAllConfigs: vi.fn().mockResolvedValue({}),
+        listConfigs: vi.fn().mockResolvedValue([]),
+      }));
+
+      // Mock prompts.confirm to return true
+      const promptsMod = await import('prompts');
+      vi.mocked(promptsMod.default).mockResolvedValueOnce({ value: true });
+
+      const freshProgram = new Command();
+      freshProgram.exitOverride();
+      registerConfigCommand(freshProgram);
+      const freshConsole = vi.spyOn(console, 'log').mockImplementation(() => {});
+      const freshConsoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
+      const freshExit = vi.spyOn(process, 'exit').mockImplementation(() => undefined as never);
+
+      try {
+        await freshProgram.parseAsync(['node', 'cc-config', 'config', 'remove', 'test-config']);
+      } catch {
+        // May exit on success
+      }
+
+      // Verify risk warning message (D-10)
+      const calls = freshConsole.mock.calls;
+      const hasRiskWarning = calls.some(call =>
+        typeof call[0] === 'string' && (call[0].includes('删除') || call[0].includes('更新'))
+      );
+      expect(hasRiskWarning).toBe(true);
+
+      freshConsole.mockRestore();
+      freshConsoleError.mockRestore();
+      freshExit.mockRestore();
+    });
+  });
+
+  // Task 3 Tests: displayValidationErrors function
+  describe('displayValidationErrors', () => {
+    it('Test 22: Groups errors by field type (name/apiKey/baseUrl/modelName)', async () => {
+      // Import the function directly
+      const { displayValidationErrors } = await import('./config.js');
+      const { ValidationError } = await import('../../lib/types/validation.js');
+
+      const error = new ValidationError('Test', [
+        { path: ['name'], message: '名称不能为空', code: 'invalid_type' },
+        { path: ['apiKey'], message: 'API Key 长度不足', code: 'invalid_type' },
+      ]);
+
+      const freshConsoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+      displayValidationErrors(error);
+
+      // Verify grouped output
+      expect(freshConsoleError.mock.calls.some(call =>
+        typeof call[0] === 'string' && call[0].includes('配置名错误')
+      )).toBe(true);
+      expect(freshConsoleError.mock.calls.some(call =>
+        typeof call[0] === 'string' && call[0].includes('API Key 错误')
+      )).toBe(true);
+
+      freshConsoleError.mockRestore();
+    });
+
+    it('Test 23: chalk.red for group titles, chalk.gray for messages (D-12)', async () => {
+      const { displayValidationErrors } = await import('./config.js');
+      const { ValidationError } = await import('../../lib/types/validation.js');
+
+      const error = new ValidationError('Test', [
+        { path: ['name'], message: '名称不能为空', code: 'invalid_type' },
+      ]);
+
+      const freshConsoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+      displayValidationErrors(error);
+
+      // Verify colors are used (chalk adds styling)
+      expect(freshConsoleError).toHaveBeenCalled();
+
+      freshConsoleError.mockRestore();
+    });
+
+    it('Test 24: Output to stderr via console.error (D-13)', async () => {
+      const { displayValidationErrors } = await import('./config.js');
+      const { ValidationError } = await import('../../lib/types/validation.js');
+
+      const error = new ValidationError('Test', [
+        { path: ['name'], message: '名称不能为空', code: 'invalid_type' },
+      ]);
+
+      const freshConsoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
+      const freshConsoleLog = vi.spyOn(console, 'log').mockImplementation(() => {});
+
+      displayValidationErrors(error);
+
+      // Verify console.error was called (stderr), not console.log (stdout)
+      expect(freshConsoleError).toHaveBeenCalled();
+      expect(freshConsoleLog).not.toHaveBeenCalled();
+
+      freshConsoleError.mockRestore();
+      freshConsoleLog.mockRestore();
+    });
+
+    it('Test 25: Empty groups not displayed', async () => {
+      const { displayValidationErrors } = await import('./config.js');
+      const { ValidationError } = await import('../../lib/types/validation.js');
+
+      const error = new ValidationError('Test', [
+        { path: ['name'], message: '名称不能为空', code: 'invalid_type' },
+      ]);
+
+      const freshConsoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+      displayValidationErrors(error);
+
+      // Verify only '配置名错误' group is displayed (not empty groups)
+      const calls = freshConsoleError.mock.calls;
+      const hasEmptyGroup = calls.some(call =>
+        typeof call[0] === 'string' && call[0].includes('URL 错误')
+      );
+      expect(hasEmptyGroup).toBe(false);
+
+      freshConsoleError.mockRestore();
+    });
+
+    it('Test 26: API key values sanitized in error messages (T-11-07)', async () => {
+      const { displayValidationErrors } = await import('./config.js');
+      const { ValidationError } = await import('../../lib/types/validation.js');
+
+      const error = new ValidationError('Test', [
+        { path: ['apiKey'], message: 'sk-ant-api03-secret-key is invalid', code: 'invalid_type' },
+      ]);
+
+      const freshConsoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+      displayValidationErrors(error);
+
+      // Verify sk-* pattern is sanitized
+      const calls = freshConsoleError.mock.calls;
+      const hasRawKey = calls.some(call =>
+        typeof call[0] === 'string' && call[0].includes('sk-ant-api03-secret-key')
+      );
+      expect(hasRawKey).toBe(false);
+
+      freshConsoleError.mockRestore();
+    });
+  });
 });

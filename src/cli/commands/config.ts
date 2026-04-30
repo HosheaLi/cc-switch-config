@@ -35,7 +35,7 @@ import { ValidationError } from '../../lib/types/validation.js';
  *
  * @param error - ValidationError with issues array
  */
-function displayValidationErrors(error: ValidationError): void {
+export function displayValidationErrors(error: ValidationError): void {
   // D-11: Group by field type
   const groups: Record<string, string[]> = {
     '配置名错误': [],
@@ -164,5 +164,48 @@ export function registerConfigCommand(program: Command): void {
       }
     });
 
-  // Placeholder for remove - will be added in Task 3
+  // config remove - delete config with confirmation (D-08/U5)
+  config
+    .command('remove <name>')
+    .alias('rm')  // D-04: subcommand alias
+    .description('Remove an API configuration')
+    .option('-f, --force', 'skip confirmation prompt')
+    .action(async (name: string, options: { force?: boolean }) => {
+      try {
+        const apiConfigStore = new ApiConfigStore();
+        const service = new ApiService(apiConfigStore, readConfig, writeConfig);
+
+        // Check config exists first
+        const existing = await service.getConfig(name);
+        if (!existing) {
+          console.error(chalk.red(`配置 "${name}" 不存在`));
+          process.exit(ExitCodes.NOT_FOUND);
+        }
+
+        // D-08: Confirmation flow (NOT template.ts exit pattern)
+        if (!options.force) {
+          const confirmed = await prompts({
+            type: 'confirm',
+            name: 'value',
+            message: `确认删除配置 "${name}"？`,
+            initial: false,
+          });
+
+          if (!confirmed.value) {
+            console.log(chalk.gray('已取消'));
+            process.exit(0);
+          }
+        }
+
+        // D-10: Risk warning before deletion
+        console.log(chalk.yellow(`正在删除配置 "${name}"...`));
+        console.log(chalk.gray('使用此配置的项目需要更新'));
+
+        await service.deleteConfig(name);
+        console.log(chalk.green(`✓ 配置 "${name}" 已删除`));
+
+      } catch (error) {
+        handleCLIError(error);
+      }
+    });
 }
