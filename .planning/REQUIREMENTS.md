@@ -76,34 +76,34 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| TUI-01 | Phase 1 | Pending |
-| TUI-02 | Phase 1 | Pending |
-| TUI-03 | Phase 1 | Pending |
-| TUI-04 | Phase 1 | Pending |
-| TUI-05 | Phase 1 | Pending |
-| TUI-06 | Phase 7 | Pending |
-| CFG-01 | Phase 2 | Pending |
-| CFG-02 | Phase 2 | Pending |
-| CFG-04 | Phase 2 | Pending |
-| CFG-03 | Phase 3 | Pending |
-| CFG-05 | Phase 5 | Pending |
-| CFG-06 | Phase 7 | Pending |
-| ONB-01 | Phase 4 | Pending |
-| ONB-02 | Phase 4 | Pending |
-| ONB-03 | Phase 4 | Pending |
-| ONB-04 | Phase 4 | Pending |
-| ONB-05 | Phase 4 | Pending |
-| ONB-06 | Phase 5 | Pending |
-| UI-01 | Phase 6 | Pending |
-| UI-02 | Phase 6 | Pending |
-| UI-03 | Phase 6 | Pending |
-| UI-04 | Phase 6 | Pending |
-| UI-05 | Phase 6 | Pending |
-| UI-06 | Phase 6 | Pending |
-| SEC-01 | Phase 2 | Pending |
-| SEC-02 | Phase 3 | Pending |
-| SEC-03 | Phase 2 | Pending |
-| SEC-04 | Phase 3 | Pending |
+| TUI-01 | Phase 09 | Pending |
+| TUI-02 | Phase 09 | Pending |
+| TUI-03 | Phase 09 | Pending |
+| TUI-04 | Phase 09 | Pending |
+| TUI-05 | Phase 09 | Pending |
+| TUI-06 | Phase 15 | Pending |
+| CFG-01 | Phase 10 | Pending |
+| CFG-02 | Phase 10 | Pending |
+| CFG-04 | Phase 10 | Pending |
+| CFG-03 | Phase 11 | Pending |
+| CFG-05 | Phase 13 | Pending |
+| CFG-06 | Phase 15 | Pending |
+| ONB-01 | Phase 12 | Pending |
+| ONB-02 | Phase 12 | Pending |
+| ONB-03 | Phase 12 | Pending |
+| ONB-04 | Phase 12 | Pending |
+| ONB-05 | Phase 12 | Pending |
+| ONB-06 | Phase 13 | Pending |
+| UI-01 | Phase 14 | Pending |
+| UI-02 | Phase 14 | Pending |
+| UI-03 | Phase 14 | Pending |
+| UI-04 | Phase 14 | Pending |
+| UI-05 | Phase 14 | Pending |
+| UI-06 | Phase 14 | Pending |
+| SEC-01 | Phase 10 | Pending |
+| SEC-02 | Phase 11 | Pending |
+| SEC-03 | Phase 10 | Pending |
+| SEC-04 | Phase 11 | Pending |
 
 **Coverage:**
 - v1 requirements: 28 total
@@ -112,4 +112,4 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 ---
 *Requirements defined: 2026-04-30*
-*Last updated: 2026-04-30 after research synthesis*
+*Last updated: 2026-04-30 after roadmap creation*

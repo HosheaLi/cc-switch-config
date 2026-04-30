@@ -1,17 +1,17 @@
 ---
 gsd_state_version: 1.0
 milestone: v2.0
-milestone_name: 重构
-current_phase: 00
+milestone_name: Terminal-Native
+current_phase: 09
 current_plan: Not started
-status: defining_requirements
+status: ready_to_plan
 last_updated: "2026-04-30T00:00:00.000Z"
 progress:
-  total_phases: 0
-  completed_phases: 0
+  total_phases: 15
+  completed_phases: 8
   total_plans: 0
-  completed_plans: 0
-  percent: 0
+  completed_plans: 33
+  percent: 53
 ---
 
 # Project State
@@ -23,11 +23,13 @@ progress:
 
 ## Current Position
 
-**Milestone:** v2.0 重构
-**Phase:** Not started (defining requirements)
-**Plan:** —
-**Status:** Defining requirements
-**Last activity:** 2026-04-30 — Milestone v2.0 started
+**Milestone:** v2.0 Terminal-Native
+**Phase:** 9 of 15 (Prompts Integration)
+**Plan:** Not started
+**Status:** Ready to plan
+**Last activity:** 2026-04-30 — v2.0 roadmap created, ready to begin Phase 9
+
+Progress: [████████░░░░░░░░░░░░] 53% (8/15 phases complete)
 
 ---
 
@@ -35,25 +37,34 @@ progress:
 
 ### v1.0 Completed (2026-04-15)
 
-- 8 phases, 45 plans, 875 tests, 22,701 LOC
+- 8 phases, 33 plans, 875 tests, 22,701 LOC
 - All P1/P2 requirements validated
 - Core features: Project management, Ink TUI, CLI, Templates, Validation, Diff, Undo
 - Quality: Performance benchmarks passed, Documentation complete
-- Key decisions: Ink + React (TUI), 明文存储 Token, Vitest bench mode
+- Key decisions: Ink + React (TUI), 明文存储 Token, Vitest bench mode, Duck typing for errors
 
 ### v2.0 Goals
 
-**TUI 替换:** Ink → prompts (npm 风格列表选择)
+**TUI 替换:** Ink → prompts (npm 风格列表选择, j/k + Enter/Esc)
 **配置简化:** TemplateConfig → 三元组 (name/apiKey/baseUrl/modelName)
-**首次引导:** 安装后引导流程 (API配置 → 扫描)
-**精确替换:** 只修改 env/model，保留其他字段
-**Terminal Aesthetic:** OpenCode 设计理念 (温暖色调, Apple HIG 语义色)
+**首次引导:** 安装后引导流程 (API配置 → 扫描目录 → 扫描 → 主界面)
+**精确替换:** 只修改 env/model，保留 permissions/hooks/mcpServers
+**Terminal Aesthetic:** OpenCode 设计理念 (#201d1d/#fdfcfc, Apple HIG 语义色)
+**安全增强:** API key 不暴露于 CLI args/logs/screenshots, password-type input
 
 ---
 
 ## Phase Progress
 
-(None — roadmap not yet created)
+| Phase | Status | Plans |
+|-------|--------|-------|
+| 09. Prompts Integration | Not started | TBD |
+| 10. Config Service | Not started | TBD |
+| 11. Config CLI Commands | Not started | TBD |
+| 12. First-Run Wizard | Not started | TBD |
+| 13. Switch Flow | Not started | TBD |
+| 14. Terminal Aesthetic | Not started | TBD |
+| 15. Ink Removal | Not started | TBD |
 
 ---
 
@@ -68,12 +79,27 @@ progress:
 - **D-05:** 扫描目录：用户配置根目录
 - **R1:** 原子写入
 - **R2:** 备份系统
+- **M4:** 模块分离 (Services 不依赖 UI)
 
 ### v2.0 New Decisions (To be locked)
 
 - **TUI Framework:** prompts (terkelg/prompts) — npm 风格列表选择
 - **Config Structure:** 三元组 ApiConfig (name/apiKey/baseUrl/modelName)
+- **Field Replacement:** 精确字段替换 (只修改 env/model，保留其他)
 - **Design System:** OpenCode Terminal Aesthetic (#201d1d/#fdfcfc, Apple HIG)
+- **Security:** API key password-type input, masked display, no CLI args exposure
+
+---
+
+## Deferred Items
+
+| Category | Item | Status | Deferred At |
+|----------|------|--------|-------------|
+| Feature | MCP 服务器管理 | v3 | 2026-04-30 |
+| Feature | API 连接验证 | v3 | 2026-04-30 |
+| Feature | 预定义供应商模板 | v3 | 2026-04-30 |
+| Feature | 批量操作 | v3 | 2026-04-30 |
+| Feature | 桌面 GUI | v3 | 2026-04-30 |
 
 ---
 
@@ -81,8 +107,9 @@ progress:
 
 | Date | Action | Result |
 |------|--------|--------|
-| 2026-04-30 | Milestone v2.0 started | PROJECT.md updated with Active requirements |
+| 2026-04-30 | v2.0 roadmap created | 7 phases (09-15), 28 requirements mapped |
 | 2026-04-15 | v1.0 completed | 875 tests, ready for release |
 
 ---
-*State updated: 2026-04-30 after v2.0 milestone started*
+
+*State updated: 2026-04-30 after v2.0 roadmap created*

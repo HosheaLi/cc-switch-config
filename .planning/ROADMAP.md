@@ -9,19 +9,27 @@
 
 ## Overview
 
-本路线图将项目分解为 8 个细粒度阶段，每个阶段聚焦特定能力域，确保增量交付和持续验证。阶段顺序基于依赖关系：Foundation → Data → Services → Interface → Features。
+从 v1.0 Ink React TUI 到 v2.0 Terminal-Native 体验的重构之旅。用 prompts 替换 Ink，简化配置管理为三元组，实现首次引导流程，建立 OpenCode Terminal Aesthetic 设计系统。
 
 ---
 
-## Phase Structure
+## Milestones
+
+- ✅ **v1.0 MVP** - Phases 1-8 (shipped 2026-04-15)
+- 🚧 **v2.0 Terminal-Native** - Phases 9-15 (in progress)
+
+---
+
+## Phases
+
+<details>
+<summary>✅ v1.0 MVP (Phases 1-8) - SHIPPED 2026-04-15</summary>
 
 ### Phase 1: Foundation & Safety
 
 **Goal:** 建立项目基础设施，实现关键安全机制防止配置损坏。
 
-**Duration Estimate:** 1-2 weeks
-
-**Plans:** 7 plans in 7 waves
+**Plans:** 7 plans
 
 **Plans:**
 - [x] 01-01-PLAN.md — Project Setup (package.json, tsconfig, build, test configs)
@@ -32,549 +40,252 @@
 - [x] 01-06-PLAN.md — Config Versioning & Migration (version field, migration framework)
 - [x] 01-07-PLAN.md — Token Security (git tracking detection, token masking)
 
-**Delivers:**
-- 项目结构搭建（TypeScript, tsup, vitest）
-- 安全文件操作模块（atomic writes, backup system）
-- 跨平台路径处理（env-paths, path.join）
-- JSON 解析增强错误消息（line numbers, context）
-- 配置 schema 版本化（version field, migration framework）
-- Token 安全检测（git tracking detection）
-
-**Requirements Addressed:**
-- R1: Atomic Writes (no corruption on crash)
-- R2: Backup System (auto backup before modifications)
-- R4: Cross-Platform (macOS/Linux/Windows)
-- U1: Clear Errors (JSON errors with line numbers)
-- M2: Type Safety (TypeScript project setup)
-- M3: Schema Versioning (config version field)
-- S1: Token Isolation (tokens never in git)
-- S2: File Permissions (token file security checks)
-
-**Dependencies:** None (foundation phase)
-
-**Verification:**
-- Crash test: kill -9 during write, verify config remains valid
-- Backup test: verify .backups/ exists after every modification
-- JSON error test: malformed config shows line number and context
-- Platform test: CI runs on macOS, Linux, Windows
-- Migration test: v0 config loads and migrates correctly
-- Security audit: no tokens in git-tracked files
-
-**Research Notes:** Standard patterns available — use fs-extra atomic writes, env-paths, zod validation. No research-phase needed.
-
----
-
 ### Phase 2: Types & Validation
 
-**Goal:** 定义类型系统和验证框架，建立配置管理的单一数据源（Single Source of Truth）。
+**Goal:** 定义类型系统和验证框架，建立配置管理的单一数据源。
 
-**Duration Estimate:** 1 week
-
-**Plans:** 5 plans in 3 waves
+**Plans:** 5 plans
 
 **Plans:**
-- [x] 02-01-PLAN.md — Core Config Schemas (ClaudeSettingsSchema, EnvConfig, McpServerConfig, PermissionRule, HookConfig)
-- [x] 02-02-PLAN.md — Validation Utilities (ValidationError class, validateConfig, prettifyError integration)
-- [x] 02-03-PLAN.md — Merge Algorithm (deepMergeConfig, ConfigLayer type, three-layer merge)
-- [x] 02-04-PLAN.md — Provider Types (ApiProviderConfig, TemplateConfig, AuthType enum)
-- [x] 02-05-PLAN.md — Barrel Export & Integration (index.ts, update DEFAULT_CONFIG)
-
-**Delivers:**
-- TypeScript 类型定义（从 Zod schema 推断）
-- Zod schemas 验证框架
-- 配置 merge 算法
-- 默认配置和常量定义
-
-**Requirements Addressed:**
-- M2: Type Safety (full TypeScript coverage)
-- F11: Config Validation (syntax + semantic check)
-- M4: Module Separation (clear boundaries)
-
-**Dependencies:**
-- Phase 1 (需要文件操作模块进行验证测试)
-
-**Verification:**
-- Type coverage: no `any` types in core modules
-- Schema inference: TypeScript types derived from Zod
-- Validation test: invalid configs caught with helpful messages
-- Merge test: config layers combine correctly
-
-**Research Notes:** Standard patterns — Zod documentation provides excellent TypeScript integration.
-
----
+- [x] 02-01-PLAN.md — Core Config Schemas (ClaudeSettingsSchema, EnvConfig, etc.)
+- [x] 02-02-PLAN.md — Validation Utilities (ValidationError class, validateConfig)
+- [x] 02-03-PLAN.md — Merge Algorithm (deepMergeConfig, ConfigLayer type)
+- [x] 02-04-PLAN.md — Provider Types (ApiProviderConfig, TemplateConfig, AuthType)
+- [x] 02-05-PLAN.md — Barrel Export & Integration (index.ts, DEFAULT_CONFIG)
 
 ### Phase 3: Data Layer
 
 **Goal:** 实现数据持久化层，建立 Repository 模式。
 
-**Duration Estimate:** 1-2 weeks
-
-**Plans:** 5 plans in 2 waves
+**Plans:** 5 plans
 
 **Plans:**
-- [x] 03-01-PLAN.md — ConfigRepository (readConfig/writeConfig/configExists functions)
-- [x] 03-02-PLAN.md — TemplateStore (templates.json CRUD, TemplateStore class)
-- [x] 03-03-PLAN.md — ProjectIndex (projects.json, ProjectEntry, pathIndex)
-- [x] 03-04-PLAN.md — FileWatcher (chokidar, debounce, global/project watch)
-- [x] 03-05-PLAN.md — AppState + Barrel Export (conf package, index.ts)
-
-**Delivers:**
-- ConfigRepository 实现（read/write/exists/backup）
-- Template Store 实现（templates.json CRUD）
-- Project Index 实现（projects.json 管理）
-- File Watcher 实现（监听配置变化）
-- 状态管理框架（store setup）
-
-**Requirements Addressed:**
-- DATA-01: ConfigRepository 封装
-- DATA-02: TemplateStore 实现
-- DATA-03: ProjectIndex 实现
-- DATA-04: FileWatcher 实现
-- DATA-05: AppState 实现
-- R3: Error Recovery (graceful handling of file I/O errors)
-- M4: Module Separation (data layer independent)
-
-**Dependencies:**
-- Phase 1 (atomic writes, backups)
-- Phase 2 (types, schemas)
-
-**Verification:**
-- Repository test: CRUD operations with atomic writes
-- Index test: project index persists correctly
-- Watcher test: file changes trigger updates
-- Error test: ENOENT and other errors handled gracefully
-
-**Research Notes:** Standard patterns — chokidar for file watching, conf for global storage.
-
----
+- [x] 03-01-PLAN.md — ConfigRepository (read/write/exists functions)
+- [x] 03-02-PLAN.md — TemplateStore (templates.json CRUD)
+- [x] 03-03-PLAN.md — ProjectIndex (projects.json, ProjectEntry)
+- [x] 03-04-PLAN.md — FileWatcher (chokidar, debounce)
+- [x] 03-05-PLAN.md — AppState + Barrel Export
 
 ### Phase 4: Services Layer
 
 **Goal:** 实现业务逻辑层，所有核心操作逻辑。
 
-**Duration Estimate:** 2-3 weeks
-
-**Plans:** 6 plans in 3 waves
+**Plans:** 6 plans
 
 **Plans:**
-- [x] 04-01-PLAN.md — Wave 0 Foundation (ServiceError + Test Stubs)
+- [x] 04-01-PLAN.md — ServiceError + Test Stubs
 - [x] 04-02-PLAN.md — ConfigService (config CRUD, merge, apply)
-- [x] 04-03-PLAN.md — ProjectService (scan, register, list, AppState extension)
-- [x] 04-04-PLAN.md — TemplateService (template CRUD, apply to project)
-- [x] 04-05-PLAN.md — ProviderService (connectivity test via HEAD)
+- [x] 04-03-PLAN.md — ProjectService (scan, register, list)
+- [x] 04-04-PLAN.md — TemplateService (template CRUD, apply)
+- [x] 04-05-PLAN.md — ProviderService (connectivity test)
 - [x] 04-06-PLAN.md — Barrel Export + M4 Verification
-
-**Delivers:**
-- ConfigService（config read/write/merge/validate）
-- ProjectService（project indexing, detection, CRUD）
-- TemplateService（template CRUD, apply to project）
-- ProviderService（provider defaults, connectivity test）
-- ServiceError class（error handling pattern）
-- services/index.ts（barrel export）
-
-**Requirements Addressed:**
-- F1: Profile CRUD Operations (create/list/switch/delete) — Plans 02, 04
-- F7: Custom Provider Templates (template management) — Plan 04
-- F4: List All Projects (project status display) — Plan 03
-- M4: Module Separation (services independent of UI) — Plans 01, 06
-- D-06: Provider Connectivity Test — Plan 05
-
-**Dependencies:**
-- Phase 2 (types, schemas)
-- Phase 3 (data layer repositories)
-
-**Verification:**
-- Service test: all services have >=80% test coverage
-- Integration test: services combine to complete workflows
-- Mock test: services work with mocked repositories
-- M4 verification: no UI imports in services
-
-**Research Notes:** Standard patterns — service layer encapsulation, dependency injection.
-
----
 
 ### Phase 5: CLI Interface
 
-**Goal:** 实现 CLI 入口和命令路由，提供快速操作入口和帮助文档。
+**Goal:** 实现 CLI 入口和命令路由，提供快速操作入口。
 
-**Duration Estimate:** 1 week
-
-**Plans:** 6 plans in 5 waves
+**Plans:** 6 plans
 
 **Plans:**
-- [x] 05-01-PLAN.md — Wave 0: Test Infrastructure + Error Handling (cli-table3, ExitCodes, handleCLIError)
-- [x] 05-02-PLAN.md — Wave 1: CLI Entry Point + list Command (Commander setup, table output, D-02)
-- [x] 05-03-PLAN.md — Wave 2: switch Command (optional argument + TUI fallback, D-06)
-- [x] 05-04-PLAN.md — Wave 3: current Command (active project/template display)
-- [x] 05-05-PLAN.md — Wave 3: template Subcommand (nested CRUD, D-07 aliases)
-- [x] 05-06-PLAN.md — Wave 4: Barrel Export + Integration (shebang entry, M4 verification)
-
-**Delivers:**
-- CLI entry point（shebang, commander setup, version, help）
-- 基础命令实现（list/ls, switch/sw, current/cur, template/tpl）
-- 帮助文档生成（--help, command reference）
-- 错误处理和用户反馈（stderr + exit code + chalk colors）
-- TUI launch stub（Phase 06 integration point）
-
-**Requirements Addressed:**
-- F5: Quick Switch Command (one-command efficiency) — Plan 03
-- F6: Current Status Display (show active config) — Plan 04
-- F4: List All Projects (project status display) — Plan 02
-- U4: Help Documentation (command reference) — Plan 02
-- F7: Custom Provider Templates (template CRUD) — Plan 05
-- U1: Clear Errors (exit codes + colored messages) — Plan 01
-- D-01 through D-08: CLI design decisions — All plans
-
-**Dependencies:**
-- Phase 4 (services for command execution)
-
-**Verification:**
-- Command test: all commands execute correctly
-- Help test: --help shows accurate documentation
-- Error test: errors shown clearly with actionable messages
-- Version test: -v shows 0.1.0
-- Alias test: ls, sw, cur, tpl aliases work
-- M4 test: CLI has no ink/react imports
-
-**Research Notes:** Standard patterns — Commander.js documentation, auto-generated help. cli-table3 for table output.
-
----
+- [x] 05-01-PLAN.md — CLI Test Infrastructure + Error Handling
+- [x] 05-02-PLAN.md — CLI Entry Point + list Command
+- [x] 05-03-PLAN.md — switch Command (optional argument + TUI fallback)
+- [x] 05-04-PLAN.md — current Command
+- [x] 05-05-PLAN.md — template Subcommand (nested CRUD)
+- [x] 05-06-PLAN.md — Barrel Export + Integration
 
 ### Phase 6: Core TUI
 
 **Goal:** 实现交互式 TUI，核心用户界面。
 
-**Duration Estimate:** 2-3 weeks
-
-**Plans:** 7 plans in 3 waves
+**Plans:** 7 plans
 
 **Plans:**
-- [x] 06-01-PLAN.md — Wave 0: Dependencies + Hooks (ink-testing-library, useKeyInput, useNavigation, useFuzzySearch)
-- [x] 06-02-PLAN.md — Wave 1: Reusable Components (StatusBar, LoadingIndicator, PreviewPanel, useDelayedLoading)
-- [x] 06-03-PLAN.md — Wave 2: ProjectListScreen (F2, F14, U3, U4 - list, search, navigation)
-- [x] 06-04-PLAN.md — Wave 2: ConfigEditorScreen (F3 - template preview, confirm/cancel)
-- [x] 06-05-PLAN.md — Wave 2: ConfirmScreen (U5 - y/n confirmation for destructive actions)
-- [x] 06-06-PLAN.md — Wave 3: TUI App Container (screen routing, Service integration)
-- [x] 06-07-PLAN.md — Wave 3: CLI Integration + M4 Verification (replace stubs, verify architecture)
-
-**Delivers:**
-- TUI App container（ink/React setup）
-- Project List screen（项目列表展示）
-- Config Editor screen（配置编辑表单）
-- Selection components（Select, Input, Table）
-- Navigation hooks（useNavigation, useKeyInput）
-- Loading indicators（Spinner, progress）
-
-**Requirements Addressed:**
-- F2: Interactive TUI Selector (arrow-key navigation, fuzzy search) — Plan 03
-- F3: Configuration Preview (show what will change) — Plan 04
-- F14: Fuzzy Search (quick navigation) — Plans 01, 03
-- N4: Responsive TUI (<50ms render time) — Plans 06, 07
-- U3: Keyboard Navigation (arrows + j/k) — Plans 01, 03
-- U4: Escape to Cancel (always allow cancel) — Plans 03, 04, 05
-- U5: Confirmation Prompts (destructive actions) — Plan 05
-- M4: Module Separation (Services no ink imports) — Plan 07
-
-**Dependencies:**
-- Phase 4 (services for data)
-- Phase 5 (CLI routing to TUI)
-
-**Verification:**
-- Component test: ink-testing-library for UI tests
-- Navigation test: both arrow keys and j/k work
-- Render test: list renders < 50ms for 100 items
-- Escape test: all dialogs allow cancel
-- M4 test: Services have no ink/react imports
-
-**Research Notes:** Standard patterns — Ink examples, ink-testing-library, ink-select-input, ink-text-input, fuse.js.
-
----
+- [x] 06-01-PLAN.md — Dependencies + Hooks (useKeyInput, useNavigation)
+- [x] 06-02-PLAN.md — Reusable Components (StatusBar, LoadingIndicator)
+- [x] 06-03-PLAN.md — ProjectListScreen (fuzzy search, navigation)
+- [x] 06-04-PLAN.md — ConfigEditorScreen (template preview)
+- [x] 06-05-PLAN.md — ConfirmScreen (y/n confirmation)
+- [x] 06-06-PLAN.md — TUI App Container (screen routing)
+- [x] 06-07-PLAN.md — CLI Integration + M4 Verification
 
 ### Phase 7: Project Management Features
 
 **Goal:** 项目管理增强功能，提升便利性。
 
-**Duration Estimate:** 1-2 weeks
-
-**Plans:** 4 plans in 4 waves
+**Plans:** 4 plans
 
 **Plans:**
-- [x] 07-01-PLAN.md — Auto-Switch Shell Hook (F9: direnv-style hooks, silent output, prompt registration)
-- [x] 07-02-PLAN.md — Project Directory Scan (F10: CLI scan command, ScanScreen TUI multi-select, navigation)
-- [x] 07-03-PLAN.md — Import/Export Configs (F13: schema, service, CLI commands, ImportConflictScreen)
-- [x] 07-04-PLAN.md — Integration & Barrel Exports (CLI registration, TUI routing, M4 verification)
-
-**Delivers:**
-- Auto-switch shell hook（cd 自动切换配置）
-- Project directory scan（自动发现项目 + 多选注册）
-- Import/Export configs（配置备份迁移 + 冲突处理）
-- Navigation integration（TUI 'S' key + import-conflict screen）
-
-**Requirements Addressed:**
-- F9: Auto-Switch by Directory (hands-free context switching) — Plans 01, 04
-- F10: Project Directory Scan (discover existing projects) — Plans 02, 04
-- F13: Import/Export Configs (backup, migrate, share) — Plans 03, 04
-- F14: Fuzzy Search (quick navigation) — Already implemented in Phase 06
-
-**Dependencies:**
-- Phase 3 (project index)
-- Phase 4 (project service)
-- Phase 6 (TUI screens)
-
-**Verification:**
-- Auto-switch test: cd triggers correct config switch
-- Shell hook test: only outputs on actual switch (D-02)
-- Scan test: 100 projects scan < 5 seconds
-- ScanScreen test: multi-select and registration works
-- Import/Export test: round-trip preserves all config
-- Conflict test: ImportConflictScreen displays correctly
-- M4 test: ExportService has no ink imports
-
-**Research Notes:** Phase 07 research completed 2026-04-14 — direnv shell hooks (PROMPT_COMMAND/chpwd_functions), ink-select-input multi-select, deepMergeConfig for import conflicts.
-
----
+- [x] 07-01-PLAN.md — Auto-Switch Shell Hook
+- [x] 07-02-PLAN.md — Project Directory Scan
+- [x] 07-03-PLAN.md — Import/Export Configs
+- [x] 07-04-PLAN.md — Integration & Barrel Exports
 
 ### Phase 8: Quality & Polish
 
 **Goal:** 质量提升和用户体验优化。
 
-**Duration Estimate:** 1-2 weeks
-
-**Plans:** 5 plans in 4 waves
+**Plans:** 5 plans
 
 **Plans:**
-- [x] 08-01-PLAN.md — Diff Utilities + UnifiedDiff Component (F12: diff generation and rendering)
-- [x] 08-02-PLAN.md — DiffScreen + ConfigEditorScreen Integration (F12: mandatory diff display before apply)
-- [x] 08-03-PLAN.md — ValidationErrorScreen + Undo Service + CLI undo (F11 + U2: validation blocking and undo mechanism)
-- [x] 08-04-PLAN.md — TUI Undo Integration (U2: ProjectListScreen 'U' key + validation error flow)
-- [ ] 08-05-PLAN.md — Performance Benchmarks + Documentation (N1-N4 + D-09)
+- [x] 08-01-PLAN.md — Diff Utilities + UnifiedDiff Component
+- [x] 08-02-PLAN.md — DiffScreen + ConfigEditorScreen Integration
+- [x] 08-03-PLAN.md — ValidationErrorScreen + Undo Service
+- [x] 08-04-PLAN.md — TUI Undo Integration
+- [x] 08-05-PLAN.md — Performance Benchmarks + Documentation
 
-**Delivers:**
-- Diff Before Apply（unified diff generation and full-screen display）
-- Config validation UI（ValidationErrorScreen blocks continuation）
-- Undo/Rollback mechanism（CLI undo command + TUI 'U' key）
-- Performance benchmarks（N1-N4 validation with vitest bench）
-- Documentation complete（README + USAGE.md + TypeDoc API docs）
+</details>
 
-**Requirements Addressed:**
-- F11: Config Validation (validation with helpful errors, blocks continuation)
-- F12: Diff Before Apply (unified diff, only changed fields, mandatory display)
-- U2: Undo Support (CLI undo command + TUI 'U' key trigger)
-- N1: Fast Startup (<1s cold start benchmark)
-- N2: Quick Operations (<100ms for switch/list benchmark)
-- N3: Scalable Scanning (<5s for 100 projects benchmark)
-- N4: Responsive TUI (<50ms render benchmark)
-- D-09: Documentation (README, USAGE.md, API docs)
+### 🚧 v2.0 Terminal-Native (In Progress)
 
-**Dependencies:**
-- Phase 2 (validation)
-- Phase 6 (TUI for diff display)
-- Phase 7 (project features)
+**Milestone Goal:** Terminal-Native 体验重构 - npm 风格列表选择，简化配置管理，首次引导流程，OpenCode Terminal Aesthetic
 
-**Verification:**
-- Diff test: diff shown before every modification (D-03 mandatory)
-- Validation test: ValidationErrorScreen blocks invalid applies (D-05)
-- Undo test: CLI undo + TUI 'U' key work correctly (D-06, D-07)
-- Coverage test: >=80% coverage for services, lib, store
-- Performance test: N1-N4 benchmarks meet targets
-- Documentation test: README + USAGE.md + TypeDoc complete
+#### Phase 9: Prompts Integration
+**Goal**: Users interact with terminal-native prompts interface (replacing Ink React TUI)
+**Depends on**: Phase 8
+**Requirements**: TUI-01, TUI-02, TUI-03, TUI-04, TUI-05
+**Success Criteria** (what must be TRUE):
+  1. User can navigate project list with j/k keys and arrow keys
+  2. User can confirm selection with Enter and cancel with Esc
+  3. User experiences linear wizard flow without multi-screen navigation
+  4. User can search large project lists with autocomplete (>20 items)
+  5. User sees graceful exit on Ctrl+C with onCancel handling
+**Plans**: TBD
 
-**Research Notes:** Phase 08 research completed 2026-04-15 — diff package for unified diff, deep-object-diff for field comparison, vitest bench for benchmarks, TypeDoc for API docs.
+#### Phase 10: Config Service
+**Goal**: Users can manage API configurations securely with precise field replacement
+**Depends on**: Phase 9
+**Requirements**: CFG-01, CFG-02, CFG-04, SEC-01, SEC-03
+**Success Criteria** (what must be TRUE):
+  1. User can store multiple API configs as tuples (name + apiKey + baseUrl + modelName)
+  2. User's permissions/hooks/mcpServers are preserved when applying config (precise field replacement)
+  3. User sees API key masked in all display contexts (preview/diff/logs)
+  4. User's API key is never exposed in CLI args, logs, or screenshots
+  5. System maintains atomic write and backup from v1.0 (R1/R2)
+**Plans**: TBD
 
----
+#### Phase 11: Config CLI Commands
+**Goal**: Users can manage API configurations via CLI with secure input
+**Depends on**: Phase 10
+**Requirements**: CFG-03, SEC-02, SEC-04
+**Success Criteria** (what must be TRUE):
+  1. User can add API configs via `cc-config config add` command
+  2. User can list API configs via `cc-config config list` command
+  3. User can remove API configs via `cc-config config remove` command
+  4. User sees validation error messages for invalid inputs (prompts validate pattern)
+  5. User sees password-type input for API key that auto-clears
+**Plans**: TBD
 
-## Phase Summary
+#### Phase 12: First-Run Wizard
+**Goal**: New users experience guided onboarding flow
+**Depends on**: Phase 11
+**Requirements**: ONB-01, ONB-02, ONB-03, ONB-04, ONB-05
+**Success Criteria** (what must be TRUE):
+  1. User experiences first-run wizard (API config → scan directory → scan → main interface)
+  2. System detects firstRunCompleted flag in AppState
+  3. System scans directories with Promise.all parallel traversal (not serial)
+  4. System skips node_modules/.git/dist/build/target/.venv/__pycache__
+  5. User sees progress indicator during scan operations
+**Plans**: TBD
 
-| Phase | Goal | Duration | Dependencies | Plans |
-|-------|------|----------|--------------|-------|
-| 1 | Foundation & Safety | 1-2 weeks | None | 7 |
-| 2 | Types & Validation | 1 week | Phase 1 | 5 |
-| 3 | Data Layer | 1-2 weeks | Phase 1, 2 | 5 |
-| 4 | Services Layer | 2-3 weeks | Phase 2, 3 | 6 |
-| 5 | CLI Interface | 1 week | Phase 4 | 6 |
-| 6 | Core TUI | 2-3 weeks | Phase 4, 5 | 7 |
-| 7 | Project Management | 1-2 weeks | Phase 3, 4, 6 | 4 |
-| 8 | Quality & Polish | 1-2 weeks | Phase 2, 6, 7 | 5 |
+#### Phase 13: Switch Flow
+**Goal**: Users can switch project configs with diff preview before application
+**Depends on**: Phase 12
+**Requirements**: CFG-05, ONB-06
+**Success Criteria** (what must be TRUE):
+  1. User can switch project config via `cc-config switch [project] [config]`
+  2. User sees diff preview before config application confirmation
+  3. User can accept or reject changes based on diff preview
+**Plans**: TBD
 
-**Total Estimate:** 10-16 weeks
+#### Phase 14: Terminal Aesthetic
+**Goal**: Users see consistent terminal-native design system across all interfaces
+**Depends on**: Phase 13
+**Requirements**: UI-01, UI-02, UI-03, UI-04, UI-05, UI-06
+**Success Criteria** (what must be TRUE):
+  1. User sees OpenCode warm color palette (#201d1d/#fdfcfc/#9a9898)
+  2. User sees monospace-only typography throughout all interfaces
+  3. User sees flat depth system (no shadows, border-only elevation)
+  4. User sees Apple HIG semantic colors (blue/red/green/orange for accent/danger/success/warning)
+  5. System respects NO_COLOR environment variable
+  6. System detects Windows CMD vs Terminal for ANSI color compatibility
+**Plans**: TBD
+**UI hint**: yes
 
----
-
-## Critical Path
-
-```
-Phase 1 (Foundation)
-    ↓
-Phase 2 (Types)
-    ↓
-Phase 3 (Data)
-    ↓
-Phase 4 (Services)
-    ↓
-Phase 5 (CLI) ←─┐
-    ↓           │
-Phase 6 (TUI)   │ (parallel possible after Phase 4)
-    ↓           │
-Phase 7 (Features)
-    ↓
-Phase 8 (Quality)
-```
-
-**Parallel Opportunities:**
-- Phase 5 (CLI) and Phase 6 (TUI) can start in parallel after Phase 4 completes
-- Both depend on Services, but not on each other
-
----
-
-## Milestone Checkpoints
-
-### Milestone 1: Foundation Complete (End of Phase 3)
-
-**Criteria:**
-- [x] Atomic writes verified with crash testing
-- [x] Backup system creates timestamped backups
-- [x] Cross-platform paths tested in CI
-- [x] JSON errors show line numbers
-- [x] Config migration works
-- [x] Token security enforced
-- [x] Data layer repositories functional
-
-**Deliverable:** Safe, reliable file operations foundation
-
-### Milestone 2: Core MVP Complete (End of Phase 6)
-
-**Criteria:**
-- [ ] CLI commands work (list, switch, current)
-- [ ] TUI responsive and navigable
-- [ ] Config preview shows changes
-- [ ] Services have >=80% test coverage
-- [ ] First user can complete basic workflow
-
-**Deliverable:** Functional CLI/TUI tool with core features
-
-### Milestone 3: Production Ready (End of Phase 8)
-
-**Criteria:**
-- [ ] All P1 requirements met
-- [ ] All platform tests pass
-- [ ] Performance benchmarks meet targets
-- [ ] Documentation complete
-- [ ] Ready for first external user
-
-**Deliverable:** Production-ready tool ready for release
+#### Phase 15: Ink Removal
+**Goal**: Clean codebase with Ink React TUI layer completely removed
+**Depends on**: Phase 14
+**Requirements**: TUI-06, CFG-06
+**Success Criteria** (what must be TRUE):
+  1. Ink React TUI layer completely removed from dependencies
+  2. TemplateConfig/TemplateService/TemplateStore removed and replaced with simplified config service
+  3. All Ink components replaced with prompts equivalents
+  4. No React dependencies remain in TUI layer
+  5. Bundle size reduced without React/Ink overhead
+**Plans**: TBD
 
 ---
 
-## Deferred Features (v2+)
+## Progress
+
+**Execution Order:**
+Phases execute in numeric order: 9 → 10 → 11 → 12 → 13 → 14 → 15
+
+| Phase | Milestone | Plans Complete | Status | Completed |
+|-------|-----------|----------------|--------|-----------|
+| 1. Foundation & Safety | v1.0 | 7/7 | Complete | 2026-04-13 |
+| 2. Types & Validation | v1.0 | 5/5 | Complete | 2026-04-13 |
+| 3. Data Layer | v1.0 | 5/5 | Complete | 2026-04-13 |
+| 4. Services Layer | v1.0 | 6/6 | Complete | 2026-04-14 |
+| 5. CLI Interface | v1.0 | 6/6 | Complete | 2026-04-14 |
+| 6. Core TUI | v1.0 | 7/7 | Complete | 2026-04-14 |
+| 7. Project Management | v1.0 | 4/4 | Complete | 2026-04-14 |
+| 8. Quality & Polish | v1.0 | 5/5 | Complete | 2026-04-15 |
+| 9. Prompts Integration | v2.0 | 0/TBD | Not started | - |
+| 10. Config Service | v2.0 | 0/TBD | Not started | - |
+| 11. Config CLI Commands | v2.0 | 0/TBD | Not started | - |
+| 12. First-Run Wizard | v2.0 | 0/TBD | Not started | - |
+| 13. Switch Flow | v2.0 | 0/TBD | Not started | - |
+| 14. Terminal Aesthetic | v2.0 | 0/TBD | Not started | - |
+| 15. Ink Removal | v2.0 | 0/TBD | Not started | - |
+
+---
+
+## Deferred Features (v3+)
 
 | Feature | Phase | Rationale |
 |---------|-------|-----------|
-| MCP Server Management | v2 | Complex, needs research on Claude Code MCP format |
-| API Connectivity Validation | v2 | Provider-specific, needs validation endpoint research |
-| Pre-defined Provider Templates | v2 | Maintenance burden, add when user demand validated |
-| Bulk Operations | v2 | Power user feature, validate single-project workflow first |
-| Desktop GUI (Tauri) | v2/v3 | Platform expansion, only if TUI shows traction |
-
----
-
-## Research Flags
-
-Phases needing additional research during planning:
-
-| Phase | Research Topic | Confidence | Action |
-|-------|----------------|------------|--------|
-| Phase 8 | API validation patterns by provider | HIGH | Research completed 2026-04-15 — standard patterns confirmed |
-
-Phases with standard patterns (no research needed):
-
-| Phase | Pattern Source |
-|-------|----------------|
-| Phase 1 | fs-extra atomic writes, env-paths, zod |
-| Phase 2 | Zod documentation, TypeScript best practices |
-| Phase 3 | chokidar file watching, conf storage |
-| Phase 4 | Service layer patterns, dependency injection |
-| Phase 5 | Commander.js documentation, cli-table3 |
-| Phase 6 | Ink examples, ink-testing-library |
-| Phase 7 | direnv shell hooks, ink-select-input, deepMergeConfig |
-| Phase 8 | diff package, deep-object-diff, vitest bench, TypeDoc |
-
----
-
-## Risk Management
-
-### Phase-Level Risks
-
-| Phase | Risk | Mitigation |
-|-------|------|------------|
-| 1 | Config corruption missed | Extensive crash testing (kill -9, power loss simulation) |
-| 3 | File watcher race conditions | Debounce changes, handle ENOENT gracefully |
-| 6 | TUI performance lag | Virtual scrolling for large lists, benchmark early |
-| 7 | Auto-switch detection fails | Multiple detection strategies, graceful fallback |
-| 8 | Performance benchmarks unreliable | Use vitest bench with statistical sampling, warmup phase |
-
-### Mitigation Strategies
-
-- **Each phase ends with verification**: Do not proceed until verification criteria met
-- **Continuous integration**: CI tests all phases on all platforms
-- **Rollback capability**: Backups allow reverting to any previous state
-- **User validation**: Test with real user after Milestone 2
-
----
-
-## Execution Order
-
-**Recommended execution sequence:**
-
-1. **Phase 1 → Phase 2 → Phase 3 → Phase 4** (Sequential, foundation chain)
-2. **Phase 5 + Phase 6** (Parallel after Phase 4, both depend on Services)
-3. **Phase 7 → Phase 8** (Sequential, feature enhancement)
-
-**Parallel execution notes:**
-- Phase 5 (CLI) can use services directly, no TUI dependency
-- Phase 6 (TUI) can use services, may call CLI commands for non-interactive fallback
-- Merge Phase 5 and 6 work at Phase 7 start
+| MCP Server Management | v3 | Complex, needs research on Claude Code MCP format |
+| API Connectivity Validation | v3 | Provider-specific, needs validation endpoint research |
+| Pre-defined Provider Templates | v3 | Maintenance burden, add when user demand validated |
+| Bulk Operations | v3 | Power user feature, validate single-project workflow first |
+| Desktop GUI (Tauri) | v3 | Platform expansion, only if TUI shows traction |
 
 ---
 
 ## Success Metrics
 
-### Technical Metrics
+### Technical Metrics (v2.0)
 
 | Metric | Target | Verification Method |
 |--------|--------|---------------------|
 | Test Coverage | >=80% core modules | vitest coverage report |
 | Cold Start Time | <1 second | Benchmark test (N1) |
 | Switch Operation | <100ms | Performance test (N2) |
-| TUI Render | <50ms | Ink performance profiling (N4) |
+| TUI Render | <50ms | Prompts performance (N4) |
 | 100 Project Scan | <5 seconds | Scalability benchmark (N3) |
+| Bundle Size | Reduced (no React/Ink) | Build size comparison |
 
-### User Success Metrics
+### User Success Metrics (v2.0)
 
 | Metric | Target | Verification Method |
 |--------|--------|---------------------|
-| First User Success | Complete basic workflow | User testing session |
-| Error Recovery | User fixes error from message | User testing observation |
-| Workflow Completion | CRUD + switch + preview | User task completion |
-
----
-
-## Evolution
-
-This roadmap evolves at:
-- **Phase completions**: Update verification criteria, adjust estimates
-- **Milestone completions**: Review deferred features, adjust priorities
-- **User feedback**: Re-prioritize Phase 7-8 features based on validation
+| First-Run Completion | Complete wizard in <2 min | User testing session |
+| Config Management | Add/list/remove configs via CLI | User task completion |
+| Error Recovery | User understands validation messages | User testing observation |
 
 ---
 
 *Roadmap for: CCAPISwitch*  
 *Created: 2026-04-13*  
-*Based on: Research Summary (HIGH confidence)*  
-*Phase 1 plans added: 2026-04-13*  
-*Phase 2 plans added: 2026-04-13*  
-*Phase 3 plans added: 2026-04-13*  
-*Phase 4 plans added: 2026-04-13*  
-*Phase 5 plans added: 2026-04-14*  
-*Phase 6 plans added: 2026-04-14*  
-*Phase 7 plans added: 2026-04-14*  
-*Phase 8 plans added: 2026-04-15*
+*Last updated: 2026-04-30 (v2.0 roadmap created)*
