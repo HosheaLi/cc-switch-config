@@ -146,6 +146,12 @@ export function registerConfigCommand(program: Command): void {
         console.log(chalk.cyan('\n可用配置'));
         console.log(chalk.gray('─'.repeat(50)));
 
+        // Header row
+        console.log(chalk.cyan(
+          `  ${'名称'.padEnd(16)} ${'模型'.padEnd(20)} API Key`
+        ));
+        console.log(chalk.gray('─'.repeat(50)));
+
         for (const [name, cfg] of Object.entries(configs)) {
           const maskedKey = maskApiKey(cfg.apiKey); // CFG-04/SEC-01
           const modelName = cfg.mode === 'unified'
