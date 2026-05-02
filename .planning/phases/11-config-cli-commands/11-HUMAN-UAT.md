@@ -1,14 +1,14 @@
 ---
-status: diagnosed
+status: resolved
 phase: 11-config-cli-commands
 source: [11-VERIFICATION.md]
 started: 2026-04-30T21:40:00+08:00
-updated: 2026-05-02T10:50:00+08:00
+updated: 2026-05-02T17:05:00+08:00
 ---
 
 ## Current Test
 
-[testing complete]
+[testing complete — gap resolved]
 
 ## Tests
 
@@ -20,9 +20,10 @@ result: pass
 
 ### 2. Config List Table Format
 expected: Table format with name, modelName, masked apiKey (...xyz), separator lines, count message
-result: issue
-reported: "确认，但表格没有表头，需要增加名称、模型、apikey等表头"
-severity: major
+result: resolved
+
+**Original Issue:** 表格没有表头，需要增加名称、模型、apikey等表头
+**Fix:** 11-03 gap closure — added header row with chalk.cyan styling
 
 **Command:** `cc-config config list`
 
@@ -42,15 +43,16 @@ result: pass
 
 total: 4
 passed: 3
-issues: 1
+issues: 0
 pending: 0
 skipped: 0
 blocked: 0
+resolved: 1
 
 ## Gaps
 
 - truth: "Table format with name, modelName, masked apiKey (...xyz), separator lines, count message"
-  status: failed
+  status: resolved
   reason: "User reported: 确认，但表格没有表头，需要增加名称、模型、apikey等表头"
   severity: major
   test: 2
@@ -61,3 +63,5 @@ blocked: 0
   missing:
     - "Add console.log after line 147 with column headers: 名称(16), 模型(20), API Key"
   debug_session: .planning/debug/config-list-table-header.md
+  fix_plan: 11-03
+  fix_commit: c18ea71
