@@ -60,8 +60,12 @@ export async function inputConfigName(
       if (existingNames.includes(trimmed)) {
         return `名称 "${trimmed}" 已存在`;
       }
-      if (!/^[a-zA-Z0-9_-]+$/.test(trimmed)) {
-        return '只能包含字母、数字、下划线和连字符';
+      // 放宽验证：允许中文、字母、数字、下划线、连字符、空格
+      if (!/^[\w一-龥\-\s]+$/.test(trimmed)) {
+        return '名称包含无效字符';
+      }
+      if (trimmed.length > 50) {
+        return '名称过长（最多50字符）';
       }
       return true;
     },

@@ -68,7 +68,7 @@ export async function runMainWizard(): Promise<void> {
 
   try {
     console.log(chalk.cyan('\n╔══════════════════════════════════════════╗'));
-    console.log(chalk.cyan('║     CC Config - Terminal Native         ║'));
+    console.log(chalk.cyan('║   欢迎使用 cc-config 配置向导             ║'));
     console.log(chalk.cyan('╚══════════════════════════════════════════╝'));
     console.log();
 
