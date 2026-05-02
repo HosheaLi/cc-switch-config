@@ -337,7 +337,7 @@ export function getBorders() {
 ## Don't Hand-Roll
 
 | Problem | Don't Build | Use Instead | Why |
-|---------|-------------|-------------|------|
+|---------|-------------|-------------|-----|
 | ANSI color formatting | Custom escape code generator | picocolors | Handles edge cases (nested colors, NO_COLOR, FORCE_COLOR) [VERIFIED: npm registry] |
 | NO_COLOR detection | Manual env check per module | picocolors.isColorSupported + theme module | Centralized handling, consistent behavior [VERIFIED: picocolors README] |
 | Terminal capability detection | Custom logic per output module | Terminal detection module (src/cli/theme/detection.ts) | Single source of truth, testable [VERIFIED: tested in session] |
@@ -521,22 +521,25 @@ export function detectTerminal(): { type: string; ansi: boolean; truecolor: bool
 
 **Confidence:** A1/A3 are MEDIUM (Windows edge cases), A2 is HIGH (terminal evolution), A4 is LOW (depends on prompts phase execution).
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Should we provide ANSI 256-color fallback for OpenCode palette?**
-   - What we know: Truecolor codes work in modern terminals (COLORTERM=truecolor).
-   - What's unclear: Basic terminals (16-color) will ignore truecolor codes.
-   - Recommendation: Implement truecolor with standard ANSI fallback (closest match: gray for muted, white for lightFg). Add `truecolorFallback` function.
+   - **Resolution:** YES — Implement truecolor with standard ANSI fallback.
+   - **Rationale:** Basic terminals (16-color) will ignore truecolor codes. The theme module will provide fallback: gray (ANSI 90) for muted, white (ANSI 97) for lightFg, dark gray (ANSI 40) for darkBg.
+   - **Implementation:** `truecolorFallback` function in `src/cli/theme/colors.ts` that checks `colorSupport.truecolor` and returns closest standard ANSI code.
+   - **Status:** RESOLVED — Addressed in 14-02-PLAN.md Task 2 (colors.ts implementation).
 
 2. **How to coordinate with prompts library colors?**
-   - What we know: prompts has its own color system, Phase 09/12/13 already integrated.
-   - What's unclear: Does prompts respect NO_COLOR? Should prompts use theme module colors?
-   - Recommendation: Verify prompts NO_COLOR handling, update prompts utils to import from theme module.
+   - **Resolution:** VERIFY prompts NO_COLOR handling, then UPDATE prompts utils to import from theme module.
+   - **Rationale:** prompts library (from Phase 09/12/13) has its own color system. To ensure consistent NO_COLOR behavior, prompts must use the centralized theme module.
+   - **Implementation:** 14-02-PLAN.md Task 3 updates `src/cli/prompts/utils/format-choices.ts` to import from `src/cli/theme/`. prompts utils theme.ts will be removed.
+   - **Status:** RESOLVED — Addressed in 14-02-PLAN.md Task 3 (prompts integration).
 
 3. **Windows version check needed for ANSI support?**
-   - What we know: Windows 10 build 10586+ supports ANSI.
-   - What's unclear: How to detect Windows version in Node.js reliably.
-   - Recommendation: Assume Windows 10+ (market reality), but test on Windows CI. If issues arise, add Windows version detection.
+   - **Resolution:** NO — Assume Windows 10+ (market reality), rely on WT_SESSION detection.
+   - **Rationale:** Windows 10 build 10586+ (2015) supports ANSI. Windows 7/8 market share is negligible (<5%). Adding Windows version detection in Node.js adds complexity without meaningful benefit.
+   - **Implementation:** Use WT_SESSION for Windows Terminal (truecolor), platform check for Windows CMD (basic ANSI). If legacy Windows users report issues, add version detection as future enhancement.
+   - **Status:** RESOLVED — Addressed in 14-01-PLAN.md Task 2 (detection.test.ts) and 14-02-PLAN.md Task 1 (detection.ts).
 
 ## Environment Availability
 
@@ -566,24 +569,24 @@ export function detectTerminal(): { type: string; ansi: boolean; truecolor: bool
 ### Phase Requirements → Test Map
 | Req ID | Behavior | Test Type | Automated Command | File Exists? |
 |--------|----------|-----------|-------------------|-------------|
-| UI-01 | OpenCode palette colors render | unit | `vitest run src/cli/theme/theme.test.ts` | ❌ Wave 0 |
+| UI-01 | OpenCode palette colors render | unit | `vitest run src/cli/theme/theme.test.ts` | Wave 0 creates |
 | UI-02 | Monospace typography | manual | Visual inspection | — (terminal config) |
-| UI-03 | Flat borders render | unit | `vitest run src/cli/theme/borders.test.ts` | ❌ Wave 0 |
-| UI-04 | Semantic colors (blue/red/green/yellow) | unit | `vitest run src/cli/theme/colors.test.ts` | ❌ Wave 0 |
-| UI-05 | NO_COLOR disables all colors | unit | `NO_COLOR=1 vitest run src/cli/theme/theme.test.ts` | ❌ Wave 0 |
-| UI-06 | Windows terminal detection | unit | `vitest run src/cli/theme/detection.test.ts` | ❌ Wave 0 |
+| UI-03 | Flat borders render | unit | `vitest run src/cli/theme/borders.test.ts` | Wave 0 creates |
+| UI-04 | Semantic colors (blue/red/green/yellow) | unit | `vitest run src/cli/theme/colors.test.ts` | Wave 0 creates |
+| UI-05 | NO_COLOR disables all colors | unit | `NO_COLOR=1 vitest run src/cli/theme/theme.test.ts` | Wave 0 creates |
+| UI-06 | Windows terminal detection | unit | `vitest run src/cli/theme/detection.test.ts` | Wave 0 creates |
 
 ### Sampling Rate
 - **Per task commit:** `vitest run src/cli/theme/*.test.ts`
 - **Per wave merge:** `npm test`
 - **Phase gate:** Full suite green before `/gsd-verify-work`
 
-### Wave 0 Gaps
+### Wave 0 Test Files (Created by 14-01-PLAN.md)
 - [ ] `src/cli/theme/theme.test.ts` — covers UI-01, UI-04, UI-05
 - [ ] `src/cli/theme/colors.test.ts` — covers UI-01, UI-04
 - [ ] `src/cli/theme/borders.test.ts` — covers UI-03
 - [ ] `src/cli/theme/detection.test.ts` — covers UI-05, UI-06
-- [ ] `vitest.config.ts` — exists, no changes needed
+- [x] `vitest.config.ts` — exists, no changes needed
 
 ## Security Domain
 
