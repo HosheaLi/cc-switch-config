@@ -89,7 +89,23 @@ export class ProjectService {
     // Default to current directory if no scan directories configured and no override
     const dirsToScan = rootDirs.length > 0 ? rootDirs : ['.'];
 
+    // Validate directories exist before scanning
+    const validDirs: string[] = [];
     for (const rootDir of dirsToScan) {
+      const expanded = this.expandPath(rootDir);
+      if (await fs.pathExists(expanded)) {
+        validDirs.push(rootDir);
+      } else {
+        console.error(`目录不存在: ${expanded}`);
+      }
+    }
+
+    if (validDirs.length === 0) {
+      console.error('没有有效的扫描目录');
+      return [];
+    }
+
+    for (const rootDir of validDirs) {
       const expanded = this.expandPath(rootDir);
       await this.walkDirectory(expanded, 0, depth, found, skipDirs);
     }

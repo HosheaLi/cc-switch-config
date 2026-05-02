@@ -4,6 +4,8 @@
  * Directory selection for scan operations.
  */
 
+import path from 'path';
+import fs from 'fs';
 import prompts from 'prompts';
 import type { Choice } from 'prompts';
 import { promptWithCancel } from '../utils/handle-cancel.js';
@@ -80,6 +82,24 @@ export async function inputCustomDirectory(
     validate: (value: string) => {
       if (!value || value.trim().length === 0) {
         return '路径不能为空';
+      }
+      // 展开路径并检查是否存在
+      const expanded = value.trim();
+      if (expanded.startsWith('~')) {
+        // 提示用户路径格式，但不阻止继续（展开后再验证）
+        return true;
+      }
+      // 检查绝对路径是否存在
+      try {
+        const resolved = path.resolve(expanded);
+        if (!fs.existsSync(resolved)) {
+          return `目录不存在: ${resolved}`;
+        }
+        if (!fs.statSync(resolved).isDirectory()) {
+          return `不是目录: ${resolved}`;
+        }
+      } catch (err) {
+        return `无效路径: ${err.message}`;
       }
       return true;
     },
