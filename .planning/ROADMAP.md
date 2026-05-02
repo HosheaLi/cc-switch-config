@@ -78,7 +78,7 @@
 - [x] 04-03-PLAN.md - ProjectService (scan, register, list)
 - [x] 04-04-PLAN.md - TemplateService (template CRUD, apply)
 - [x] 04-05-PLAN.md - ProviderService (connectivity test)
-- [x] 04-06-PLAN.md - Barrel Export + M4 Verification
+- [x] 04-06-PLAN.md - Barrel Export & M4 Verification
 
 ### Phase 5: CLI Interface
 
@@ -209,10 +209,15 @@ Plans:
 **Depends on**: Phase 12
 **Requirements**: CFG-05, ONB-06
 **Success Criteria** (what must be TRUE):
-  1. User can switch project config via `cc-config switch [project] [config]`
+  1. User can switch project config via `cc-config switch <project> [config]`
   2. User sees diff preview before config application confirmation
   3. User can accept or reject changes based on diff preview
-**Plans**: TBD
+**Plans**: 3 plans
+
+Plans:
+- [ ] 13-01-PLAN.md - Wave 0: Create test scaffolds for switch command, diff-render utility, and selectApiConfig component
+- [ ] 13-02-PLAN.md - Implement renderDiff ANSI color function and selectApiConfig prompts component
+- [ ] 13-03-PLAN.md - Refactor switch command with new flow: project lookup, config selection, diff preview, confirmation
 
 #### Phase 14: Terminal Aesthetic
 **Goal**: Users see consistent terminal-native design system across all interfaces
@@ -260,8 +265,8 @@ Phases execute in numeric order: 9 - 10 - 11 - 12 - 13 - 14 - 15
 | 9. Prompts Integration | v2.0 | 0/TBD | Not started | - |
 | 10. Config Service | v2.0 | 4/4 | Complete    | 2026-04-30 |
 | 11. Config CLI Commands | v2.0 | 2/2 | Complete    | 2026-05-02 |
-| 12. First-Run Wizard | v2.0 | 4/1 | Complete    | 2026-05-02 |
-| 13. Switch Flow | v2.0 | 0/TBD | Not started | - |
+| 12. First-Run Wizard | v2.0 | 4/4 | Complete    | 2026-05-02 |
+| 13. Switch Flow | v2.0 | 0/3 | Not started | - |
 | 14. Terminal Aesthetic | v2.0 | 0/TBD | Not started | - |
 | 15. Ink Removal | v2.0 | 0/TBD | Not started | - |
 
@@ -301,7 +306,6 @@ Phases execute in numeric order: 9 - 10 - 11 - 12 - 13 - 14 - 15
 | Error Recovery | User understands validation messages | User testing observation |
 
 ---
-
 *Roadmap for: CCAPISwitch*  
 *Created: 2026-04-13*  
-*Last updated: 2026-05-02 (Phase 12 replanned - 01-03 complete, 04 remaining)*
+*Last updated: 2026-05-02 (Phase 13 planned - 3 plans created)*
