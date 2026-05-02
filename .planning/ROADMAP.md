@@ -200,8 +200,8 @@ Plans:
 
 Plans:
 - [x] 12-01-PLAN.md - Create DEFAULT_SKIP_DIRS constant and AppState schema evolution (firstRunCompleted/skipDirectories fields)
-- [ ] 12-02-PLAN.md - Refactor walkDirectory to Promise.all parallel scan with skip directory filtering
-- [ ] 12-03-PLAN.md - Implement first-run detection at CLI entry with triple condition check
+- [x] 12-02-PLAN.md - Refactor walkDirectory to Promise.all parallel scan with skip directory filtering
+- [x] 12-03-PLAN.md - Implement first-run detection at CLI entry with triple condition check
 - [ ] 12-04-PLAN.md - Manual verification of spinner visual display during wizard
 
 #### Phase 13: Switch Flow
@@ -259,8 +259,8 @@ Phases execute in numeric order: 9 - 10 - 11 - 12 - 13 - 14 - 15
 | 8. Quality & Polish | v1.0 | 5/5 | Complete | 2026-04-15 |
 | 9. Prompts Integration | v2.0 | 0/TBD | Not started | - |
 | 10. Config Service | v2.0 | 4/4 | Complete    | 2026-04-30 |
-| 11. Config CLI Commands | v2.0 | 3/3 | Complete    | 2026-05-02 |
-| 12. First-Run Wizard | v2.0 | 1/4 | In Progress|  |
+| 11. Config CLI Commands | v2.0 | 2/2 | Complete    | 2026-05-02 |
+| 12. First-Run Wizard | v2.0 | 3/4 | In Progress | - |
 | 13. Switch Flow | v2.0 | 0/TBD | Not started | - |
 | 14. Terminal Aesthetic | v2.0 | 0/TBD | Not started | - |
 | 15. Ink Removal | v2.0 | 0/TBD | Not started | - |
@@ -304,4 +304,4 @@ Phases execute in numeric order: 9 - 10 - 11 - 12 - 13 - 14 - 15
 
 *Roadmap for: CCAPISwitch*  
 *Created: 2026-04-13*  
-*Last updated: 2026-04-30 (Phase 12 plans created)*
+*Last updated: 2026-05-02 (Phase 12 replanned - 01-03 complete, 04 remaining)*
