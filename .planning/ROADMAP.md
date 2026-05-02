@@ -215,9 +215,9 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 13-01-PLAN.md - Wave 0: Create test scaffolds for switch command, diff-render utility, and selectApiConfig component
-- [ ] 13-02-PLAN.md - Implement renderDiff ANSI color function and selectApiConfig prompts component
-- [ ] 13-03-PLAN.md - Refactor switch command with new flow: project lookup, config selection, diff preview, confirmation
+- [x] 13-01-PLAN.md - Wave 0: Create test scaffolds for switch command, diff-render utility, and selectApiConfig component
+- [x] 13-02-PLAN.md - Implement renderDiff ANSI color function and selectApiConfig prompts component
+- [x] 13-03-PLAN.md - Refactor switch command with new flow: project lookup, config selection, diff preview, confirmation
 
 #### Phase 14: Terminal Aesthetic
 **Goal**: Users see consistent terminal-native design system across all interfaces
@@ -266,7 +266,7 @@ Phases execute in numeric order: 9 - 10 - 11 - 12 - 13 - 14 - 15
 | 10. Config Service | v2.0 | 4/4 | Complete    | 2026-04-30 |
 | 11. Config CLI Commands | v2.0 | 2/2 | Complete    | 2026-05-02 |
 | 12. First-Run Wizard | v2.0 | 4/4 | Complete    | 2026-05-02 |
-| 13. Switch Flow | v2.0 | 0/3 | Not started | - |
+| 13. Switch Flow | v2.0 | 3/3 | Complete    | 2026-05-02 |
 | 14. Terminal Aesthetic | v2.0 | 0/TBD | Not started | - |
 | 15. Ink Removal | v2.0 | 0/TBD | Not started | - |
 
