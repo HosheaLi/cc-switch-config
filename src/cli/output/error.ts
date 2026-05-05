@@ -2,15 +2,15 @@
  * CLI Error Handling Module
  *
  * Per U1: Clear errors with helpful messages.
- * Per D-03: stderr output + exit code + colored messages via chalk.
+ * Per D-03: stderr output + exit code + colored messages via theme module.
  *
  * Provides:
  * - ExitCodes: Standard exit code constants
- * - handleCLIError: Unified error output with chalk coloring
+ * - handleCLIError: Unified error output with theme coloring
  * - mapErrorToExitCode: ServiceError.code -> exit code mapping
  */
 
-import chalk from 'chalk';
+import { colors } from '../theme/index.js';
 import { ServiceError } from '../../lib/services/types.js';
 
 /**
@@ -40,16 +40,16 @@ export const ExitCodes = {
 export function handleCLIError(error: unknown, code?: number): void {
   if (error instanceof ServiceError) {
     // ServiceError: display code + message, map to exit code
-    console.error(chalk.red(`[${error.code}] ${error.message}`));
+    console.error(colors.danger(`[${error.code}] ${error.message}`));
     const exitCode = code ?? mapErrorToExitCode(error.code);
     process.exit(exitCode);
   } else if (error instanceof Error) {
     // Generic Error: display message only
-    console.error(chalk.red(`Error: ${error.message}`));
+    console.error(colors.danger(`Error: ${error.message}`));
     process.exit(code ?? ExitCodes.GENERAL_ERROR);
   } else {
     // Unknown error type
-    console.error(chalk.red('Unknown error occurred'));
+    console.error(colors.danger('Unknown error occurred'));
     process.exit(ExitCodes.GENERAL_ERROR);
   }
 }
