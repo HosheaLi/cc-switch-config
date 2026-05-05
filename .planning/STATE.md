@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Terminal-Native
-status: executing
-last_updated: "2026-05-05T15:38:56.816Z"
-last_activity: 2026-05-05
+status: completed
+last_updated: "2026-05-05T16:07:04.670Z"
+last_activity: 2026-05-06
 progress:
   total_phases: 7
-  completed_phases: 4
+  completed_phases: 5
   total_plans: 15
-  completed_plans: 15
+  completed_plans: 18
   percent: 100
 ---
 
@@ -23,12 +23,12 @@ progress:
 ## Current Position
 
 Phase: 14 (terminal-aesthetic) — EXECUTING
-Plan: 2 of 4
+Plan: 4 of 4
 **Milestone:** v2.0 Terminal-Native
 **Phase:** 14 of 15 (terminal aesthetic)
-**Plan:** 14-02 complete, 14-03 next
-**Status:** Executing Phase 14
-**Last activity:** 2026-05-05
+**Plan:** 14-04 complete, Phase 14 done
+**Status:** Phase 14 complete
+**Last activity:** 2026-05-06
 
 Progress: [████████░░░░░░░░░░░░] 53% (8/15 phases complete)
 
@@ -64,7 +64,7 @@ Progress: [████████░░░░░░░░░░░░] 53% (8/
 | 11. Config CLI Commands | Not started | TBD |
 | 12. First-Run Wizard | Not started | TBD |
 | 13. Switch Flow | Not started | TBD |
-| 14. Terminal Aesthetic | Executing | 2/4 complete |
+| 14. Terminal Aesthetic | Complete | 4/4 complete |
 | 15. Ink Removal | Not started | TBD |
 
 ---
@@ -83,6 +83,8 @@ Progress: [████████░░░░░░░░░░░░] 53% (8/
 - **M4:** 模块分离 (Services 不依赖 UI)
 - [Phase 14]: Clean env per test (not spreading originalEnv) to avoid host environment leaking into detection tests
 - [Phase 14]: createColors() factory pattern enables testing color behavior with custom ColorSupport without env mocking
+- [Phase 14]: stripAnsi() added locally in consumer files for ANSI injection mitigation (T-14-06, T-14-07)
+- [Phase 14]: NO_COLOR handling centralized in theme module, manual chalk.level=0 removed from index.ts
 
 ### v2.0 New Decisions (To be locked)
 
