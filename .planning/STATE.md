@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Terminal-Native
-status: planning
-last_updated: "2026-05-02T16:04:44.685Z"
-last_activity: 2026-05-02
+status: executing
+last_updated: "2026-05-05T15:19:10Z"
+last_activity: 2026-05-05
 progress:
   total_phases: 7
   completed_phases: 4
-  total_plans: 11
+  total_plans: 15
   completed_plans: 14
-  percent: 100
+  percent: 93
 ---
 
 # Project State
@@ -22,13 +22,13 @@ progress:
 
 ## Current Position
 
-Phase: 13 (switch-flow) — EXECUTING
-Plan: 1 of 3
+Phase: 14 (terminal-aesthetic) — EXECUTING
+Plan: 2 of 4
 **Milestone:** v2.0 Terminal-Native
 **Phase:** 14 of 15 (terminal aesthetic)
-**Plan:** Not started
-**Status:** Ready to plan
-**Last activity:** 2026-05-02
+**Plan:** 14-01 complete, 14-02 next
+**Status:** Executing Phase 14
+**Last activity:** 2026-05-05
 
 Progress: [████████░░░░░░░░░░░░] 53% (8/15 phases complete)
 
@@ -64,7 +64,7 @@ Progress: [████████░░░░░░░░░░░░] 53% (8/
 | 11. Config CLI Commands | Not started | TBD |
 | 12. First-Run Wizard | Not started | TBD |
 | 13. Switch Flow | Not started | TBD |
-| 14. Terminal Aesthetic | Not started | TBD |
+| 14. Terminal Aesthetic | Executing | 1/4 complete |
 | 15. Ink Removal | Not started | TBD |
 
 ---
@@ -84,6 +84,7 @@ Progress: [████████░░░░░░░░░░░░] 53% (8/
 
 ### v2.0 New Decisions (To be locked)
 
+- **picocolors:** picocolors@1.1.1 replaces chalk as ANSI color library (zero-dep, fastest, smallest)
 - **TUI Framework:** prompts (terkelg/prompts) — npm 风格列表选择
 - **Config Structure:** 三元组 ApiConfig (name/apiKey/baseUrl/modelName)
 - **Field Replacement:** 精确字段替换 (只修改 env/model，保留其他)
@@ -108,9 +109,10 @@ Progress: [████████░░░░░░░░░░░░] 53% (8/
 
 | Date | Action | Result |
 |------|--------|--------|
+| 2026-05-05 | 14-01 executed | picocolors installed, chalk removed, 4 test scaffolds created |
 | 2026-04-30 | v2.0 roadmap created | 7 phases (09-15), 28 requirements mapped |
 | 2026-04-15 | v1.0 completed | 875 tests, ready for release |
 
 ---
 
-*State updated: 2026-04-30 after v2.0 roadmap created*
+*State updated: 2026-05-05 after 14-01 plan executed*
