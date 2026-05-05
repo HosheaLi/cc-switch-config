@@ -34,12 +34,12 @@
 
 ### Design System
 
-- [ ] **UI-01**: User sees OpenCode warm color palette (#201d1d/#fdfcfc/#9a9898)
+- [x] **UI-01**: User sees OpenCode warm color palette (#201d1d/#fdfcfc/#9a9898)
 - [ ] **UI-02**: User sees monospace-only typography throughout
 - [ ] **UI-03**: User sees flat depth system (no shadows, border-only elevation)
-- [ ] **UI-04**: User sees Apple HIG semantic colors (blue/red/green/orange for accent/danger/success/warning)
-- [ ] **UI-05**: System respects NO_COLOR environment variable
-- [ ] **UI-06**: System detects Windows CMD vs Terminal for ANSI color compatibility
+- [x] **UI-04**: User sees Apple HIG semantic colors (blue/red/green/orange for accent/danger/success/warning)
+- [x] **UI-05**: System respects NO_COLOR environment variable
+- [x] **UI-06**: System detects Windows CMD vs Terminal for ANSI color compatibility
 
 ### Security & Reliability
 
@@ -94,12 +94,12 @@ Which phases cover which requirements. Updated during roadmap creation.
 | ONB-04 | Phase 12 | Pending |
 | ONB-05 | Phase 12 | Pending |
 | ONB-06 | Phase 13 | Pending |
-| UI-01 | Phase 14 | Pending |
+| UI-01 | Phase 14 | Complete |
 | UI-02 | Phase 14 | Pending |
 | UI-03 | Phase 14 | Pending |
-| UI-04 | Phase 14 | Pending |
-| UI-05 | Phase 14 | Pending |
-| UI-06 | Phase 14 | Pending |
+| UI-04 | Phase 14 | Complete |
+| UI-05 | Phase 14 | Complete |
+| UI-06 | Phase 14 | Complete |
 | SEC-01 | Phase 10 | Pending |
 | SEC-02 | Phase 11 | Complete ✓ |
 | SEC-03 | Phase 10 | Pending |

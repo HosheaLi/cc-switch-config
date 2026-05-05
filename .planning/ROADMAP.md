@@ -235,7 +235,7 @@ Plans:
 
 Plans:
 - [x] 14-01-PLAN.md - Wave 0: Install picocolors, uninstall chalk, create test scaffolds
-- [ ] 14-02-PLAN.md - Wave 1: Implement detection, colors, borders modules
+- [x] 14-02-PLAN.md - Wave 1: Implement detection, colors, borders modules
 - [ ] 14-03-PLAN.md - Wave 2: Create formatters and barrel export
 - [ ] 14-04-PLAN.md - Wave 3: Integrate theme into CLI output consumers, remove old theme.ts
 
@@ -273,7 +273,7 @@ Phases execute in numeric order: 9 - 10 - 11 - 12 - 13 - 14 - 15
 | 11. Config CLI Commands | v2.0 | 2/2 | Complete    | 2026-05-02 |
 | 12. First-Run Wizard | v2.0 | 4/4 | Complete    | 2026-05-02 |
 | 13. Switch Flow | v2.0 | 3/3 | Complete    | 2026-05-02 |
-| 14. Terminal Aesthetic | v2.0 | 1/4 | Executing  | - |
+| 14. Terminal Aesthetic | v2.0 | 2/4 | In Progress|  |
 | 15. Ink Removal | v2.0 | 0/TBD | Not started | - |
 
 ---

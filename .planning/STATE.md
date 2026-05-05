@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Terminal-Native
 status: executing
-last_updated: "2026-05-05T15:19:10Z"
+last_updated: "2026-05-05T15:38:56.816Z"
 last_activity: 2026-05-05
 progress:
   total_phases: 7
   completed_phases: 4
   total_plans: 15
-  completed_plans: 14
-  percent: 93
+  completed_plans: 15
+  percent: 100
 ---
 
 # Project State
@@ -26,7 +26,7 @@ Phase: 14 (terminal-aesthetic) — EXECUTING
 Plan: 2 of 4
 **Milestone:** v2.0 Terminal-Native
 **Phase:** 14 of 15 (terminal aesthetic)
-**Plan:** 14-01 complete, 14-02 next
+**Plan:** 14-02 complete, 14-03 next
 **Status:** Executing Phase 14
 **Last activity:** 2026-05-05
 
@@ -64,7 +64,7 @@ Progress: [████████░░░░░░░░░░░░] 53% (8/
 | 11. Config CLI Commands | Not started | TBD |
 | 12. First-Run Wizard | Not started | TBD |
 | 13. Switch Flow | Not started | TBD |
-| 14. Terminal Aesthetic | Executing | 1/4 complete |
+| 14. Terminal Aesthetic | Executing | 2/4 complete |
 | 15. Ink Removal | Not started | TBD |
 
 ---
@@ -81,6 +81,8 @@ Progress: [████████░░░░░░░░░░░░] 53% (8/
 - **R1:** 原子写入
 - **R2:** 备份系统
 - **M4:** 模块分离 (Services 不依赖 UI)
+- [Phase 14]: Clean env per test (not spreading originalEnv) to avoid host environment leaking into detection tests
+- [Phase 14]: createColors() factory pattern enables testing color behavior with custom ColorSupport without env mocking
 
 ### v2.0 New Decisions (To be locked)
 
@@ -110,9 +112,10 @@ Progress: [████████░░░░░░░░░░░░] 53% (8/
 | Date | Action | Result |
 |------|--------|--------|
 | 2026-05-05 | 14-01 executed | picocolors installed, chalk removed, 4 test scaffolds created |
+| 2026-05-05 | 14-02 executed | detection.ts, colors.ts, borders.ts implemented, 24 tests passing |
 | 2026-04-30 | v2.0 roadmap created | 7 phases (09-15), 28 requirements mapped |
 | 2026-04-15 | v1.0 completed | 875 tests, ready for release |
 
 ---
 
-*State updated: 2026-05-05 after 14-01 plan executed*
+*State updated: 2026-05-05 after 14-02 plan executed*
