@@ -1,8 +1,9 @@
 /**
  * CLI Entry Point - Commander Setup
+ *
+ * Per UI-05: NO_COLOR handling centralized in theme module (not manual here).
  */
 import { Command } from 'commander';
-import chalk from 'chalk';
 import { AppState } from '../lib/store/state.js';
 import { ApiConfigStore } from '../lib/store/api-config.js';
 import { ProjectIndex } from '../lib/store/project.js';
@@ -23,8 +24,6 @@ import { registerConfigCommand } from './commands/config.js';
 const VERSION = '0.1.0';
 
 export async function runCLI(argv: string[] = process.argv): Promise<void> {
-  if (process.env.NO_COLOR) chalk.level = 0;
-
   const program = new Command();
   program.name('cc-config').description('CLI tool for managing Claude Code API provider configurations')
     .version(VERSION, '-v, --version', 'output the current version')
