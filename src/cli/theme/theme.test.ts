@@ -1,9 +1,10 @@
 import { describe, it, expect } from 'vitest';
 import { message, hint, error, success, warning, separator } from './formatters.js';
-import { colors } from './colors.js';
-import { createColors } from './colors.js';
+import { colors, createColors, OPENCODE_PALETTE } from './index.js';
+import { colorSupport, detectColorSupport } from './index.js';
+import { getBorders, BORDERS } from './index.js';
+import { formatters } from './index.js';
 import type { ColorSupport } from './detection.js';
-import { colorSupport } from './detection.js';
 
 /** 去除 ANSI 转义码，获取可见文本 */
 function stripAnsi(str: string): string {
@@ -77,5 +78,36 @@ describe('NO_COLOR handling', () => {
     expect(stripAnsi(warning('test'))).toBe('⚠ test');
     expect(stripAnsi(message('test'))).toBe('test');
     expect(stripAnsi(hint('test'))).toBe('test');
+  });
+});
+
+describe('barrel export (index.ts)', () => {
+  it('exports colors module', () => {
+    expect(colors).toBeDefined();
+    expect(colors.accent).toBeDefined();
+    expect(colors.danger).toBeDefined();
+  });
+
+  it('exports OPENCODE_PALETTE', () => {
+    expect(OPENCODE_PALETTE).toBeDefined();
+    expect(OPENCODE_PALETTE.darkBg).toBeDefined();
+  });
+
+  it('exports borders module', () => {
+    expect(BORDERS).toBeDefined();
+    expect(BORDERS.unicode.horizontal).toBe('─');
+    expect(getBorders).toBeDefined();
+  });
+
+  it('exports formatters module', () => {
+    expect(formatters).toBeDefined();
+    expect(formatters.message).toBeDefined();
+    expect(formatters.error).toBeDefined();
+    expect(formatters.success).toBeDefined();
+  });
+
+  it('exports detection module', () => {
+    expect(colorSupport).toBeDefined();
+    expect(detectColorSupport).toBeDefined();
   });
 });
