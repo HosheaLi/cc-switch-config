@@ -4,17 +4,24 @@
  * Per D-05, D-06: ANSI color diff rendering for terminal output.
  *
  * Renders unified diff representation with ANSI colors:
- * - Header: gray (--- a/ and +++ b/)
- * - Removed: red with - prefix
- * - Added: green with + prefix
- * - Modified: yellow with ~ prefix (before -> after)
+ * - Header: muted (--- a/ and +++ b/)
+ * - Removed: danger with - prefix
+ * - Added: success with + prefix
+ * - Modified: warning with ~ prefix (before -> after)
  *
  * Value truncation:
  * - Strings > TRUNCATE_LENGTH chars are truncated with ellipsis
+ *
+ * Per T-14-07: 用户输入 (config values) 在显示前需去除 ANSI 转义码。
  */
 
-import chalk from 'chalk';
+import { colors } from '../theme/index.js';
 import type { DiffLine } from './diff.js';
+
+/**
+ * 去除字符串中的 ANSI 转义码 (per T-14-07 安全缓解)
+ */
+const stripAnsi = (str: string): string => str.replace(/\x1b\[[0-9;]*m/g, '');
 
 /** Maximum length before truncation */
 export const TRUNCATE_LENGTH = 50;
@@ -76,13 +83,13 @@ export function renderDiff(
   filePath: string = '.claude/settings.json'
 ): void {
   // Header (D-05)
-  console.log(chalk.gray(`--- a/${filePath}`));
-  console.log(chalk.gray(`+++ b/${filePath}`));
+  console.log(colors.muted(`--- a/${filePath}`));
+  console.log(colors.muted(`+++ b/${filePath}`));
 
   // Empty diff handling
   if (diffLines.length === 0) {
     console.log('');
-    console.log(chalk.gray('配置无变化。'));
+    console.log(colors.muted('配置无变化。'));
     return;
   }
 
@@ -96,16 +103,16 @@ export function renderDiff(
   for (const line of sortedLines) {
     switch (line.type) {
       case 'removed':
-        console.log(chalk.red(`- ${line.path}: ${formatValue(line.value)}`));
+        console.log(colors.danger(`- ${stripAnsi(line.path)}: ${stripAnsi(formatValue(line.value))}`));
         break;
 
       case 'added':
-        console.log(chalk.green(`+ ${line.path}: ${formatValue(line.value)}`));
+        console.log(colors.success(`+ ${stripAnsi(line.path)}: ${stripAnsi(formatValue(line.value))}`));
         break;
 
       case 'modified':
         console.log(
-          chalk.yellow(`~ ${line.path}: ${formatValue(line.before)} -> ${formatValue(line.after)}`)
+          colors.warning(`~ ${stripAnsi(line.path)}: ${stripAnsi(formatValue(line.before))} -> ${stripAnsi(formatValue(line.after))}`)
         );
         break;
     }

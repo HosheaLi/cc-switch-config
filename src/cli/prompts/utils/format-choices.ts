@@ -2,10 +2,11 @@
  * Choice Formatting Helpers
  *
  * Utilities for formatting prompt choices with consistent styling.
+ * Per UI-01~06: 使用统一主题模块 (picocolors) 替代 chalk。
  */
 
 import type { Choice } from 'prompts';
-import chalk from 'chalk';
+import { colors } from '../../theme/index.js';
 import path from 'path';
 
 /**
@@ -17,8 +18,8 @@ import path from 'path';
 export function formatProjectChoice(project: { name: string; path: string; activeConfig?: string | null }): Choice {
   const displayName = project.name || path.basename(project.path);
   const configStatus = project.activeConfig
-    ? chalk.green(`[${project.activeConfig}]`)
-    : chalk.gray('[未配置]');
+    ? colors.success(`[${project.activeConfig}]`)
+    : colors.muted('[未配置]');
 
   return {
     title: `${displayName} ${configStatus}`,
@@ -80,7 +81,7 @@ export function addCancelOption(choices: Choice[]): Choice[] {
   return [
     ...choices,
     {
-      title: chalk.red('取消'),
+      title: colors.danger('取消'),
       value: '__cancel__',
       description: '返回上一级或退出',
     },
