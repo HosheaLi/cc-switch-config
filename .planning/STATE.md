@@ -3,11 +3,11 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Terminal-Native
 status: completed
-last_updated: "2026-05-05T16:07:04.670Z"
-last_activity: 2026-05-06
+last_updated: "2026-05-07T16:10:24.373Z"
+last_activity: 2026-05-08
 progress:
   total_phases: 7
-  completed_phases: 5
+  completed_phases: 6
   total_plans: 15
   completed_plans: 18
   percent: 100
@@ -22,15 +22,15 @@ progress:
 
 ## Current Position
 
-Phase: 14 (terminal-aesthetic) — EXECUTING
-Plan: 4 of 4
+Phase: 15 (ink-removal) — CONTEXT GATHERED
+Plan: TBD
 **Milestone:** v2.0 Terminal-Native
-**Phase:** 14 of 15 (terminal aesthetic)
-**Plan:** 14-04 complete, Phase 14 done
-**Status:** Phase 14 complete
-**Last activity:** 2026-05-06
+**Phase:** 15 of 15 (ink removal) — NEXT
+**Plan:** TBD
+**Status:** Phase 15 context gathered
+**Last activity:** 2026-05-08
 
-Progress: [████████░░░░░░░░░░░░] 53% (8/15 phases complete)
+Progress: [████████████░░░░░░░░░] 60% (9/15 phases complete)
 
 ---
 
@@ -59,13 +59,13 @@ Progress: [████████░░░░░░░░░░░░] 53% (8/
 
 | Phase | Status | Plans |
 |-------|--------|-------|
-| 09. Prompts Integration | Not started | TBD |
-| 10. Config Service | Not started | TBD |
-| 11. Config CLI Commands | Not started | TBD |
-| 12. First-Run Wizard | Not started | TBD |
-| 13. Switch Flow | Not started | TBD |
-| 14. Terminal Aesthetic | Complete | 4/4 complete |
-| 15. Ink Removal | Not started | TBD |
+| 09. Prompts Integration | Complete (absorbed) | 吸收到 10-14 |
+| 10. Config Service | Complete | 4/4 |
+| 11. Config CLI Commands | Complete | 2/2 |
+| 12. First-Run Wizard | Complete | 4/4 |
+| 13. Switch Flow | Complete | 3/3 |
+| 14. Terminal Aesthetic | Complete | 4/4 |
+| 15. Ink Removal | Context gathered | TBD |
 
 ---
 
@@ -113,6 +113,8 @@ Progress: [████████░░░░░░░░░░░░] 53% (8/
 
 | Date | Action | Result |
 |------|--------|--------|
+| 2026-05-08 | 15 context gathered | Phase 15 discuss-phase complete, CONTEXT.md created |
+| 2026-05-07 | 09 evaluated | Phase 09 marked complete (absorbed into Phase 10-14) |
 | 2026-05-05 | 14-01 executed | picocolors installed, chalk removed, 4 test scaffolds created |
 | 2026-05-05 | 14-02 executed | detection.ts, colors.ts, borders.ts implemented, 24 tests passing |
 | 2026-04-30 | v2.0 roadmap created | 7 phases (09-15), 28 requirements mapped |
