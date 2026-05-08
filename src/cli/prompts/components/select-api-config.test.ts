@@ -15,7 +15,6 @@
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import prompts from 'prompts';
-import chalk from 'chalk';
 
 // Types
 import type { ApiConfig } from '../../lib/types/api-config.js';
@@ -40,17 +39,18 @@ vi.mock('../utils/autocomplete.js', () => ({
   createFuzzySuggest: vi.fn(() => async () => []),
 }));
 
-// Mock chalk
-vi.mock('chalk', () => ({
-  default: {
-    yellow: vi.fn((str: string) => str),
-    gray: vi.fn((str: string) => str),
+// Mock theme/colors
+vi.mock('../../theme/index.js', () => ({
+  colors: {
+    warning: vi.fn((str: string) => str),
+    muted: vi.fn((str: string) => str),
   },
 }));
 
 // Import mocked modules after mocking
 import { promptWithCancel } from '../utils/handle-cancel.js';
 import { getPromptType } from '../utils/autocomplete.js';
+import { colors } from '../../theme/index.js';
 
 describe('selectApiConfig', () => {
   let consoleLogSpy: ReturnType<typeof vi.spyOn>;
@@ -93,12 +93,12 @@ describe('selectApiConfig', () => {
       expect(promptWithCancel).not.toHaveBeenCalled();
     });
 
-    it('uses yellow color for warning', async () => {
-      vi.mocked(chalk.yellow).mockReturnValue('YELLOW_WARNING');
+    it('uses warning color for message', async () => {
+      vi.mocked(colors.warning).mockReturnValue('WARNING_MSG');
 
       await selectApiConfig({});
 
-      expect(chalk.yellow).toHaveBeenCalled();
+      expect(colors.warning).toHaveBeenCalled();
     });
   });
 

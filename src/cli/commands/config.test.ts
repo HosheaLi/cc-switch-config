@@ -8,7 +8,6 @@
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { Command } from 'commander';
-import chalk from 'chalk';
 import { registerConfigCommand } from './config.js';
 
 // Mock ApiService
@@ -744,7 +743,7 @@ describe('config command', () => {
       freshConsoleError.mockRestore();
     });
 
-    it('Test 23: chalk.red for group titles, chalk.gray for messages (D-12)', async () => {
+    it('Test 23: colors.danger for group titles, colors.muted for messages (D-12)', async () => {
       const { displayValidationErrors } = await import('./config.js');
       const { ValidationError } = await import('../../lib/types/validation.js');
 
@@ -756,7 +755,7 @@ describe('config command', () => {
 
       displayValidationErrors(error);
 
-      // Verify colors are used (chalk adds styling)
+      // Verify colors are used (theme module adds styling)
       expect(freshConsoleError).toHaveBeenCalled();
 
       freshConsoleError.mockRestore();

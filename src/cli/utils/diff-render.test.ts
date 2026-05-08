@@ -11,7 +11,6 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import chalk from 'chalk';
 
 // Types (import from existing diff module)
 import type { DiffLine } from './diff.js';
