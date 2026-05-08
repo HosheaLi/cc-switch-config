@@ -9,8 +9,8 @@
 // Auto-switch utility for shell hook integration
 export * from './auto-switch.js';
 
-// TUI launch utility
-export * from './tui-launch.js';
+// CLI launch utility (terminal-native mode)
+export * from './cli-launch.js';
 
 // Diff generation utilities for config comparison
 export * from './diff.js';

@@ -1,29 +1,26 @@
 /**
- * TUI Launch Utility Tests - Real Implementation (Phase 06)
+ * CLI Launch Utility Tests - Terminal-Native Mode (Phase 15)
  *
- * Tests launchTUI calls runTUI from TUI module (D-02).
- * Tests selectTemplateInTUI lists templates (D-06).
+ * Tests launchTUI calls launchPromptsTUI (D-02).
+ * Tests selectConfigInCLI lists configs (D-06).
  *
- * Phase 09: launchTUI now calls launchPromptsTUI.
+ * Phase 09: launchTUI calls launchPromptsTUI.
+ * Phase 15: Renamed to cli-launch.ts, migrated to ApiService.
  *
  * Note: Uses vi.mock with factory functions for proper hoisting.
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-
-// Mock TUI module - hoisted to top
-vi.mock('../../tui/index.js', () => ({
-  runTUI: vi.fn().mockResolvedValue(undefined),
-}));
 
 // Mock prompts module - Phase 09
 vi.mock('../prompts/index.js', () => ({
   launchPromptsTUI: vi.fn().mockResolvedValue(undefined),
 }));
 
-// Mock services - hoisted to top, returns object with listTemplates method
+// Mock services - hoisted to top, returns object with listConfigs method
 vi.mock('../../lib/services/index.js', () => ({
-  TemplateService: vi.fn().mockImplementation(() => ({
-    listTemplates: vi.fn().mockResolvedValue(['anthropic-template', 'openai-template']),
+  ApiService: vi.fn().mockImplementation(() => ({
+    listConfigs: vi.fn().mockResolvedValue(['anthropic-config', 'openai-config']),
+    getConfig: vi.fn().mockResolvedValue(null),
   })),
   ProjectService: vi.fn().mockImplementation(() => ({
     listProjects: vi.fn().mockResolvedValue([]),
@@ -32,9 +29,9 @@ vi.mock('../../lib/services/index.js', () => ({
   })),
 }));
 
-// Mock store - hoisted to top (Phase 09: added ProjectIndex, AppState)
+// Mock store - hoisted to top
 vi.mock('../../lib/store/index.js', () => ({
-  TemplateStore: vi.fn().mockImplementation(() => {}),
+  ApiConfigStore: vi.fn().mockImplementation(() => {}),
   ProjectIndex: vi.fn().mockImplementation(() => {}),
   AppState: vi.fn().mockImplementation(() => {}),
 }));
@@ -46,10 +43,10 @@ vi.mock('../../lib/store/config.js', () => ({
 }));
 
 // Import AFTER mocks are defined (vitest hoists mocks automatically)
-import { launchTUI, selectTemplateInTUI } from './tui-launch.js';
-import { TemplateService } from '../../lib/services/index.js';
+import { launchTUI, selectConfigInCLI } from './cli-launch.js';
+import { ApiService } from '../../lib/services/index.js';
 
-describe('TUI launch utility', () => {
+describe('CLI launch utility', () => {
   let mockConsole: ReturnType<typeof vi.spyOn>;
 
   beforeEach(() => {
@@ -59,9 +56,10 @@ describe('TUI launch utility', () => {
 
   afterEach(() => {
     vi.restoreAllMocks();
-    // Reset TemplateService to default implementation
-    vi.mocked(TemplateService).mockImplementation(() => ({
-      listTemplates: vi.fn().mockResolvedValue(['anthropic-template', 'openai-template']),
+    // Reset ApiService to default implementation
+    vi.mocked(ApiService).mockImplementation(() => ({
+      listConfigs: vi.fn().mockResolvedValue(['anthropic-config', 'openai-config']),
+      getConfig: vi.fn().mockResolvedValue(null),
     }));
   });
 
@@ -79,46 +77,48 @@ describe('TUI launch utility', () => {
     });
   });
 
-  describe('selectTemplateInTUI', () => {
+  describe('selectConfigInCLI', () => {
     it('returns null (user must specify via CLI)', async () => {
-      const result = await selectTemplateInTUI();
-      expect(result).toBeNull();
+      const result = await selectConfigInCLI();
+      expect(result).isNull();
     });
 
-    it('lists available templates (D-06)', async () => {
-      await selectTemplateInTUI();
+    it('lists available configs (D-06)', async () => {
+      await selectConfigInCLI();
 
-      // Should output template names
+      // Should output config names
       expect(mockConsole).toHaveBeenCalled();
       const calls = mockConsole.mock.calls;
       const logOutput = calls.map(c => c[0]).join('\n');
 
-      expect(logOutput).toContain('Available templates');
+      expect(logOutput).toContain('可用配置');
     });
 
-    it('handles no templates available', async () => {
-      // Override TemplateService mock for empty templates
-      vi.mocked(TemplateService).mockImplementationOnce(() => ({
-        listTemplates: vi.fn().mockResolvedValue([]),
-      } as any));
+    it('handles no configs available', async () => {
+      // Override ApiService mock for empty configs
+      vi.mocked(ApiService).mockImplementationOnce(() => ({
+        listConfigs: vi.fn().mockResolvedValue([]),
+        getConfig: vi.fn().mockResolvedValue(null),
+      }) as any);
 
-      await selectTemplateInTUI();
+      await selectConfigInCLI();
 
       const logOutput = mockConsole.mock.calls.map(c => c[0]).join('\n');
-      expect(logOutput).toContain('No templates available');
+      expect(logOutput).toContain('没有可用的配置');
     });
 
     it('handles errors gracefully', async () => {
-      // Override TemplateService mock for error
-      vi.mocked(TemplateService).mockImplementationOnce(() => ({
-        listTemplates: vi.fn().mockRejectedValue(new Error('Store error')),
-      } as any));
+      // Override ApiService mock for error
+      vi.mocked(ApiService).mockImplementationOnce(() => ({
+        listConfigs: vi.fn().mockRejectedValue(new Error('Store error')),
+        getConfig: vi.fn().mockResolvedValue(null),
+      }) as any);
 
-      const result = await selectTemplateInTUI();
+      const result = await selectConfigInCLI();
 
-      expect(result).toBeNull();
+      expect(result).isNull();
       const logOutput = mockConsole.mock.calls.map(c => c[0]).join('\n');
-      expect(logOutput).toContain('Error listing templates');
+      expect(logOutput).toContain('列出配置失败');
     });
   });
 });

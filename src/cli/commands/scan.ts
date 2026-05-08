@@ -15,7 +15,7 @@ import { ProjectService } from '../../lib/services/index.js';
 import type { ScanResult } from '../../lib/services/index.js';
 import { ProjectIndex, AppState } from '../../lib/store/index.js';
 import { handleCLIError } from '../output/error.js';
-import { launchScanTUI } from '../utils/tui-launch.js';
+import { launchScanTUI } from '../utils/cli-launch.js';
 
 /**
  * Options for scan command.

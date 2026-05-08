@@ -31,8 +31,8 @@ vi.mock('../../lib/store/state.js', () => ({
   })),
 }));
 
-// Mock TUI launch
-vi.mock('../utils/tui-launch.js', () => ({
+// Mock CLI launch
+vi.mock('../utils/cli-launch.js', () => ({
   launchScanTUI: vi.fn().mockResolvedValue(undefined),
 }));
 
@@ -192,7 +192,7 @@ describe('scan command', () => {
     });
 
     it('calls launchScanTUI when --tui option is set', async () => {
-      const mockLaunchScanTUI = vi.mocked(await import('../utils/tui-launch.js')).launchScanTUI;
+      const mockLaunchScanTUI = vi.mocked(await import('../utils/cli-launch.js')).launchScanTUI;
 
       const mockScanProjects = vi.fn().mockResolvedValue([
         { path: '/test/project1', isNew: true },

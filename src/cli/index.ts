@@ -7,7 +7,7 @@ import { Command } from 'commander';
 import { AppState } from '../lib/store/state.js';
 import { ApiConfigStore } from '../lib/store/api-config.js';
 import { ProjectIndex } from '../lib/store/project.js';
-import { launchTUI } from './utils/tui-launch.js';
+import { launchTUI } from './utils/cli-launch.js';
 import { launchPromptsTUI } from './prompts/wizards/main-wizard.js';
 import { registerListCommand } from './commands/list.js';
 import { registerSwitchCommand } from './commands/switch.js';

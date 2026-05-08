@@ -19,7 +19,7 @@ vi.mock('../../lib/store/state.js');
 vi.mock('../../lib/store/config.js');
 vi.mock('../../lib/services/config-service.js');
 vi.mock('../../lib/services/export-service.js');
-vi.mock('../utils/tui-launch.js');
+vi.mock('../utils/cli-launch.js');
 
 describe('registerImportCommand', () => {
   let program: Command;
