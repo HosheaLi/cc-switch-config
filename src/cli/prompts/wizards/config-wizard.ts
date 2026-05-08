@@ -4,13 +4,12 @@
  * Per CFG-03: Manage API configs via CLI
  */
 
-import chalk from 'chalk';
 import { ApiService } from '../../../lib/services/index.js';
 import { ApiConfigStore, readConfig, writeConfig } from '../../../lib/store/index.js';
 import { selectTemplate } from '../components/select-template.js';
 import { confirmWithDetails } from '../components/confirm-action.js';
 import { inputFullApiConfig, inputConfigName } from '../components/input-api-key.js';
-import { formatters, separator as themeSeparator } from '../../theme/index.js';
+import { colors, formatters, separator as themeSeparator } from '../../theme/index.js';
 
 /**
  * @deprecated
@@ -84,31 +83,31 @@ export async function runConfigListWizard(): Promise<void> {
 
     if (configs.length === 0) {
       console.log(formatters.warning('没有可用的配置。'));
-      console.log(chalk.gray('创建配置: cc-config config add'));
+      console.log(colors.muted('创建配置: cc-config config add'));
       return;
     }
 
-    console.log(chalk.cyan('\n可用配置'));
+    console.log(colors.accent('\n可用配置'));
     console.log(themeSeparator(40));
 
     for (const name of configs) {
       try {
         const config = await apiService.getConfig(name);
         if (config) {
-          console.log(chalk.white(`  ${name}`));
+          console.log(colors.foreground(`  ${name}`));
           const modelName = config.modelName || '未设置';
           const hasKey = config.apiKey;
-          console.log(chalk.gray(`    模型: ${modelName}`));
-          console.log(chalk.gray(`    API Key: ${hasKey ? '已配置' : '未设置'}`));
+          console.log(colors.muted(`    模型: ${modelName}`));
+          console.log(colors.muted(`    API Key: ${hasKey ? '已配置' : '未设置'}`));
         }
       } catch {
-        console.log(chalk.white(`  ${name}`));
-        console.log(chalk.gray(`    (无法加载详情)`));
+        console.log(colors.foreground(`  ${name}`));
+        console.log(colors.muted(`    (无法加载详情)`));
       }
     }
 
     console.log(themeSeparator(40));
-    console.log(chalk.gray(`共 ${configs.length} 个配置`));
+    console.log(colors.muted(`共 ${configs.length} 个配置`));
 
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
@@ -138,7 +137,7 @@ export async function runConfigRemoveWizard(): Promise<void> {
       return;
     }
 
-    console.log(chalk.cyan('\n删除配置'));
+    console.log(colors.accent('\n删除配置'));
     console.log(themeSeparator(40));
 
     const configName = await selectTemplate(configs, '选择要删除的配置');
@@ -151,7 +150,7 @@ export async function runConfigRemoveWizard(): Promise<void> {
     );
 
     if (!confirmed) {
-      console.log(chalk.gray('已取消。'));
+      console.log(colors.muted('已取消。'));
       return;
     }
 

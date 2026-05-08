@@ -11,7 +11,6 @@
 
 import type { Command } from 'commander';
 import fs from 'fs-extra';
-import chalk from 'chalk';
 import { ExportService, detectConflicts, type ImportStrategy } from '../../lib/services/export-service.js';
 import { ProjectIndex } from '../../lib/store/project.js';
 import { ApiConfigStore } from '../../lib/store/api-config.js';
@@ -21,6 +20,7 @@ import { handleCLIError } from '../output/error.js';
 import { migrateExportPayload } from '../../lib/types/export-schema.js';
 import type { ConflictField } from '../../lib/types/export-schema.js';
 import type { ExportPayload } from '../../lib/types/export-schema.js';
+import { colors } from '../theme/index.js';
 
 /**
  * Import command options.
@@ -76,14 +76,14 @@ async function importConfig(file: string, options: ImportOptions): Promise<void>
 
   // Validate basic structure to get project path
   if (typeof payload !== 'object' || payload === null) {
-    console.error(chalk.red('Invalid export file: not a JSON object'));
+    console.error(colors.danger('Invalid export file: not a JSON object'));
     process.exit(4); // CONFIG_ERROR
   }
 
   const basicPayload = payload as Record<string, unknown>;
   const projectObj = basicPayload.project as Record<string, unknown> | undefined;
   if (typeof projectObj?.path !== 'string') {
-    console.error(chalk.red('Invalid export file: missing project path'));
+    console.error(colors.danger('Invalid export file: missing project path'));
     process.exit(4); // CONFIG_ERROR
   }
 
@@ -97,7 +97,7 @@ async function importConfig(file: string, options: ImportOptions): Promise<void>
   const service = new ExportService(projectIndex, apiConfigStore, configService);
 
   // Determine strategy
-  let strategy: ImportStrategy;
+  let strategy: ImportStrategy | undefined;
 
   if (options.strategy) {
     // Non-interactive mode: use specified strategy
@@ -112,17 +112,18 @@ async function importConfig(file: string, options: ImportOptions): Promise<void>
     if (conflicts.length === 0) {
       // No conflicts: proceed with merge (default)
       strategy = 'merge';
-      console.log(chalk.gray('No conflicts detected. Importing with merge strategy.'));
+      console.log(colors.muted('No conflicts detected. Importing with merge strategy.'));
     } else {
       // Conflicts detected: launch TUI for resolution
-      console.log(chalk.yellow(`Found ${conflicts.length} conflicting fields.`));
-      strategy = await launchImportConflictTUI(conflicts);
+      console.log(colors.warning(`Found ${conflicts.length} conflicting fields.`));
+      const selectedStrategy = await launchImportConflictTUI(conflicts);
 
-      if (!strategy) {
+      if (!selectedStrategy) {
         // User cancelled
-        console.log(chalk.gray('Import cancelled.'));
+        console.log(colors.muted('Import cancelled.'));
         return;
       }
+      strategy = selectedStrategy;
     }
   }
 
@@ -130,7 +131,7 @@ async function importConfig(file: string, options: ImportOptions): Promise<void>
   await service.importProject(payload, targetPath, strategy);
 
   // Success message
-  console.log(chalk.green(`Imported config to ${targetPath}`));
+  console.log(colors.success(`Imported config to ${targetPath}`));
 }
 
 /**
@@ -147,25 +148,25 @@ async function launchImportConflictTUI(conflicts: ConflictField[]): Promise<Impo
   // When implementing, use Ink's ImportConflictScreen with keyboard input (1/2/3/Esc).
 
   // Display conflicts summary
-  console.log(chalk.cyan.bold('Import Conflicts Detected'));
-  console.log(chalk.gray(`${conflicts.length} conflicting fields found`));
+  console.log(colors.bold(colors.accent('Import Conflicts Detected')));
+  console.log(colors.muted(`${conflicts.length} conflicting fields found`));
   console.log();
 
   // Show conflict details
   for (const conflict of conflicts) {
-    console.log(chalk.white.bold(`  ${conflict.key}`));
-    console.log(chalk.cyan(`    Imported: ${JSON.stringify(conflict.imported)}`));
-    console.log(chalk.yellow(`    Existing: ${JSON.stringify(conflict.existing)}`));
+    console.log(colors.bold(colors.foreground(`  ${conflict.key}`)));
+    console.log(colors.accent(`    Imported: ${JSON.stringify(conflict.imported)}`));
+    console.log(colors.warning(`    Existing: ${JSON.stringify(conflict.existing)}`));
     console.log();
   }
 
-  console.log(chalk.white('Resolution options:'));
-  console.log(chalk.white('  [1] Merge all - preserve existing values, add new fields'));
-  console.log(chalk.white('  [2] Overwrite all - replace with imported values'));
-  console.log(chalk.white('  [3] Skip all - keep existing, discard imported'));
-  console.log(chalk.gray('  [Esc] Cancel import'));
+  console.log(colors.foreground('Resolution options:'));
+  console.log(colors.foreground('  [1] Merge all - preserve existing values, add new fields'));
+  console.log(colors.foreground('  [2] Overwrite all - replace with imported values'));
+  console.log(colors.foreground('  [3] Skip all - keep existing, discard imported'));
+  console.log(colors.muted('  [Esc] Cancel import'));
   console.log();
 
-  console.log(chalk.gray('Proceeding with merge strategy (default).'));
+  console.log(colors.muted('Proceeding with merge strategy (default).'));
   return 'merge';
 }

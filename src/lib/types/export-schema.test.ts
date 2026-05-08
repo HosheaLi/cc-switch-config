@@ -124,7 +124,7 @@ describe('ProjectRefSchema', () => {
 });
 
 describe('ExportPayloadSchema', () => {
-  it('should validate valid payload with template', () => {
+  it('should validate valid payload with config', () => {
     const validPayload = {
       metadata: {
         version: '1.0',
@@ -142,24 +142,19 @@ describe('ExportPayloadSchema', () => {
           ANTHROPIC_MODEL: 'claude-3-opus',
         },
       },
-      template: {
+      config: {
         name: 'custom-provider',
-        description: 'My custom provider',
-        provider: {
-          name: 'Custom API',
-          baseUrl: 'https://api.custom.com',
-          authType: 'header',
-        },
-        tags: ['custom', 'api'],
-        createdAt: '2026-04-01T00:00:00.000Z',
-        updatedAt: '2026-04-14T00:00:00.000Z',
+        apiKey: 'sk-test-api-key',
+        baseUrl: 'https://api.custom.com',
+        mode: 'unified',
+        modelName: 'claude-3-opus',
       },
     };
     const result = ExportPayloadSchema.safeParse(validPayload);
     expect(result.success).toBe(true);
   });
 
-  it('should validate valid payload without template (nullable)', () => {
+  it('should validate valid payload without config (nullable)', () => {
     const validPayload = {
       metadata: {
         version: '1.0',
@@ -172,7 +167,7 @@ describe('ExportPayloadSchema', () => {
       settings: {
         model: 'claude-3-opus',
       },
-      template: null,
+      config: null,
     };
     const result = ExportPayloadSchema.safeParse(validPayload);
     expect(result.success).toBe(true);
@@ -189,7 +184,7 @@ describe('ExportPayloadSchema', () => {
         path: '/Users/test/project',
       },
       // Missing 'settings' field
-      template: null,
+      config: null,
     };
     const result = ExportPayloadSchema.safeParse(invalidPayload);
     expect(result.success).toBe(false);
@@ -209,7 +204,7 @@ describe('ExportPayloadSchema', () => {
         model: 'claude-3-opus',
         unknownSettingsField: 'value', // Unknown field
       },
-      template: null,
+      config: null,
     };
     const result = ExportPayloadSchema.safeParse(invalidPayload);
     expect(result.success).toBe(false);
@@ -226,7 +221,7 @@ describe('ExportPayloadSchema', () => {
         path: '/Users/test/project',
       },
       settings: {},
-      template: null,
+      config: null,
       unknownPayloadField: 'value', // Unknown field
     };
     const result = ExportPayloadSchema.safeParse(invalidPayload);
@@ -263,7 +258,7 @@ describe('ExportPayloadSchema', () => {
           { match: 'PreToolUse', run: 'echo "before"' },
         ],
       },
-      template: null,
+      config: null,
     };
     const result = ExportPayloadSchema.safeParse(validPayload);
     expect(result.success).toBe(true);
@@ -325,7 +320,7 @@ describe('Type exports', () => {
       metadata: { version: '1.0', exportedAt: '2026-04-14T12:00:00.000Z' },
       project: { id: '550e8400-e29b-41d4-a716-446655440000', path: '/path' },
       settings: {},
-      template: null,
+      config: null,
     };
     expect(payload.metadata.version).toBe('1.0');
   });

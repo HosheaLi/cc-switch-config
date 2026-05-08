@@ -80,7 +80,7 @@ describe('CLI launch utility', () => {
   describe('selectConfigInCLI', () => {
     it('returns null (user must specify via CLI)', async () => {
       const result = await selectConfigInCLI();
-      expect(result).isNull();
+      expect(result).toBeNull();
     });
 
     it('lists available configs (D-06)', async () => {
@@ -116,7 +116,7 @@ describe('CLI launch utility', () => {
 
       const result = await selectConfigInCLI();
 
-      expect(result).isNull();
+      expect(result).toBeNull();
       const logOutput = mockConsole.mock.calls.map(c => c[0]).join('\n');
       expect(logOutput).toContain('列出配置失败');
     });

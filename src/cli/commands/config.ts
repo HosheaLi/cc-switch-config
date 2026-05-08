@@ -30,7 +30,7 @@ import { ValidationError } from '../../lib/types/validation.js';
 /**
  * Display validation errors grouped by field type.
  * Per SEC-02/D-11: Grouped display for user-friendly error feedback.
- * Per D-12: chalk.red for titles, chalk.gray for messages.
+ * Per D-12: colors.danger for titles, colors.muted for messages.
  * Per D-13: stderr output keeps stdout clean.
  *
  * @param error - ValidationError with issues array

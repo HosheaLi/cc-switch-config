@@ -11,7 +11,7 @@ import { colors } from '../../theme/index.js';
 import type { Choice } from 'prompts';
 import { getPromptType, createFuzzySuggest } from '../utils/autocomplete.js';
 import { promptWithCancel } from '../utils/handle-cancel.js';
-import type { ApiConfig } from '../../lib/types/api-config.js';
+import type { ApiConfig } from '../../../lib/types/api-config.js';
 
 /**
  * Select an API configuration from available configs.

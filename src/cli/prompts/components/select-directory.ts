@@ -99,7 +99,8 @@ export async function inputCustomDirectory(
           return `不是目录: ${resolved}`;
         }
       } catch (err) {
-        return `无效路径: ${err.message}`;
+        const message = err instanceof Error ? err.message : String(err);
+        return `无效路径: ${message}`;
       }
       return true;
     },

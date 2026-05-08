@@ -54,7 +54,8 @@ export function deepMergeConfig<T extends Record<string, unknown>>(
   base: T,
   override: Partial<T>
 ): T {
-  const result = { ...base } as T;
+  // Cast to mutable record for assignment operations
+  const result = { ...base } as Record<string, unknown>;
 
   for (const key of Object.keys(override)) {
     const overrideValue = override[key];
@@ -67,13 +68,13 @@ export function deepMergeConfig<T extends Record<string, unknown>>(
 
     // Null replaces - explicit null clears the value
     if (overrideValue === null) {
-      result[key] = null as T[Extract<keyof T, string>];
+      result[key] = null;
       continue;
     }
 
     // Arrays REPLACE (not concatenate) - per D-04 research
     if (Array.isArray(overrideValue)) {
-      result[key] = overrideValue as T[Extract<keyof T, string>];
+      result[key] = overrideValue;
       continue;
     }
 
@@ -89,15 +90,16 @@ export function deepMergeConfig<T extends Record<string, unknown>>(
       result[key] = deepMergeConfig(
         baseValue as Record<string, unknown>,
         overrideValue as Record<string, unknown>
-      ) as T[Extract<keyof T, string>];
+      );
       continue;
     }
 
     // Primitives replace
-    result[key] = overrideValue as T[Extract<keyof T, string>];
+    result[key] = overrideValue;
   }
 
-  return result;
+  // Cast back to T for return
+  return result as T;
 }
 
 /**

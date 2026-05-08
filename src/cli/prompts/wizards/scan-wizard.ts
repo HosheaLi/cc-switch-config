@@ -6,13 +6,12 @@
  */
 
 import path from 'path';
-import chalk from 'chalk';
 import { ProjectService } from '../../../lib/services/index.js';
 import { ProjectIndex, AppState } from '../../../lib/store/index.js';
 import { selectFromScanResults } from '../components/select-project.js';
 import { confirmAction } from '../components/confirm-action.js';
 import { selectDirectory } from '../components/select-directory.js';
-import { formatters, separator as themeSeparator } from '../../theme/index.js';
+import { colors, formatters, separator as themeSeparator } from '../../theme/index.js';
 // Note: ora is not installed, using simple spinner fallback
 
 /**
@@ -30,11 +29,11 @@ function createSpinner(message: string) {
   return {
     succeed: (msg: string) => {
       clearInterval(interval);
-      process.stdout.write(`\r${chalk.green('✓')} ${msg}\n`);
+      process.stdout.write(`\r${colors.success('✓')} ${msg}\n`);
     },
     fail: (msg: string) => {
       clearInterval(interval);
-      process.stdout.write(`\r${chalk.red('✗')} ${msg}\n`);
+      process.stdout.write(`\r${colors.danger('✗')} ${msg}\n`);
     },
     stop: () => {
       clearInterval(interval);
@@ -60,7 +59,7 @@ export async function runScanWizard(): Promise<void> {
   const projectService = new ProjectService(projectIndex, appState);
 
   try {
-    console.log(chalk.cyan('\n项目扫描'));
+    console.log(colors.accent('\n项目扫描'));
     console.log(themeSeparator(40));
 
     // Step 1: Select scan directory
@@ -80,7 +79,7 @@ export async function runScanWizard(): Promise<void> {
     const newProjects = results.filter(r => r.isNew);
     const existingCount = results.length - newProjects.length;
 
-    console.log(chalk.gray(`发现 ${results.length} 个项目 (${newProjects.length} 新, ${existingCount} 已注册)`));
+    console.log(colors.muted(`发现 ${results.length} 个项目 (${newProjects.length} 新, ${existingCount} 已注册)`));
 
     if (newProjects.length === 0) {
       console.log(formatters.success('所有项目都已注册。'));
@@ -92,7 +91,7 @@ export async function runScanWizard(): Promise<void> {
     if (!selectedPaths || selectedPaths.length === 0) return;
 
     // Step 4: Register selected projects
-    console.log(chalk.gray(`\n注册 ${selectedPaths.length} 个项目...`));
+    console.log(colors.muted(`\n注册 ${selectedPaths.length} 个项目...`));
 
     const registered: string[] = [];
     const failed: string[] = [];
@@ -113,7 +112,7 @@ export async function runScanWizard(): Promise<void> {
     if (registered.length > 0) {
       console.log(formatters.success(`已注册 ${registered.length} 个项目`));
       for (const name of registered) {
-        console.log(chalk.gray(`  - ${name}`));
+        console.log(colors.muted(`  - ${name}`));
       }
     }
     if (failed.length > 0) {
@@ -144,7 +143,7 @@ export async function quickScanWizard(directory: string): Promise<void> {
 
     const newProjects = results.filter(r => r.isNew);
     if (newProjects.length === 0) {
-      console.log(chalk.gray('没有新项目发现。'));
+      console.log(colors.muted('没有新项目发现。'));
       return;
     }
 

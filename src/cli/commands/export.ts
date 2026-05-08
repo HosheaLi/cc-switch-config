@@ -11,7 +11,6 @@
 
 import type { Command } from 'commander';
 import fs from 'fs-extra';
-import chalk from 'chalk';
 import { ExportService } from '../../lib/services/export-service.js';
 import { ProjectIndex } from '../../lib/store/project.js';
 import { ApiConfigStore } from '../../lib/store/api-config.js';
@@ -19,6 +18,7 @@ import { ConfigService } from '../../lib/services/config-service.js';
 import { readConfig, writeConfig } from '../../lib/store/config.js';
 import { AppState } from '../../lib/store/state.js';
 import { handleCLIError } from '../output/error.js';
+import { colors } from '../theme/index.js';
 
 /**
  * Export command options.
@@ -73,13 +73,14 @@ async function exportConfig(projectId: string | undefined, options: ExportOption
   const appState = new AppState();
 
   // Get project ID (use active if not specified)
-  let targetId = projectId;
+  let targetId: string | undefined = projectId;
   if (!targetId) {
-    targetId = appState.getActiveProject();
-    if (!targetId) {
-      console.error(chalk.yellow('No active project. Specify a project ID or use "switch" first.'));
+    const activeProject = appState.getActiveProject();
+    if (!activeProject) {
+      console.error(colors.warning('No active project. Specify a project ID or use "switch" first.'));
       process.exit(3); // NOT_FOUND
     }
+    targetId = activeProject;
   }
 
   // Create export service
@@ -96,6 +97,6 @@ async function exportConfig(projectId: string | undefined, options: ExportOption
     // Output to file
     const outputPath = options.output ?? `${payload.project.name}-config.json`;
     await fs.writeJSON(outputPath, payload, { spaces: 2 });
-    console.log(chalk.green(`Exported ${payload.project.name} config to ${outputPath}`));
+    console.log(colors.success(`Exported ${payload.project.name} config to ${outputPath}`));
   }
 }

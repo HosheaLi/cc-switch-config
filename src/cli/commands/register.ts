@@ -6,10 +6,10 @@
  */
 
 import type { Command } from 'commander';
-import chalk from 'chalk';
 import { ProjectService } from '../../lib/services/index.js';
 import { ProjectIndex, AppState } from '../../lib/store/index.js';
 import { handleCLIError } from '../output/error.js';
+import { colors } from '../theme/index.js';
 import fs from 'fs-extra';
 import path from 'path';
 
@@ -59,7 +59,7 @@ export async function executeRegister(
 
   // Check if path exists
   if (!await fs.pathExists(expandedPath)) {
-    console.error(chalk.red(`Path does not exist: ${expandedPath}`));
+    console.error(colors.danger(`Path does not exist: ${expandedPath}`));
     throw new Error(`Path does not exist: ${expandedPath}`);
   }
 
@@ -69,24 +69,24 @@ export async function executeRegister(
     await fs.pathExists(path.join(claudeDir, 'settings.local.json'));
 
   if (!hasSettings) {
-    console.log(chalk.yellow(`Warning: No .claude/settings.json or settings.local.json found at ${expandedPath}`));
-    console.log(chalk.gray('Project will be registered, but may need Claude Code config initialization.'));
+    console.log(colors.warning(`Warning: No .claude/settings.json or settings.local.json found at ${expandedPath}`));
+    console.log(colors.muted('Project will be registered, but may need Claude Code config initialization.'));
   }
 
   // Register the project
   const entry = await service.registerProject(expandedPath);
 
-  console.log(chalk.green(`Project registered successfully!`));
-  console.log(chalk.white(`  Name: ${entry.name}`));
-  console.log(chalk.white(`  ID: ${entry.id}`));
-  console.log(chalk.white(`  Path: ${entry.path}`));
+  console.log(colors.success(`Project registered successfully!`));
+  console.log(colors.foreground(`  Name: ${entry.name}`));
+  console.log(colors.foreground(`  ID: ${entry.id}`));
+  console.log(colors.foreground(`  Path: ${entry.path}`));
 
   // Assign template if specified
   if (options.template) {
-    console.log(chalk.gray(`Assigning template: ${options.template}`));
+    console.log(colors.muted(`Assigning template: ${options.template}`));
     // Template assignment would require TemplateService integration
     // For now, just update the activeConfig field
     await projectIndex.update(entry.id, { activeConfig: options.template });
-    console.log(chalk.green(`Template "${options.template}" assigned.`));
+    console.log(colors.success(`Template "${options.template}" assigned.`));
   }
 }

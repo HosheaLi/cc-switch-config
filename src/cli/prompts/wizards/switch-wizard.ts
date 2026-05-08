@@ -5,13 +5,12 @@
  */
 
 import path from 'path';
-import chalk from 'chalk';
 import { ProjectService, ApiService } from '../../../lib/services/index.js';
 import { ProjectIndex, ApiConfigStore, AppState, readConfig, writeConfig } from '../../../lib/store/index.js';
 import { selectProject } from '../components/select-project.js';
 import { selectTemplate } from '../components/select-template.js';
 import { confirmApplyTemplate } from '../components/confirm-action.js';
-import { formatters } from '../../theme/index.js';
+import { colors, formatters, separator as themeSeparator } from '../../theme/index.js';
 
 /**
  * Run the quick switch wizard flow.
@@ -38,12 +37,12 @@ export async function runSwitchWizard(): Promise<void> {
 
     if (projects.length === 0) {
       console.log(formatters.warning('没有已注册的项目。'));
-      console.log(chalk.gray('先扫描项目: cc-config scan'));
+      console.log(colors.muted('先扫描项目: cc-config scan'));
       return;
     }
 
-    console.log(chalk.cyan('\n项目切换'));
-    console.log(chalk.gray('━'.repeat(40)));
+    console.log(colors.accent('\n项目切换'));
+    console.log(themeSeparator(40));
 
     const projectPath = await selectProject(projects, '选择项目');
     if (!projectPath) return; // Cancelled
@@ -55,7 +54,7 @@ export async function runSwitchWizard(): Promise<void> {
 
     if (configs.length === 0) {
       console.log(formatters.warning('没有可用的配置。'));
-      console.log(chalk.gray('先创建配置: cc-config config add'));
+      console.log(colors.muted('先创建配置: cc-config config add'));
       return;
     }
 
@@ -67,7 +66,7 @@ export async function runSwitchWizard(): Promise<void> {
     const confirmed = await confirmApplyTemplate(projectName, configName);
 
     if (!confirmed) {
-      console.log(chalk.gray('已取消。'));
+      console.log(colors.muted('已取消。'));
       return;
     }
 
@@ -100,7 +99,7 @@ export async function runSwitchWizardForProject(projectPath: string): Promise<vo
     }
 
     const projectName = path.basename(projectPath);
-    console.log(chalk.cyan(`\n切换: ${projectName}`));
+    console.log(colors.accent(`\n切换: ${projectName}`));
 
     const configName = await selectTemplate(configs, '选择配置');
     if (!configName) return;

@@ -26,7 +26,7 @@
  * ```
  */
 
-import chokidar from 'chokidar';
+import chokidar, { type FSWatcher } from 'chokidar';
 import path from 'path';
 import os from 'os';
 import { getClaudeSettingsFilePath } from '../paths/claude.js';
@@ -90,7 +90,7 @@ export interface WatcherOptions {
  * - Graceful ENOENT handling
  */
 export class FileWatcher {
-  private watcher: chokidar.FSWatcher | null = null;
+  private watcher: FSWatcher | null = null;
   private options: Required<WatcherOptions>;
   private watchedPaths: Set<string> = new Set();
 
@@ -235,9 +235,10 @@ export class FileWatcher {
     });
 
     // Handle errors gracefully
-    this.watcher.on('error', (error: Error) => {
+    this.watcher.on('error', (err: unknown) => {
       // Log error but don't throw - keep watcher running
-      console.error(`FileWatcher error: ${error.message}`);
+      const message = err instanceof Error ? err.message : String(err);
+      console.error(`FileWatcher error: ${message}`);
     });
 
     // Wait for watcher to be ready

@@ -9,13 +9,13 @@
  */
 
 import type { Command } from 'commander';
-import chalk from 'chalk';
 import Table from 'cli-table3';
 import { ProjectService } from '../../lib/services/index.js';
 import type { ScanResult } from '../../lib/services/index.js';
 import { ProjectIndex, AppState } from '../../lib/store/index.js';
 import { handleCLIError } from '../output/error.js';
 import { launchScanTUI } from '../utils/cli-launch.js';
+import { colors, formatters } from '../theme/index.js';
 
 /**
  * Options for scan command.
@@ -90,18 +90,18 @@ export async function scanProjectsCLI(options: ScanOptions): Promise<void> {
   if (options.register) {
     const newProjects = results.filter(r => r.isNew);
     if (newProjects.length === 0) {
-      console.log(chalk.gray('No new projects to register.'));
+      console.log(colors.muted('No new projects to register.'));
       return;
     }
     for (const result of newProjects) {
       try {
         await service.registerProject(result.path);
-        console.log(chalk.green(`✓ Registered: ${result.path}`));
+        console.log(colors.success(`✓ Registered: ${result.path}`));
       } catch (err) {
-        console.error(chalk.red(`✗ Failed to register ${result.path}: ${err instanceof Error ? err.message : String(err)}`));
+        console.error(colors.danger(`✗ Failed to register ${result.path}: ${err instanceof Error ? err.message : String(err)}`));
       }
     }
-    console.log(chalk.gray(`\nRegistered ${newProjects.length} project(s).`));
+    console.log(colors.muted(`\nRegistered ${newProjects.length} project(s).`));
     return;
   }
 
@@ -130,15 +130,15 @@ export async function scanProjectsCLI(options: ScanOptions): Promise<void> {
  */
 function outputScanTable(results: ScanResult[]): void {
   if (results.length === 0) {
-    console.log(chalk.yellow('No projects found in configured directories.'));
-    console.log(chalk.gray('Scan a specific directory: cc-config scan --root <path>'));
+    console.log(colors.warning('No projects found in configured directories.'));
+    console.log(colors.muted('Scan a specific directory: cc-config scan --root <path>'));
     return;
   }
 
   const table = new Table({
     head: [
-      chalk.cyan.bold('Path'),
-      chalk.cyan.bold('Status'),
+      colors.bold(colors.accent('Path')),
+      colors.bold(colors.accent('Status')),
     ],
     colWidths: [50, 15],
     style: { head: [], border: ['gray'] },
@@ -151,22 +151,22 @@ function outputScanTable(results: ScanResult[]): void {
   for (const result of results) {
     const pathDisplay = truncatePath(result.path, 48);
     const statusDisplay = result.isNew
-      ? chalk.green('new')
-      : chalk.gray('registered');
+      ? colors.success('new')
+      : colors.muted('registered');
 
-    table.push([chalk.white(pathDisplay), statusDisplay]);
+    table.push([colors.foreground(pathDisplay), statusDisplay]);
   }
 
   console.log(table.toString());
 
   // Summary
-  console.log(chalk.gray(`\n${results.length} project(s) found.`));
-  console.log(chalk.green(`${newProjects.length} new`));
-  console.log(chalk.gray(`${registeredProjects.length} already registered`));
+  console.log(colors.muted(`\n${results.length} project(s) found.`));
+  console.log(colors.success(`${newProjects.length} new`));
+  console.log(colors.muted(`${registeredProjects.length} already registered`));
 
   if (newProjects.length > 0) {
-    console.log(chalk.gray('\nRegister new projects: cc-config register <path>'));
-    console.log(chalk.gray('Register all from list: cc-config scan --tui'));
+    console.log(colors.muted('\nRegister new projects: cc-config register <path>'));
+    console.log(colors.muted('Register all from list: cc-config scan --tui'));
   }
 }
 

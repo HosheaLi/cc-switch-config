@@ -64,18 +64,20 @@ export function registerSwitchCommand(program: Command): void {
 
         // D-03: Config optional - trigger selection if omitted
         const allConfigs = await apiConfigStore.getAll();
-        if (!config) {
-          config = await selectApiConfig(allConfigs, '选择要应用的配置');
-          if (!config) {
+        let configName = config;
+        if (!configName) {
+          const selectedConfig = await selectApiConfig(allConfigs, '选择要应用的配置');
+          if (!selectedConfig) {
             console.log(colors.warning('未选择配置，操作已取消。'));
             process.exit(ExitCodes.SUCCESS);
           }
+          configName = selectedConfig;
         }
 
         // Validate config exists
-        const apiConfig = await apiConfigStore.get(config);
+        const apiConfig = await apiConfigStore.get(configName);
         if (!apiConfig) {
-          console.error(colors.danger(`配置 '${config}' 不存在。`));
+          console.error(colors.danger(`配置 '${configName}' 不存在。`));
           console.log(colors.muted('可用配置列表: cc-config config list'));
           process.exit(ExitCodes.NOT_FOUND);
         }
@@ -94,7 +96,7 @@ export function registerSwitchCommand(program: Command): void {
         console.log();
         console.log(colors.accent('配置变更预览：'));
         console.log(colors.muted(`项目: ${projectEntry.name}`));
-        console.log(colors.muted(`配置: ${config}`));
+        console.log(colors.muted(`配置: ${configName}`));
         console.log();
         renderDiff(diffLines, '.claude/settings.json');
 

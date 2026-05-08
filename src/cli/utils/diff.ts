@@ -131,10 +131,11 @@ export function generateUnifiedDiff(
         afterValue !== null
       ) {
         // Both are objects - use deep-object-diff
-        const updated = updatedDiff(
+        const diffResult = updatedDiff(
           { [key]: beforeValue },
           { [key]: afterValue }
-        )[key] as Record<string, unknown>;
+        ) as Record<string, Record<string, unknown>>;
+        const updated = diffResult[key];
         if (updated && Object.keys(updated).length > 0) {
           collectModifiedLines(
             beforeValue as Record<string, unknown>,
@@ -221,10 +222,11 @@ export function filterChangedFields(before: ClaudeSettings, after: ClaudeSetting
         afterValue !== null
       ) {
         // Both are objects - use deep-object-diff
-        const changed = deepDiff(
+        const diffResult = deepDiff(
           { [key]: beforeValue },
           { [key]: afterValue }
-        )[key] as Record<string, unknown>;
+        ) as Record<string, Record<string, unknown>>;
+        const changed = diffResult[key];
         if (changed && Object.keys(changed).length > 0) {
           paths.push(...collectPaths(changed, key));
         }
