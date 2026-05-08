@@ -9,7 +9,7 @@ import type { Choice } from 'prompts';
 import { getPromptType, createFuzzySuggest } from '../utils/autocomplete.js';
 import { promptWithCancel, defaultOnCancel } from '../utils/handle-cancel.js';
 import { formatTemplateChoice, addCancelOption, isCancelSelection } from '../utils/format-choices.js';
-import chalk from 'chalk';
+import { colors } from '../../theme/index.js';
 
 /**
  * Template/API config metadata
@@ -34,8 +34,8 @@ export async function selectTemplate(
   allowCancel: boolean = false
 ): Promise<string | null> {
   if (templates.length === 0) {
-    console.log(chalk.yellow('没有可用配置。'));
-    console.log(chalk.gray('先创建配置: cc-config config add'));
+    console.log(colors.warning('没有可用配置。'));
+    console.log(colors.muted('先创建配置: cc-config config add'));
     return null;
   }
 

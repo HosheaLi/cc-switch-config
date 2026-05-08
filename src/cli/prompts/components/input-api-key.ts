@@ -7,7 +7,7 @@
 
 import prompts from 'prompts';
 import { promptWithCancel } from '../utils/handle-cancel.js';
-import chalk from 'chalk';
+import { colors, formatters, separator } from '../../theme/index.js';
 
 /**
  * Input API key with password masking.
@@ -134,8 +134,8 @@ export async function inputFullApiConfig(): Promise<{
   baseUrl: string;
   modelName: string;
 } | null> {
-  console.log(chalk.cyan('\n创建 API 配置'));
-  console.log(chalk.gray('━'.repeat(40)));
+  console.log(colors.accent('\n创建 API 配置'));
+  console.log(separator(40));
 
   const name = await inputConfigName('配置名称');
   if (!name) return null;
@@ -149,8 +149,8 @@ export async function inputFullApiConfig(): Promise<{
   const modelName = await inputModelName('模型名称');
   if (!modelName) return null;
 
-  console.log(chalk.gray('━'.repeat(40)));
-  console.log(chalk.green(`✓ 配置 "${name}" 创建完成`));
+  console.log(separator(40));
+  console.log(formatters.success(`配置 "${name}" 创建完成`));
 
   return { name, apiKey, baseUrl, modelName };
 }

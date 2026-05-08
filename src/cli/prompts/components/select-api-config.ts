@@ -7,7 +7,7 @@
  * Per CFG-04: API key NOT shown in description (modelName @ baseUrl only).
  */
 
-import chalk from 'chalk';
+import { colors } from '../../theme/index.js';
 import type { Choice } from 'prompts';
 import { getPromptType, createFuzzySuggest } from '../utils/autocomplete.js';
 import { promptWithCancel } from '../utils/handle-cancel.js';
@@ -31,8 +31,8 @@ export async function selectApiConfig(
 
   // Empty configs handling
   if (names.length === 0) {
-    console.log(chalk.yellow('没有可用配置。'));
-    console.log(chalk.gray('先创建配置: cc-config config add'));
+    console.log(colors.warning('没有可用配置。'));
+    console.log(colors.muted('先创建配置: cc-config config add'));
     return null;
   }
 

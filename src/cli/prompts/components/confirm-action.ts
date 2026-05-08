@@ -6,7 +6,7 @@
 
 import prompts from 'prompts';
 import { promptWithCancel } from '../utils/handle-cancel.js';
-import chalk from 'chalk';
+import { colors } from '../../theme/index.js';
 
 /**
  * Confirm an action with y/n prompt.
@@ -22,7 +22,7 @@ export async function confirmAction(
   const result = await promptWithCancel<boolean>({
     type: 'confirm',
     name: 'confirm',
-    message: `${message} ${chalk.gray('[y/N]')}`,
+    message: `${message} ${colors.muted('[y/N]')}`,
     initial: defaultChoice,
   });
 
@@ -50,11 +50,11 @@ export async function confirmWithDetails(
   // Display details first
   console.log();
   if (isDangerous) {
-    console.log(chalk.red(`⚠ ${actionTitle}`));
+    console.log(colors.danger(`⚠ ${actionTitle}`));
   } else {
-    console.log(chalk.cyan(actionTitle));
+    console.log(colors.accent(actionTitle));
   }
-  console.log(chalk.gray(actionDescription));
+  console.log(colors.muted(actionDescription));
   console.log();
 
   return confirmAction('确认执行？', false);
@@ -72,9 +72,9 @@ export async function confirmApplyTemplate(
   templateName: string
 ): Promise<boolean | null> {
   console.log();
-  console.log(chalk.cyan('应用配置'));
-  console.log(chalk.gray(`项目: ${projectName}`));
-  console.log(chalk.gray(`配置: ${templateName}`));
+  console.log(colors.accent('应用配置'));
+  console.log(colors.muted(`项目: ${projectName}`));
+  console.log(colors.muted(`配置: ${templateName}`));
   console.log();
 
   return confirmAction('确认应用？', true);
@@ -91,8 +91,8 @@ export async function confirmRegisterProject(
 ): Promise<boolean | null> {
   const projectName = projectPath.split('/').pop() || projectPath;
   console.log();
-  console.log(chalk.cyan('注册项目'));
-  console.log(chalk.gray(`路径: ${projectPath}`));
+  console.log(colors.accent('注册项目'));
+  console.log(colors.muted(`路径: ${projectPath}`));
   console.log();
 
   return confirmAction(`注册 "${projectName}"？`, true);

@@ -10,7 +10,7 @@ import prompts from 'prompts';
 import type { Choice } from 'prompts';
 import { promptWithCancel } from '../utils/handle-cancel.js';
 import { formatDirectoryChoice, addCancelOption, isCancelSelection } from '../utils/format-choices.js';
-import chalk from 'chalk';
+import { colors } from '../../theme/index.js';
 
 /**
  * Select a scan directory from a list of options.
@@ -26,7 +26,7 @@ export async function selectDirectory(
   allowCustom: boolean = true
 ): Promise<string | null> {
   if (directories.length === 0 && !allowCustom) {
-    console.log(chalk.yellow('没有可用的扫描目录。'));
+    console.log(colors.warning('没有可用的扫描目录。'));
     return null;
   }
 
@@ -34,7 +34,7 @@ export async function selectDirectory(
 
   if (allowCustom) {
     choices.push({
-      title: chalk.cyan('自定义目录...'),
+      title: colors.accent('自定义目录...'),
       value: '__custom__',
       description: '输入自定义路径',
     });
@@ -120,7 +120,7 @@ export async function selectMultipleDirectories(
   message: string = '选择要扫描的目录'
 ): Promise<string[] | null> {
   if (directories.length === 0) {
-    console.log(chalk.yellow('没有可用的目录。'));
+    console.log(colors.warning('没有可用的目录。'));
     return null;
   }
 
