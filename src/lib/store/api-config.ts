@@ -63,7 +63,8 @@ const ApiConfigStoreSchema = z.object({
 export class ApiConfigStore {
   /**
    * Path to the api-configs.json file.
-   * Per D-07: Default is ~/.claude/api-configs.json (Claude's config dir).
+   * Per D-07: Uses XDG config home (~/.config/cc-config-switch-nodejs/ on Linux,
+   * ~/Library/Preferences/cc-config-switch-nodejs/ on macOS).
    */
   private filePath: string;
 
@@ -77,10 +78,10 @@ export class ApiConfigStore {
    * Create a new ApiConfigStore instance.
    *
    * @param customFilePath - Optional custom file path for testing
-   *                         If not provided, uses ~/.claude/api-configs.json
+   *                         If not provided, uses XDG config directory
    */
   constructor(customFilePath?: string) {
-    // Per D-07: Store in ~/.claude/ (Claude's config directory), not cc-config-switch config dir
+    // Per D-07: Use XDG config home (~/.config/cc-config-switch-nodejs/ on Linux)
     this.filePath = customFilePath ?? path.join(getConfigDir(), 'api-configs.json');
   }
 

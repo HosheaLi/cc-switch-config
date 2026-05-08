@@ -204,10 +204,8 @@ describe('ProjectService', () => {
     it('should expand ~ to home directory', async () => {
       // This test verifies the path expansion logic
       mockAppState.set('scanDirectories', ['~/some-dir']);
-      // Even if ~/some-dir doesn't exist, scanProjects should handle it gracefully
-      const results = await projectService.scanProjects();
-      // Should return empty array or results (not throw)
-      expect(Array.isArray(results)).toBe(true);
+      // If ~/some-dir doesn't exist, scanProjects should throw ServiceError
+      await expect(projectService.scanProjects()).rejects.toThrow('没有有效的扫描目录');
     });
   });
 

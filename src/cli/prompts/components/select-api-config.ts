@@ -9,9 +9,19 @@
 
 import { colors } from '../../theme/index.js';
 import type { Choice } from 'prompts';
+import type { PromptObject } from 'prompts';
 import { getPromptType, createFuzzySuggest } from '../utils/autocomplete.js';
 import { promptWithCancel } from '../utils/handle-cancel.js';
 import type { ApiConfig } from '../../../lib/types/api-config.js';
+
+/**
+ * 扩展 prompts 配置接口支持 autocomplete suggest。
+ *
+ * 用于类型安全的 autocomplete prompt 配置。
+ */
+interface AutocompletePromptConfig extends PromptObject {
+  suggest?: (input: string, choices: Choice[]) => Promise<Choice[]>;
+}
 
 /**
  * Select an API configuration from available configs.
@@ -63,7 +73,7 @@ export async function selectApiConfig(
 
   // Add fuzzy suggest for autocomplete mode
   if (promptType === 'autocomplete') {
-    (promptConfig as any).suggest = createFuzzySuggest(choices);
+    (promptConfig as AutocompletePromptConfig).suggest = createFuzzySuggest(choices);
   }
 
   // Execute prompt with cancellation support (TUI-05)

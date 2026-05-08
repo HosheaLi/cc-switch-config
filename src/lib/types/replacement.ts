@@ -64,15 +64,21 @@ export function replaceEnvModel(
  *
  * @param config - API configuration with unified mode
  * @returns Standard env object for Claude Code
+ * @throws Error if modelName is undefined (防御性校验)
  */
 export function buildUnifiedEnv(config: ApiConfig): Record<string, string> {
+  // 防御性校验：unified mode 必须有 modelName
+  if (!config.modelName) {
+    throw new Error('unified mode requires modelName');
+  }
+
   return {
     // 6 model variables - all use same modelName per D-14
-    ANTHROPIC_MODEL: config.modelName!,
-    ANTHROPIC_DEFAULT_SONNET_MODEL: config.modelName!,
-    ANTHROPIC_DEFAULT_HAIKU_MODEL: config.modelName!,
-    ANTHROPIC_DEFAULT_OPUS_MODEL: config.modelName!,
-    ANTHROPIC_REASONING_MODEL: config.modelName!,
+    ANTHROPIC_MODEL: config.modelName,
+    ANTHROPIC_DEFAULT_SONNET_MODEL: config.modelName,
+    ANTHROPIC_DEFAULT_HAIKU_MODEL: config.modelName,
+    ANTHROPIC_DEFAULT_OPUS_MODEL: config.modelName,
+    ANTHROPIC_REASONING_MODEL: config.modelName,
     // API key and base URL
     ANTHROPIC_AUTH_TOKEN: config.apiKey,
     ANTHROPIC_BASE_URL: config.baseUrl,

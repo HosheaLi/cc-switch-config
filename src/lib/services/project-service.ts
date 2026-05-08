@@ -91,18 +91,27 @@ export class ProjectService {
 
     // Validate directories exist before scanning
     const validDirs: string[] = [];
+    const invalidDirs: string[] = [];
     for (const rootDir of dirsToScan) {
       const expanded = this.expandPath(rootDir);
       if (await fs.pathExists(expanded)) {
         validDirs.push(rootDir);
       } else {
-        console.error(`目录不存在: ${expanded}`);
+        invalidDirs.push(expanded);
       }
     }
 
     if (validDirs.length === 0) {
-      console.error('没有有效的扫描目录');
-      return [];
+      // 所有目录都不存在，抛出 ServiceError
+      const message = invalidDirs.length > 0
+        ? `没有有效的扫描目录: ${invalidDirs.join(', ')}`
+        : '没有有效的扫描目录';
+      throw new ServiceError(message, 'SCAN_DIR_NOT_FOUND');
+    }
+
+    // 记录无效目录（非关键错误，继续扫描有效目录）
+    if (invalidDirs.length > 0) {
+      console.error(`跳过无效目录: ${invalidDirs.join(', ')}`);
     }
 
     for (const rootDir of validDirs) {

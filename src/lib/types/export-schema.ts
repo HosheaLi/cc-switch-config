@@ -95,6 +95,38 @@ export const LegacyExportPayloadSchema = z.object({
 }).strict();
 
 /**
+ * Legacy Template Provider Structure.
+ *
+ * 用于类型守卫验证旧格式 template.provider 字段。
+ */
+interface LegacyTemplateProvider {
+  name?: string;
+  baseUrl?: string;
+  env?: Record<string, string>;
+}
+
+interface LegacyTemplate {
+  name: string;
+  provider?: LegacyTemplateProvider;
+}
+
+interface LegacyPayload {
+  metadata?: unknown;
+  project?: unknown;
+  settings?: unknown;
+  template?: LegacyTemplate | null;
+}
+
+/**
+ * 验证 legacy.template 是否有效结构。
+ */
+function isValidLegacyTemplate(template: unknown): template is LegacyTemplate {
+  if (!template || typeof template !== 'object') return false;
+  const t = template as Record<string, unknown>;
+  return typeof t.name === 'string';
+}
+
+/**
  * Migrate legacy export payload to new format.
  *
  * Detects old format (contains 'template' field) and converts to new format
@@ -126,11 +158,11 @@ export function migrateExportPayload(payload: unknown): ExportPayload {
 
   // Check if legacy format (has template field)
   if (payload && typeof payload === 'object' && 'template' in payload) {
-    const legacy = payload as any;
+    const legacy = payload as LegacyPayload;
 
     // Convert template to config if template exists
     let config: ApiConfig | null = null;
-    if (legacy.template && legacy.template.provider) {
+    if (legacy.template && isValidLegacyTemplate(legacy.template) && legacy.template.provider) {
       const template = legacy.template;
 
       // Field mapping (per PATTERNS.md Pattern A)
