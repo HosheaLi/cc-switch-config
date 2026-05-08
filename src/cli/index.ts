@@ -12,7 +12,6 @@ import { launchPromptsTUI } from './prompts/wizards/main-wizard.js';
 import { registerListCommand } from './commands/list.js';
 import { registerSwitchCommand } from './commands/switch.js';
 import { registerCurrentCommand } from './commands/current.js';
-import { registerTemplateCommand } from './commands/template.js';
 import { registerAutoCheckCommand } from './commands/auto-check.js';
 import { registerScanCommand } from './commands/scan.js';
 import { registerExportCommand } from './commands/export.js';
@@ -33,7 +32,6 @@ export async function runCLI(argv: string[] = process.argv): Promise<void> {
   registerListCommand(program);
   registerSwitchCommand(program);
   registerCurrentCommand(program);
-  registerTemplateCommand(program);
 
   // Phase 11 commands
   registerConfigCommand(program);

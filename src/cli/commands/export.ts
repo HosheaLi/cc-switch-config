@@ -14,7 +14,7 @@ import fs from 'fs-extra';
 import chalk from 'chalk';
 import { ExportService } from '../../lib/services/export-service.js';
 import { ProjectIndex } from '../../lib/store/project.js';
-import { TemplateStore } from '../../lib/store/template.js';
+import { ApiConfigStore } from '../../lib/store/api-config.js';
 import { ConfigService } from '../../lib/services/config-service.js';
 import { readConfig, writeConfig } from '../../lib/store/config.js';
 import { AppState } from '../../lib/store/state.js';
@@ -68,7 +68,7 @@ export function registerExportCommand(program: Command): void {
 async function exportConfig(projectId: string | undefined, options: ExportOptions): Promise<void> {
   // Initialize dependencies
   const projectIndex = new ProjectIndex();
-  const templateStore = new TemplateStore();
+  const apiConfigStore = new ApiConfigStore();
   const configService = new ConfigService(readConfig, writeConfig);
   const appState = new AppState();
 
@@ -83,7 +83,7 @@ async function exportConfig(projectId: string | undefined, options: ExportOption
   }
 
   // Create export service
-  const service = new ExportService(projectIndex, templateStore, configService);
+  const service = new ExportService(projectIndex, apiConfigStore, configService);
 
   // Export project
   const payload = await service.exportProject(targetId);
