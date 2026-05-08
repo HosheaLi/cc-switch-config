@@ -10,7 +10,7 @@ import { TemplateStore, readConfig, writeConfig } from '../../../lib/store/index
 import { selectTemplate } from '../components/select-template.js';
 import { confirmWithDetails } from '../components/confirm-action.js';
 import { inputFullApiConfig, inputConfigName } from '../components/input-api-key.js';
-import { styleSuccess, styleError, styleWarning, separator } from '../utils/theme.js';
+import { formatters, separator as themeSeparator } from '../../theme/index.js';
 
 /**
  * @deprecated
@@ -65,11 +65,11 @@ export async function runConfigAddWizard(): Promise<void> {
       },
     });
 
-    console.log(styleSuccess(`配置 "${config.name}" 已创建`));
+    console.log(formatters.success(`配置 "${config.name}" 已创建`));
 
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    console.log(styleError(`创建失败: ${message}`));
+    console.log(formatters.error(`创建失败: ${message}`));
   }
 }
 
@@ -88,13 +88,13 @@ export async function runConfigListWizard(): Promise<void> {
     const templates = await templateService.listTemplates();
 
     if (templates.length === 0) {
-      console.log(styleWarning('没有可用的配置。'));
+      console.log(formatters.warning('没有可用的配置。'));
       console.log(chalk.gray('创建配置: cc-config config add'));
       return;
     }
 
     console.log(chalk.cyan('\n可用配置'));
-    console.log(separator(40));
+    console.log(themeSeparator(40));
 
     for (const name of templates) {
       try {
@@ -112,12 +112,12 @@ export async function runConfigListWizard(): Promise<void> {
       }
     }
 
-    console.log(separator(40));
+    console.log(themeSeparator(40));
     console.log(chalk.gray(`共 ${templates.length} 个配置`));
 
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    console.log(styleError(`列表失败: ${message}`));
+    console.log(formatters.error(`列表失败: ${message}`));
   }
 }
 
@@ -139,12 +139,12 @@ export async function runConfigRemoveWizard(): Promise<void> {
     const templates = await templateService.listTemplates();
 
     if (templates.length === 0) {
-      console.log(styleWarning('没有可用的配置。'));
+      console.log(formatters.warning('没有可用的配置。'));
       return;
     }
 
     console.log(chalk.cyan('\n删除配置'));
-    console.log(separator(40));
+    console.log(themeSeparator(40));
 
     const templateName = await selectTemplate(templates, '选择要删除的配置');
     if (!templateName) return; // Cancelled
@@ -161,11 +161,11 @@ export async function runConfigRemoveWizard(): Promise<void> {
     }
 
     await templateService.deleteTemplate(templateName);
-    console.log(styleSuccess(`配置 "${templateName}" 已删除`));
+    console.log(formatters.success(`配置 "${templateName}" 已删除`));
 
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    console.log(styleError(`删除失败: ${message}`));
+    console.log(formatters.error(`删除失败: ${message}`));
   }
 }
 

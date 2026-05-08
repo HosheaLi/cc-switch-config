@@ -12,7 +12,7 @@ import { ProjectIndex, AppState } from '../../../lib/store/index.js';
 import { selectFromScanResults } from '../components/select-project.js';
 import { confirmAction } from '../components/confirm-action.js';
 import { selectDirectory } from '../components/select-directory.js';
-import { styleSuccess, styleError, styleWarning, separator } from '../utils/theme.js';
+import { formatters, separator as themeSeparator } from '../../theme/index.js';
 // Note: ora is not installed, using simple spinner fallback
 
 /**
@@ -61,7 +61,7 @@ export async function runScanWizard(): Promise<void> {
 
   try {
     console.log(chalk.cyan('\n项目扫描'));
-    console.log(separator(40));
+    console.log(themeSeparator(40));
 
     // Step 1: Select scan directory
     const directory = await selectDirectory(
@@ -83,7 +83,7 @@ export async function runScanWizard(): Promise<void> {
     console.log(chalk.gray(`发现 ${results.length} 个项目 (${newProjects.length} 新, ${existingCount} 已注册)`));
 
     if (newProjects.length === 0) {
-      console.log(styleSuccess('所有项目都已注册。'));
+      console.log(formatters.success('所有项目都已注册。'));
       return;
     }
 
@@ -103,26 +103,26 @@ export async function runScanWizard(): Promise<void> {
         registered.push(path.basename(projectPath));
       } catch (err) {
         const msg = err instanceof Error ? err.message : String(err);
-        console.log(styleError(`注册失败 ${path.basename(projectPath)}: ${msg}`));
+        console.log(formatters.error(`注册失败 ${path.basename(projectPath)}: ${msg}`));
         failed.push(projectPath);
       }
     }
 
     // Summary
-    console.log(separator(40));
+    console.log(themeSeparator(40));
     if (registered.length > 0) {
-      console.log(styleSuccess(`已注册 ${registered.length} 个项目`));
+      console.log(formatters.success(`已注册 ${registered.length} 个项目`));
       for (const name of registered) {
         console.log(chalk.gray(`  - ${name}`));
       }
     }
     if (failed.length > 0) {
-      console.log(styleError(`${failed.length} 个项目注册失败`));
+      console.log(formatters.error(`${failed.length} 个项目注册失败`));
     }
 
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    console.log(styleError(`扫描失败: ${message}`));
+    console.log(formatters.error(`扫描失败: ${message}`));
   }
 }
 
@@ -154,11 +154,11 @@ export async function quickScanWizard(directory: string): Promise<void> {
 
     for (const projectPath of selectedPaths) {
       await projectService.registerProject(projectPath);
-      console.log(styleSuccess(`已注册: ${path.basename(projectPath)}`));
+      console.log(formatters.success(`已注册: ${path.basename(projectPath)}`));
     }
 
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    console.log(styleError(`扫描失败: ${message}`));
+    console.log(formatters.error(`扫描失败: ${message}`));
   }
 }

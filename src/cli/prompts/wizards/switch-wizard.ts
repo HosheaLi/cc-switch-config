@@ -11,7 +11,7 @@ import { ProjectIndex, TemplateStore, AppState, readConfig, writeConfig } from '
 import { selectProject } from '../components/select-project.js';
 import { selectTemplate } from '../components/select-template.js';
 import { confirmApplyTemplate } from '../components/confirm-action.js';
-import { styleSuccess, styleError, styleWarning } from '../utils/theme.js';
+import { formatters } from '../../theme/index.js';
 
 /**
  * Run the quick switch wizard flow.
@@ -37,7 +37,7 @@ export async function runSwitchWizard(): Promise<void> {
     const projects = await projectService.listProjects();
 
     if (projects.length === 0) {
-      console.log(styleWarning('没有已注册的项目。'));
+      console.log(formatters.warning('没有已注册的项目。'));
       console.log(chalk.gray('先扫描项目: cc-config scan'));
       return;
     }
@@ -54,7 +54,7 @@ export async function runSwitchWizard(): Promise<void> {
     const templates = await templateService.listTemplates();
 
     if (templates.length === 0) {
-      console.log(styleWarning('没有可用的配置。'));
+      console.log(formatters.warning('没有可用的配置。'));
       console.log(chalk.gray('先创建配置: cc-config config add'));
       return;
     }
@@ -73,11 +73,11 @@ export async function runSwitchWizard(): Promise<void> {
 
     // Apply the template
     await templateService.applyTemplate(projectPath, templateName);
-    console.log(styleSuccess(`配置 "${templateName}" 已应用到 "${projectName}"`));
+    console.log(formatters.success(`配置 "${templateName}" 已应用到 "${projectName}"`));
 
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    console.log(styleError(`切换失败: ${message}`));
+    console.log(formatters.error(`切换失败: ${message}`));
   }
 }
 
@@ -95,7 +95,7 @@ export async function runSwitchWizardForProject(projectPath: string): Promise<vo
     const templates = await templateService.listTemplates();
 
     if (templates.length === 0) {
-      console.log(styleWarning('没有可用的配置。'));
+      console.log(formatters.warning('没有可用的配置。'));
       return;
     }
 
@@ -109,10 +109,10 @@ export async function runSwitchWizardForProject(projectPath: string): Promise<vo
     if (!confirmed) return;
 
     await templateService.applyTemplate(projectPath, templateName);
-    console.log(styleSuccess(`配置已应用`));
+    console.log(formatters.success(`配置已应用`));
 
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    console.log(styleError(`切换失败: ${message}`));
+    console.log(formatters.error(`切换失败: ${message}`));
   }
 }

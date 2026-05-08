@@ -14,7 +14,7 @@ import { selectTemplate } from '../components/select-template.js';
 import { confirmAction, confirmApplyTemplate } from '../components/confirm-action.js';
 import { inputFullApiConfig } from '../components/input-api-key.js';
 import { selectDirectory } from '../components/select-directory.js';
-import { styleSuccess, styleError, styleWarning, separator } from '../utils/theme.js';
+import { formatters, separator as themeSeparator } from '../../theme/index.js';
 
 /**
  * Simple loading indicator
@@ -77,7 +77,7 @@ export async function runMainWizard(): Promise<void> {
 
     if (templates.length === 0) {
       console.log(chalk.yellow('首次运行 - 需要创建 API 配置'));
-      console.log(separator(40));
+      console.log(themeSeparator(40));
 
       const config = await inputFullApiConfig();
       if (!config) return; // Cancelled
@@ -95,8 +95,8 @@ export async function runMainWizard(): Promise<void> {
         },
       });
 
-      console.log(styleSuccess(`配置 "${config.name}" 已创建`));
-      console.log(separator(40));
+      console.log(formatters.success(`配置 "${config.name}" 已创建`));
+      console.log(themeSeparator(40));
     }
 
     // Step 2: Scan Directory Selection
@@ -104,7 +104,7 @@ export async function runMainWizard(): Promise<void> {
 
     if (projects.length === 0) {
       console.log(chalk.cyan('\n扫描项目'));
-      console.log(separator(40));
+      console.log(themeSeparator(40));
 
       const directory = await selectDirectory([process.cwd()], '扫描目录', true);
       if (!directory) return;
@@ -116,7 +116,7 @@ export async function runMainWizard(): Promise<void> {
 
       const newProjects = results.filter(r => r.isNew);
       if (newProjects.length === 0) {
-        console.log(styleWarning('没有发现项目。'));
+        console.log(formatters.warning('没有发现项目。'));
         return;
       }
 
@@ -128,7 +128,7 @@ export async function runMainWizard(): Promise<void> {
         await projectService.registerProject(projectPath);
       }
 
-      console.log(styleSuccess(`已注册 ${selectedPaths.length} 个项目`));
+      console.log(formatters.success(`已注册 ${selectedPaths.length} 个项目`));
 
       // Reload projects
       projects = await projectService.listProjects();
@@ -136,7 +136,7 @@ export async function runMainWizard(): Promise<void> {
 
     // Step 4: Select Project
     console.log(chalk.cyan('\n选择项目'));
-    console.log(separator(40));
+    console.log(themeSeparator(40));
 
     const projectPath = await selectProject(projects, '选择项目');
     if (!projectPath) return;
@@ -152,7 +152,7 @@ export async function runMainWizard(): Promise<void> {
 
     // Step 6: Confirm & Apply
     console.log(chalk.cyan('\n应用配置'));
-    console.log(separator(40));
+    console.log(themeSeparator(40));
     console.log(chalk.gray(`项目: ${projectName}`));
     console.log(chalk.gray(`配置: ${templateName}`));
     console.log();
@@ -164,13 +164,13 @@ export async function runMainWizard(): Promise<void> {
     }
 
     await templateService.applyTemplate(projectPath, templateName);
-    console.log(separator(40));
-    console.log(styleSuccess(`配置已应用到 "${projectName}"`));
+    console.log(themeSeparator(40));
+    console.log(formatters.success(`配置已应用到 "${projectName}"`));
     console.log(chalk.gray('\n提示: 运行 `cc-config list` 查看所有项目'));
 
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    console.log(styleError(`操作失败: ${message}`));
+    console.log(formatters.error(`操作失败: ${message}`));
   }
 }
 
@@ -180,10 +180,5 @@ export async function runMainWizard(): Promise<void> {
  * @returns Promise that resolves when wizard completes
  */
 export async function launchPromptsTUI(): Promise<void> {
-  // Respect NO_COLOR
-  if (process.env.NO_COLOR) {
-    chalk.level = 0;
-  }
-
   await runMainWizard();
 }
