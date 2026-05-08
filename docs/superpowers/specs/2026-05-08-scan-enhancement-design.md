@@ -328,7 +328,7 @@ export async function selectFromScanResults(
 export function formatScanResultTitle(result: ScanResult): string {
   const indent = result.depth > 1 ? '  '.repeat(result.depth - 1) : '';
   const marker = result.parentPath ? ' [子项目]' : '';
-  const name = result.path.split('/').pop() || result.path;
+  const name = path.basename(result.path);  // 使用 path.basename 保证跨平台兼容
   
   const statusIcon: Record<ScanResult['configStatus'], string> = {
     'new': '○',
