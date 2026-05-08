@@ -60,33 +60,6 @@ describe('registerExportCommand', () => {
   });
 });
 
-describe('export command behavior', () => {
-  // Integration-style tests would require more mocking
-  // For now, verify command registration structure
-
-  it('should export to file when no stdout flag', async () => {
-    // This would require extensive mocking of dependencies
-    // In real implementation, the command calls ExportService.exportProject
-    // and writes output via fs.writeJSON
-    expect(true).toBe(true);
-  });
-
-  it('should output to stdout when --stdout flag', async () => {
-    // This would require mocking console.log and ExportService
-    expect(true).toBe(true);
-  });
-
-  it('should use active project when no project-id specified', async () => {
-    // This would require mocking AppState.getActiveProject
-    expect(true).toBe(true);
-  });
-
-  it('should handle PROJECT_NOT_FOUND error', async () => {
-    // This would require mocking ExportService to throw error
-    expect(true).toBe(true);
-  });
-});
-
 describe('ExportOptions interface', () => {
   it('should define output and stdout options', () => {
     const options = { output: 'test.json', stdout: false };

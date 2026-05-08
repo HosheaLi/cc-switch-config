@@ -16,12 +16,8 @@
  */
 
 import { colors } from '../theme/index.js';
+import { stripAnsi } from './string-utils.js';
 import type { DiffLine } from './diff.js';
-
-/**
- * 去除字符串中的 ANSI 转义码 (per T-14-07 安全缓解)
- */
-const stripAnsi = (str: string): string => str.replace(/\x1b\[[0-9;]*m/g, '');
 
 /** Maximum length before truncation */
 export const TRUNCATE_LENGTH = 50;

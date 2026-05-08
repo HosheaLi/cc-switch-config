@@ -16,11 +16,13 @@ import { ProjectIndex } from '../../lib/store/project.js';
 import { ApiConfigStore } from '../../lib/store/api-config.js';
 import { ConfigService } from '../../lib/services/config-service.js';
 import { readConfig, writeConfig } from '../../lib/store/config.js';
-import { handleCLIError } from '../output/error.js';
+import { handleCLIError, ExitCodes } from '../output/error.js';
 import { migrateExportPayload } from '../../lib/types/export-schema.js';
 import type { ConflictField } from '../../lib/types/export-schema.js';
 import type { ExportPayload } from '../../lib/types/export-schema.js';
 import { colors } from '../theme/index.js';
+import { promptWithCancel } from '../prompts/utils/handle-cancel.js';
+import type { Choice } from 'prompts';
 
 /**
  * Import command options.
@@ -77,14 +79,14 @@ async function importConfig(file: string, options: ImportOptions): Promise<void>
   // Validate basic structure to get project path
   if (typeof payload !== 'object' || payload === null) {
     console.error(colors.danger('Invalid export file: not a JSON object'));
-    process.exit(4); // CONFIG_ERROR
+    process.exit(ExitCodes.CONFIG_ERROR);
   }
 
   const basicPayload = payload as Record<string, unknown>;
   const projectObj = basicPayload.project as Record<string, unknown> | undefined;
   if (typeof projectObj?.path !== 'string') {
     console.error(colors.danger('Invalid export file: missing project path'));
-    process.exit(4); // CONFIG_ERROR
+    process.exit(ExitCodes.CONFIG_ERROR);
   }
 
   // Determine target path
@@ -143,10 +145,6 @@ async function importConfig(file: string, options: ImportOptions): Promise<void>
  * @returns Selected strategy or null if cancelled
  */
 async function launchImportConflictTUI(conflicts: ConflictField[]): Promise<ImportStrategy | null> {
-  // TODO: Implement true interactive TUI (ImportConflictScreen) for conflict resolution.
-  // This placeholder always returns 'merge' as the safest default.
-  // When implementing, use Ink's ImportConflictScreen with keyboard input (1/2/3/Esc).
-
   // Display conflicts summary
   console.log(colors.bold(colors.accent('Import Conflicts Detected')));
   console.log(colors.muted(`${conflicts.length} conflicting fields found`));
@@ -160,13 +158,38 @@ async function launchImportConflictTUI(conflicts: ConflictField[]): Promise<Impo
     console.log();
   }
 
-  console.log(colors.foreground('Resolution options:'));
-  console.log(colors.foreground('  [1] Merge all - preserve existing values, add new fields'));
-  console.log(colors.foreground('  [2] Overwrite all - replace with imported values'));
-  console.log(colors.foreground('  [3] Skip all - keep existing, discard imported'));
-  console.log(colors.muted('  [Esc] Cancel import'));
-  console.log();
+  // Build strategy choices
+  const choices: Choice[] = [
+    {
+      title: 'Merge all',
+      description: 'preserve existing values, add new fields',
+      value: 'merge',
+    },
+    {
+      title: 'Overwrite all',
+      description: 'replace with imported values',
+      value: 'overwrite',
+    },
+    {
+      title: 'Skip all',
+      description: 'keep existing, discard imported',
+      value: 'skip',
+    },
+  ];
 
-  console.log(colors.muted('Proceeding with merge strategy (default).'));
-  return 'merge';
+  // Interactive selection
+  const result = await promptWithCancel<ImportStrategy>({
+    type: 'select',
+    name: 'strategy',
+    message: '选择冲突解决策略',
+    choices,
+    initial: 0,
+  });
+
+  if (result.cancelled || result.value === null) {
+    console.log(colors.muted('Import cancelled.'));
+    return null;
+  }
+
+  return result.value;
 }

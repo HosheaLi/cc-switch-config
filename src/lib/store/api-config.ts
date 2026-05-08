@@ -26,7 +26,8 @@ import { ValidationError } from '../types/validation.js';
 /**
  * ApiConfigStore data structure.
  * Contains version and configs record.
- * Per D-07: File path is ~/.claude/api-configs.json (NOT cc-config-switch config dir).
+ * Per D-07: File path uses XDG config home (~/.config/cc-config-switch-nodejs/api-configs.json on Linux,
+ * ~/Library/Preferences/cc-config-switch-nodejs/api-configs.json on macOS).
  */
 export interface ApiConfigStoreData {
   version?: number;

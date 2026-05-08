@@ -60,35 +60,6 @@ describe('registerImportCommand', () => {
   });
 });
 
-describe('import command behavior', () => {
-  // Integration-style tests would require more mocking
-
-  it('should read file content for import', async () => {
-    // This would require mocking fs.readJSON
-    expect(true).toBe(true);
-  });
-
-  it('should validate payload structure', async () => {
-    // This would require mocking payload validation
-    expect(true).toBe(true);
-  });
-
-  it('should detect conflicts in interactive mode', async () => {
-    // This would require mocking detectConflicts
-    expect(true).toBe(true);
-  });
-
-  it('should launch TUI when conflicts detected', async () => {
-    // This would require mocking launchImportConflictTUI
-    expect(true).toBe(true);
-  });
-
-  it('should handle IMPORT_INVALID error', async () => {
-    // This would require mocking ExportService to throw error
-    expect(true).toBe(true);
-  });
-});
-
 describe('ImportOptions interface', () => {
   it('should define strategy and target options', () => {
     const options = { strategy: 'merge', target: '/path/to/project' };

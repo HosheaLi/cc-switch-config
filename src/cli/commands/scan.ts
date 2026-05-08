@@ -15,7 +15,8 @@ import type { ScanResult } from '../../lib/services/index.js';
 import { ProjectIndex, AppState } from '../../lib/store/index.js';
 import { handleCLIError } from '../output/error.js';
 import { launchScanTUI } from '../utils/cli-launch.js';
-import { colors, formatters } from '../theme/index.js';
+import { colors } from '../theme/index.js';
+import { truncatePath } from '../utils/string-utils.js';
 
 /**
  * Options for scan command.
@@ -78,7 +79,7 @@ export async function scanProjectsCLI(options: ScanOptions): Promise<void> {
   const service = new ProjectService(projectIndex, appState);
 
   // Parse depth option
-  const depth = options.depth ? parseInt(options.depth, 10) : 3;
+  const depth = options.depth !== undefined ? parseInt(options.depth, 10) : 3;
 
   // Use --root as temporary override without persisting to appState
   const overrideDirs = options.root ? [options.root] : undefined;
@@ -168,16 +169,4 @@ function outputScanTable(results: ScanResult[]): void {
     console.log(colors.muted('\nRegister new projects: cc-config register <path>'));
     console.log(colors.muted('Register all from list: cc-config scan --tui'));
   }
-}
-
-/**
- * Truncate path for table display.
- *
- * @param path - Full path to truncate
- * @param maxLength - Maximum length (default: 48)
- * @returns Truncated path with ... prefix
- */
-function truncatePath(path: string, maxLength: number = 48): string {
-  if (path.length <= maxLength) return path;
-  return '...' + path.slice(-maxLength + 3);
 }

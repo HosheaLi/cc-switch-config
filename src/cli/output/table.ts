@@ -6,12 +6,11 @@
  */
 import Table from 'cli-table3';
 import { colors, getBorders } from '../theme/index.js';
+import { stripAnsi, truncatePath } from '../utils/string-utils.js';
 import type { ProjectEntry } from '../../lib/store/project.js';
 
-/**
- * 去除字符串中的 ANSI 转义码 (per T-14-06 安全缓解)
- */
-const stripAnsi = (str: string): string => str.replace(/\x1b\[[0-9;]*m/g, '');
+// Re-export truncatePath for backward compatibility
+export { truncatePath };
 
 export function formatProjectTable(projects: ProjectEntry[]): string {
   if (projects.length === 0) {
@@ -52,13 +51,8 @@ export function formatProjectTable(projects: ProjectEntry[]): string {
     const configName = project.activeConfig ? colors.success(project.activeConfig) : colors.muted('none');
     const statusIcon = project.activeConfig ? colors.success('✓') : colors.warning('○');
 
-    table.push([colors.foreground(projectName), colors.muted(safePath), configName, statusIcon]);
+    table.push([colors.foreground(projectName), colors.muted(truncatePath(safePath)), configName, statusIcon]);
   }
 
   return table.toString();
-}
-
-export function truncatePath(path: string, maxLength: number = 40): string {
-  if (path.length <= maxLength) return path;
-  return '...' + path.slice(-maxLength + 3);
 }

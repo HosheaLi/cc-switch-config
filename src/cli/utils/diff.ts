@@ -8,7 +8,7 @@
  * Uses deep-object-diff for object comparison and converts to DiffLine format.
  */
 
-import { diff as deepDiff, addedDiff, deletedDiff, updatedDiff } from 'deep-object-diff';
+import { diff as deepDiff, updatedDiff } from 'deep-object-diff';
 import type { ClaudeSettings } from '../../lib/types/config.js';
 
 /**

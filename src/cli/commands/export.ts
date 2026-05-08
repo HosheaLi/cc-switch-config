@@ -17,7 +17,7 @@ import { ApiConfigStore } from '../../lib/store/api-config.js';
 import { ConfigService } from '../../lib/services/config-service.js';
 import { readConfig, writeConfig } from '../../lib/store/config.js';
 import { AppState } from '../../lib/store/state.js';
-import { handleCLIError } from '../output/error.js';
+import { handleCLIError, ExitCodes } from '../output/error.js';
 import { colors } from '../theme/index.js';
 
 /**
@@ -78,7 +78,7 @@ async function exportConfig(projectId: string | undefined, options: ExportOption
     const activeProject = appState.getActiveProject();
     if (!activeProject) {
       console.error(colors.warning('No active project. Specify a project ID or use "switch" first.'));
-      process.exit(3); // NOT_FOUND
+      process.exit(ExitCodes.NOT_FOUND);
     }
     targetId = activeProject;
   }

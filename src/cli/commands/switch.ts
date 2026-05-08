@@ -16,7 +16,7 @@
  */
 
 import type { Command } from 'commander';
-import { colors, formatters, separator } from '../theme/index.js';
+import { colors, formatters } from '../theme/index.js';
 import { ConfigService } from '../../lib/services/config-service.js';
 import { ApiConfigStore } from '../../lib/store/api-config.js';
 import { ProjectIndex } from '../../lib/store/project.js';
@@ -114,10 +114,10 @@ export function registerSwitchCommand(program: Command): void {
         await configService.applyApiConfig(projectEntry.path, apiConfig);
 
         // Update project metadata
-        await projectIndex.update(projectEntry.id, { activeConfig: config });
+        await projectIndex.update(projectEntry.id, { activeConfig: configName });
 
         // Success message
-        console.log(formatters.success(`已切换配置: ${config}`));
+        console.log(formatters.success(`已切换配置: ${configName}`));
         console.log(colors.muted(`项目: ${projectEntry.name}`));
         console.log(colors.muted(`路径: ${projectEntry.path}`));
 
