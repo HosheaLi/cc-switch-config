@@ -5,8 +5,8 @@
  */
 
 import chalk from 'chalk';
-import { TemplateService } from '../../../lib/services/index.js';
-import { TemplateStore, readConfig, writeConfig } from '../../../lib/store/index.js';
+import { ApiService } from '../../../lib/services/index.js';
+import { ApiConfigStore, readConfig, writeConfig } from '../../../lib/store/index.js';
 import { selectTemplate } from '../components/select-template.js';
 import { confirmWithDetails } from '../components/confirm-action.js';
 import { inputFullApiConfig, inputConfigName } from '../components/input-api-key.js';
@@ -42,27 +42,22 @@ import { formatters, separator as themeSeparator } from '../../theme/index.js';
  * @returns Promise that resolves when wizard completes
  */
 export async function runConfigAddWizard(): Promise<void> {
-  const templateStore = new TemplateStore();
-  const templateService = new TemplateService(templateStore, readConfig, writeConfig);
+  const apiConfigStore = new ApiConfigStore();
+  const apiService = new ApiService(apiConfigStore, readConfig, writeConfig);
 
   try {
-    const existingTemplates = await templateService.listTemplates();
+    const existingConfigs = await apiService.listConfigs();
 
     const config = await inputFullApiConfig();
     if (!config) return; // Cancelled
 
-    // Create template/config with proper TemplateConfig structure
-    await templateService.createTemplate(config.name, {
+    // Create ApiConfig with unified mode
+    await apiService.createConfig(config.name, {
       name: config.name,
-      description: `API config for ${config.name}`,
-      provider: {
-        name: config.modelName,
-        baseUrl: config.baseUrl,
-        authType: 'header',
-        env: {
-          ANTHROPIC_API_KEY: config.apiKey,
-        },
-      },
+      apiKey: config.apiKey,
+      baseUrl: config.baseUrl,
+      mode: 'unified',
+      modelName: config.modelName,
     });
 
     console.log(formatters.success(`配置 "${config.name}" 已创建`));
@@ -81,13 +76,13 @@ export async function runConfigAddWizard(): Promise<void> {
  * @returns Promise that resolves when wizard completes
  */
 export async function runConfigListWizard(): Promise<void> {
-  const templateStore = new TemplateStore();
-  const templateService = new TemplateService(templateStore, readConfig, writeConfig);
+  const apiConfigStore = new ApiConfigStore();
+  const apiService = new ApiService(apiConfigStore, readConfig, writeConfig);
 
   try {
-    const templates = await templateService.listTemplates();
+    const configs = await apiService.listConfigs();
 
-    if (templates.length === 0) {
+    if (configs.length === 0) {
       console.log(formatters.warning('没有可用的配置。'));
       console.log(chalk.gray('创建配置: cc-config config add'));
       return;
@@ -96,13 +91,13 @@ export async function runConfigListWizard(): Promise<void> {
     console.log(chalk.cyan('\n可用配置'));
     console.log(themeSeparator(40));
 
-    for (const name of templates) {
+    for (const name of configs) {
       try {
-        const template = await templateService.getTemplate(name);
-        if (template) {
+        const config = await apiService.getConfig(name);
+        if (config) {
           console.log(chalk.white(`  ${name}`));
-          const modelName = template.provider?.name || '未设置';
-          const hasKey = template.provider?.env?.ANTHROPIC_API_KEY;
+          const modelName = config.modelName || '未设置';
+          const hasKey = config.apiKey;
           console.log(chalk.gray(`    模型: ${modelName}`));
           console.log(chalk.gray(`    API Key: ${hasKey ? '已配置' : '未设置'}`));
         }
@@ -113,7 +108,7 @@ export async function runConfigListWizard(): Promise<void> {
     }
 
     console.log(themeSeparator(40));
-    console.log(chalk.gray(`共 ${templates.length} 个配置`));
+    console.log(chalk.gray(`共 ${configs.length} 个配置`));
 
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
@@ -132,13 +127,13 @@ export async function runConfigListWizard(): Promise<void> {
  * @returns Promise that resolves when wizard completes
  */
 export async function runConfigRemoveWizard(): Promise<void> {
-  const templateStore = new TemplateStore();
-  const templateService = new TemplateService(templateStore, readConfig, writeConfig);
+  const apiConfigStore = new ApiConfigStore();
+  const apiService = new ApiService(apiConfigStore, readConfig, writeConfig);
 
   try {
-    const templates = await templateService.listTemplates();
+    const configs = await apiService.listConfigs();
 
-    if (templates.length === 0) {
+    if (configs.length === 0) {
       console.log(formatters.warning('没有可用的配置。'));
       return;
     }
@@ -146,12 +141,12 @@ export async function runConfigRemoveWizard(): Promise<void> {
     console.log(chalk.cyan('\n删除配置'));
     console.log(themeSeparator(40));
 
-    const templateName = await selectTemplate(templates, '选择要删除的配置');
-    if (!templateName) return; // Cancelled
+    const configName = await selectTemplate(configs, '选择要删除的配置');
+    if (!configName) return; // Cancelled
 
     const confirmed = await confirmWithDetails(
       '删除配置',
-      `将永久删除配置 "${templateName}"`,
+      `将永久删除配置 "${configName}"`,
       true // Dangerous
     );
 
@@ -160,8 +155,8 @@ export async function runConfigRemoveWizard(): Promise<void> {
       return;
     }
 
-    await templateService.deleteTemplate(templateName);
-    console.log(formatters.success(`配置 "${templateName}" 已删除`));
+    await apiService.deleteConfig(configName);
+    console.log(formatters.success(`配置 "${configName}" 已删除`));
 
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);

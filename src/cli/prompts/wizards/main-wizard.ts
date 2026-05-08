@@ -7,8 +7,8 @@
 
 import path from 'path';
 import chalk from 'chalk';
-import { ProjectService, TemplateService } from '../../../lib/services/index.js';
-import { ProjectIndex, TemplateStore, AppState, readConfig, writeConfig, type ProjectEntry } from '../../../lib/store/index.js';
+import { ProjectService, ApiService } from '../../../lib/services/index.js';
+import { ProjectIndex, ApiConfigStore, AppState, readConfig, writeConfig, type ProjectEntry } from '../../../lib/store/index.js';
 import { selectProject, selectFromScanResults } from '../components/select-project.js';
 import { selectTemplate } from '../components/select-template.js';
 import { confirmAction, confirmApplyTemplate } from '../components/confirm-action.js';
@@ -60,11 +60,11 @@ function createSpinner(message: string) {
 export async function runMainWizard(): Promise<void> {
   // Create services
   const projectIndex = new ProjectIndex();
-  const templateStore = new TemplateStore();
+  const apiConfigStore = new ApiConfigStore();
   const appState = new AppState();
 
   const projectService = new ProjectService(projectIndex, appState);
-  const templateService = new TemplateService(templateStore, readConfig, writeConfig);
+  const apiService = new ApiService(apiConfigStore, readConfig, writeConfig);
 
   try {
     console.log(chalk.cyan('\n╔══════════════════════════════════════════╗'));
@@ -73,26 +73,21 @@ export async function runMainWizard(): Promise<void> {
     console.log();
 
     // Step 1: API Configuration (if needed)
-    const templates = await templateService.listTemplates();
+    const configs = await apiService.listConfigs();
 
-    if (templates.length === 0) {
+    if (configs.length === 0) {
       console.log(chalk.yellow('首次运行 - 需要创建 API 配置'));
       console.log(themeSeparator(40));
 
       const config = await inputFullApiConfig();
       if (!config) return; // Cancelled
 
-      await templateService.createTemplate(config.name, {
+      await apiService.createConfig(config.name, {
         name: config.name,
-        description: `API config for ${config.name}`,
-        provider: {
-          name: config.modelName,
-          baseUrl: config.baseUrl,
-          authType: 'header',
-          env: {
-            ANTHROPIC_API_KEY: config.apiKey,
-          },
-        },
+        apiKey: config.apiKey,
+        baseUrl: config.baseUrl,
+        mode: 'unified',
+        modelName: config.modelName,
       });
 
       console.log(formatters.success(`配置 "${config.name}" 已创建`));
@@ -145,16 +140,16 @@ export async function runMainWizard(): Promise<void> {
     const projectName = path.basename(projectPath);
 
     // Step 5: Select Configuration
-    const availableTemplates = await templateService.listTemplates();
+    const availableConfigs = await apiService.listConfigs();
 
-    const templateName = await selectTemplate(availableTemplates, '选择配置');
-    if (!templateName) return;
+    const configName = await selectTemplate(availableConfigs, '选择配置');
+    if (!configName) return;
 
     // Step 6: Confirm & Apply
     console.log(chalk.cyan('\n应用配置'));
     console.log(themeSeparator(40));
     console.log(chalk.gray(`项目: ${projectName}`));
-    console.log(chalk.gray(`配置: ${templateName}`));
+    console.log(chalk.gray(`配置: ${configName}`));
     console.log();
 
     const confirmed = await confirmAction('确认应用此配置？', true);
@@ -163,7 +158,7 @@ export async function runMainWizard(): Promise<void> {
       return;
     }
 
-    await templateService.applyTemplate(projectPath, templateName);
+    await apiService.applyConfig(projectPath, configName);
     console.log(themeSeparator(40));
     console.log(formatters.success(`配置已应用到 "${projectName}"`));
     console.log(chalk.gray('\n提示: 运行 `cc-config list` 查看所有项目'));
