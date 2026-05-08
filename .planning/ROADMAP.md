@@ -144,13 +144,13 @@
 **Goal**: Users interact with terminal-native prompts interface (replacing Ink React TUI)
 **Depends on**: Phase 8
 **Requirements**: TUI-01, TUI-02, TUI-03, TUI-04, TUI-05
+**Status**: ✅ Complete — absorbed into Phase 10-14 (prompts integrated incrementally with each feature)
 **Success Criteria** (what must be TRUE):
-  1. User can navigate project list with j/k keys and arrow keys
-  2. User can confirm selection with Enter and cancel with Esc
-  3. User experiences linear wizard flow without multi-screen navigation
-  4. User can search large project lists with autocomplete (>20 items)
-  5. User sees graceful exit on Ctrl+C with onCancel handling
-**Plans**: 4 plans
+  1. User can navigate project list with j/k keys and arrow keys ✅ (select-project.ts)
+  2. User can confirm selection with Enter and cancel with Esc ✅ (handle-cancel.ts)
+  3. User experiences linear wizard flow without multi-screen navigation ✅ (config/main/scan/switch-wizard.ts)
+  4. User can search large project lists with autocomplete (>20 items) ✅ (autocomplete.ts)
+  5. User sees graceful exit on Ctrl+C with onCancel handling ✅ (handle-cancel.ts)
 
 #### Phase 10: Config Service
 **Goal**: Users can manage API configurations securely with precise field replacement
@@ -268,13 +268,13 @@ Phases execute in numeric order: 9 - 10 - 11 - 12 - 13 - 14 - 15
 | 6. Core TUI | v1.0 | 7/7 | Complete | 2026-04-14 |
 | 7. Project Management | v1.0 | 4/4 | Complete | 2026-04-14 |
 | 8. Quality & Polish | v1.0 | 5/5 | Complete | 2026-04-15 |
-| 9. Prompts Integration | v2.0 | 0/TBD | Not started | - |
+| 9. Prompts Integration | v2.0 | - | Complete (absorbed) | 2026-05-07 |
 | 10. Config Service | v2.0 | 4/4 | Complete    | 2026-04-30 |
 | 11. Config CLI Commands | v2.0 | 2/2 | Complete    | 2026-05-02 |
 | 12. First-Run Wizard | v2.0 | 4/4 | Complete    | 2026-05-02 |
 | 13. Switch Flow | v2.0 | 3/3 | Complete    | 2026-05-02 |
 | 14. Terminal Aesthetic | v2.0 | 4/4 | Complete   | 2026-05-05 |
-| 15. Ink Removal | v2.0 | 0/TBD | Not started | - |
+| 15. Ink Removal | v2.0 | 3/5 | In Progress|  |
 
 ---
 
