@@ -5,4 +5,3 @@
 export * from './autocomplete.js';
 export * from './handle-cancel.js';
 export * from './format-choices.js';
-export * from './theme.js';
