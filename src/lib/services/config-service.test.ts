@@ -4,9 +4,8 @@
  * Tests for configuration management service.
  * Per D-01: Services as classes + constructor injection.
  * Per D-02: Services throw Error, caller handles.
- * Per D-03: Template uses deep merge.
  *
- * Per F1: ConfigService handles config read/write, merge, validation, and application.
+ * Per F1: ConfigService handles config read/write, validation, and application.
  */
 
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
@@ -17,7 +16,6 @@ import { ConfigService } from './config-service.js';
 import { readConfig, writeConfig } from '../store/config.js';
 import { ServiceError } from './types.js';
 import type { ClaudeSettings } from '../types/config.js';
-import type { TemplateConfig } from '../types/provider.js';
 
 describe('ConfigService', () => {
   let tempDir: string;
@@ -142,121 +140,6 @@ describe('ConfigService', () => {
       // List backup files
       const backups = await fs.readdir(backupDir);
       expect(backups.length).toBeGreaterThan(0);
-    });
-  });
-
-  describe('mergeTemplateWithConfig', () => {
-    it('should merge template with existing config (D-03)', async () => {
-      // Create existing config
-      const existingConfig: ClaudeSettings = {
-        version: 1,
-        model: 'claude-3',
-        env: {
-          ANTHROPIC_MODEL: 'claude-3',
-        },
-        permissions: [{ allow: 'Bash' }],
-      };
-      await writeConfig(configPath, existingConfig);
-
-      // Template with provider config
-      const template: TemplateConfig = {
-        name: 'test-template',
-        description: 'Test template',
-        provider: {
-          name: 'Test Provider',
-          baseUrl: 'https://api.test.com',
-          authType: 'token',
-          env: {
-            ANTHROPIC_MODEL: 'claude-4',
-            ANTHROPIC_BASE_URL: 'https://api.test.com',
-          },
-        },
-      };
-
-      const merged = await service.mergeTemplateWithConfig(tempDir, template);
-
-      // Per D-03: Deep merge - env should be merged, not replaced
-      expect(merged.env?.ANTHROPIC_MODEL).toBe('claude-4');
-      expect(merged.env?.ANTHROPIC_BASE_URL).toBe('https://api.test.com');
-      // Existing fields should remain
-      expect(merged.permissions?.length).toBe(1);
-    });
-
-    it('should return merged config for non-existent project', async () => {
-      const template: TemplateConfig = {
-        name: 'test-template',
-        description: 'Test template',
-        provider: {
-          name: 'Test Provider',
-          baseUrl: 'https://api.test.com',
-          authType: 'token',
-          env: {
-            ANTHROPIC_MODEL: 'claude-4',
-          },
-        },
-      };
-
-      const merged = await service.mergeTemplateWithConfig(tempDir, template);
-
-      // Non-existent config treated as empty base
-      expect(merged.env?.ANTHROPIC_MODEL).toBe('claude-4');
-    });
-  });
-
-  describe('applyTemplate', () => {
-    it('should apply template to project config', async () => {
-      // Create existing config
-      const existingConfig: ClaudeSettings = {
-        version: 1,
-        model: 'claude-3',
-        permissions: [{ allow: 'Read' }],
-      };
-      await writeConfig(configPath, existingConfig);
-
-      // Template to apply
-      const template: TemplateConfig = {
-        name: 'test-template',
-        provider: {
-          name: 'Test Provider',
-          baseUrl: 'https://api.test.com',
-          authType: 'token',
-          env: {
-            ANTHROPIC_MODEL: 'claude-4',
-          },
-        },
-      };
-
-      await service.applyTemplate(tempDir, template);
-
-      // Verify merged config was written
-      const result = await readConfig(configPath);
-      expect(result).not.toBeNull();
-      expect(result?.env?.ANTHROPIC_MODEL).toBe('claude-4');
-      // Existing permissions preserved
-      expect(result?.permissions?.length).toBe(1);
-    });
-
-    it('should create backup before applying template', async () => {
-      // Create initial config
-      const initialConfig: ClaudeSettings = { version: 1 };
-      await writeConfig(configPath, initialConfig);
-
-      const template: TemplateConfig = {
-        name: 'test-template',
-        provider: {
-          name: 'Test Provider',
-          baseUrl: 'https://api.test.com',
-          authType: 'token',
-          env: { ANTHROPIC_MODEL: 'claude-4' },
-        },
-      };
-
-      await service.applyTemplate(tempDir, template);
-
-      // Check backup was created in .claude/.backups (same directory as config)
-      const backupDir = path.join(tempDir, '.claude', '.backups');
-      const backupExists = await fs.pathExists(backupDir);
-      expect(backupExists).toBe(true);
     });
   });
 

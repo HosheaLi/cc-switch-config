@@ -4,13 +4,10 @@
  * Encapsulates config file operations for Profile CRUD (F1).
  * Per D-01: Services as classes + constructor injection.
  * Per D-02: Services throw Error, caller handles.
- * Per D-03: Template uses deep merge.
  *
  * Key features:
  * - readProjectConfig: Load project config from path
  * - writeProjectConfig: Write config with validation and backup
- * - mergeTemplateWithConfig: Deep merge template with existing config
- * - applyTemplate: Apply template to project (merge + write)
  * - applyApiConfig: Apply ApiConfig with precise env/model replacement (CFG-02)
  *
  * Dependencies (constructor injected):
@@ -20,9 +17,7 @@
 
 import path from 'path';
 import type { ClaudeSettings } from '../types/config.js';
-import type { TemplateConfig } from '../types/provider.js';
 import type { ApiConfig } from '../types/api-config.js';
-import { deepMergeConfig } from '../types/merge.js';
 import { replaceEnvModel } from '../types/replacement.js';
 import { ServiceError } from './types.js';
 import { ValidationError } from '../types/validation.js';
@@ -110,49 +105,6 @@ export class ConfigService {
       }
       throw error;
     }
-  }
-
-  /**
-   * Merge template configuration with existing project config.
-   *
-   * Per D-03: Uses deep merge for template application.
-   * Template provider config overrides existing config fields.
-   *
-   * @param projectPath - Root path of the project
-   * @param template - TemplateConfig to merge
-   * @returns Merged ClaudeSettings
-   */
-  async mergeTemplateWithConfig(
-    projectPath: string,
-    template: TemplateConfig
-  ): Promise<ClaudeSettings> {
-    // Get existing config (null treated as empty)
-    const existing = await this.readProjectConfig(projectPath) ?? {};
-
-    // Deep merge template provider settings with existing
-    // Template provider fields: env, baseUrl, headers -> merge into ClaudeSettings
-    const templateSettings: Partial<ClaudeSettings> = {
-      env: template.provider.env,
-      // Other provider fields would map to appropriate ClaudeSettings fields
-      // For now, we focus on env which is the primary use case
-    };
-
-    return deepMergeConfig(existing, templateSettings);
-  }
-
-  /**
-   * Apply template to project configuration.
-   *
-   * Per F1: Apply template (merge + write) for Profile CRUD.
-   * Per D-03: Uses deep merge before writing.
-   *
-   * @param projectPath - Root path of the project
-   * @param template - TemplateConfig to apply
-   * @throws ServiceError on write failure
-   */
-  async applyTemplate(projectPath: string, template: TemplateConfig): Promise<void> {
-    const merged = await this.mergeTemplateWithConfig(projectPath, template);
-    await this.writeProjectConfig(projectPath, merged);
   }
 
   /**
