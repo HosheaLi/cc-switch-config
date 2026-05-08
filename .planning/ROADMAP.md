@@ -274,7 +274,7 @@ Phases execute in numeric order: 9 - 10 - 11 - 12 - 13 - 14 - 15
 | 12. First-Run Wizard | v2.0 | 4/4 | Complete    | 2026-05-02 |
 | 13. Switch Flow | v2.0 | 3/3 | Complete    | 2026-05-02 |
 | 14. Terminal Aesthetic | v2.0 | 4/4 | Complete   | 2026-05-05 |
-| 15. Ink Removal | v2.0 | 4/5 | In Progress|  |
+| 15. Ink Removal | v2.0 | 5/5 | Complete   | 2026-05-08 |
 
 ---
 
