@@ -6,17 +6,13 @@
  *
  * Import examples:
  * - import { readConfig, writeConfig } from './lib/store/index.js';
- * - import { TemplateStore } from './lib/store/index.js';
+ * - import { ApiConfigStore } from './lib/store/index.js';
  * - import { ProjectIndex } from './lib/store/index.js';
  * - import { AppState } from './lib/store/index.js';
  */
 
 // Config Repository (functions)
 export { readConfig, writeConfig, configExists } from './config.js';
-
-// Template Store (class)
-export { TemplateStore } from './template.js';
-export type { TemplateStoreData } from './template.js';
 
 // API Config Store (class)
 export { ApiConfigStore } from './api-config.js';

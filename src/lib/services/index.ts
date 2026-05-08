@@ -7,16 +7,15 @@
  * Import examples:
  * - import { ConfigService, ServiceError } from './lib/services/index.js';
  * - import { ProjectService, ScanResult } from './lib/services/index.js';
- * - import { TemplateService } from './lib/services/index.js';
  * - import { ProviderService, ConnectivityResult } from './lib/services/index.js';
  * - import { ExportService, detectConflicts } from './lib/services/index.js';
  * - import { UndoService, UndoResult } from './lib/services/index.js';
+ * - import { ApiService } from './lib/services/index.js';
  */
 
 // Service classes
 export { ConfigService } from './config-service.js';
 export { ProjectService } from './project-service.js';
-export { TemplateService } from './template-service.js';
 export { ProviderService } from './provider-service.js';
 export { ExportService } from './export-service.js';
 export { UndoService } from './undo-service.js';
@@ -36,7 +35,6 @@ export { detectConflicts } from './export-service.js';
 
 // Re-export types that services use (convenience for callers)
 export type { ClaudeSettings } from '../types/config.js';
-export type { TemplateConfig } from '../types/provider.js';
 export type { ApiConfig, MaskedApiConfig } from '../types/api-config.js';
 export type { ProjectEntry } from '../store/project.js';
 export type { ConflictField, ExportPayload, ExportMetadata, ExportPayloadSchema } from '../types/export-schema.js';
