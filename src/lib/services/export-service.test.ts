@@ -9,10 +9,11 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { ExportService, detectConflicts, type ImportStrategy } from './export-service.js';
 import { ServiceError } from './types.js';
 import type { ProjectIndex, ProjectEntry } from '../store/index.js';
-import type { TemplateStore } from '../store/index.js';
+import type { ApiConfigStore } from '../store/index.js';
 import type { ConfigService } from './config-service.js';
 import type { ExportPayload, ConflictField } from '../types/export-schema.js';
-import type { ClaudeSettings, TemplateConfig } from '../types/index.js';
+import { migrateExportPayload } from '../types/export-schema.js';
+import type { ClaudeSettings, ApiConfig } from '../types/index.js';
 
 // Mock implementations
 const createMockProjectIndex = (): ProjectIndex => ({
@@ -25,13 +26,13 @@ const createMockProjectIndex = (): ProjectIndex => ({
   clearCache: vi.fn(),
 } as unknown as ProjectIndex);
 
-const createMockTemplateStore = (): TemplateStore => ({
+const createMockApiConfigStore = (): ApiConfigStore => ({
   get: vi.fn(),
   set: vi.fn(),
   delete: vi.fn(),
   getAll: vi.fn(),
   list: vi.fn(),
-} as unknown as TemplateStore);
+} as unknown as ApiConfigStore);
 
 const createMockConfigService = (): ConfigService => ({
   readProjectConfig: vi.fn(),
@@ -42,15 +43,15 @@ const createMockConfigService = (): ConfigService => ({
 
 describe('ExportService', () => {
   let mockProjectIndex: ProjectIndex;
-  let mockTemplateStore: TemplateStore;
+  let mockApiConfigStore: ApiConfigStore;
   let mockConfigService: ConfigService;
   let service: ExportService;
 
   beforeEach(() => {
     mockProjectIndex = createMockProjectIndex();
-    mockTemplateStore = createMockTemplateStore();
+    mockApiConfigStore = createMockApiConfigStore();
     mockConfigService = createMockConfigService();
-    service = new ExportService(mockProjectIndex, mockTemplateStore, mockConfigService);
+    service = new ExportService(mockProjectIndex, mockApiConfigStore, mockConfigService);
   });
 
   describe('exportProject', () => {
@@ -78,10 +79,10 @@ describe('ExportService', () => {
       expect(payload.project.path).toBe(project.path);
       expect(payload.project.name).toBe('project');
       expect(payload.settings).toEqual(settings);
-      expect(payload.template).toBeNull();
+      expect(payload.config).toBeNull();
     });
 
-    it('should export project with template', async () => {
+    it('should export project with config', async () => {
       const project: ProjectEntry = {
         id: '550e8400-e29b-41d4-a716-446655440000',
         name: 'project',
@@ -90,22 +91,21 @@ describe('ExportService', () => {
         lastModified: '2026-04-14T00:00:00.000Z',
       };
       const settings: ClaudeSettings = { model: 'claude-3-opus' };
-      const template: TemplateConfig = {
+      const apiConfig: ApiConfig = {
         name: 'custom-provider',
-        provider: {
-          name: 'Custom API',
-          baseUrl: 'https://api.custom.com',
-          authType: 'header',
-        },
+        apiKey: 'sk-test-key',
+        baseUrl: 'https://api.custom.com',
+        mode: 'unified',
+        modelName: 'Custom API',
       };
 
       vi.mocked(mockProjectIndex.getById).mockResolvedValue(project);
       vi.mocked(mockConfigService.readProjectConfig).mockResolvedValue(settings);
-      vi.mocked(mockTemplateStore.get).mockResolvedValue(template);
+      vi.mocked(mockApiConfigStore.get).mockResolvedValue(apiConfig);
 
       const payload = await service.exportProject(project.id);
 
-      expect(payload.template).toEqual(template);
+      expect(payload.config).toEqual(apiConfig);
     });
 
     it('should throw PROJECT_NOT_FOUND for missing project', async () => {
@@ -261,7 +261,7 @@ describe('ExportService', () => {
         metadata: { version: '1.0', exportedAt: '2026-04-14T00:00:00.000Z' },
         project: { id: '550e8400-e29b-41d4-a716-446655440000', path: '/old/path' },
         settings: { model: 'claude-3-opus' },
-        template: null,
+        config: null,
       };
       const targetPath = '/Users/test/project';
 
@@ -281,7 +281,7 @@ describe('ExportService', () => {
         metadata: { version: '1.0', exportedAt: '2026-04-14T00:00:00.000Z' },
         project: { id: '550e8400-e29b-41d4-a716-446655440000', path: '/old/path' },
         settings: { model: 'claude-3-opus', env: { NEW_VAR: 'value' } },
-        template: null,
+        config: null,
       };
       const targetPath = '/Users/test/project';
       const existing: ClaudeSettings = { model: 'old', env: { OLD_VAR: 'old-value' } };
@@ -308,7 +308,7 @@ describe('ExportService', () => {
         metadata: { version: '1.0', exportedAt: '2026-04-14T00:00:00.000Z' },
         project: { id: '550e8400-e29b-41d4-a716-446655440000', path: '/old/path' },
         settings: { model: 'claude-3-opus' },
-        template: null,
+        config: null,
       };
 
       await service.importProject(payload, '/path', 'skip');
@@ -338,7 +338,7 @@ describe('ExportService', () => {
         metadata: { version: '1.0', exportedAt: '2026-04-14T00:00:00.000Z' },
         project: { id: '550e8400-e29b-41d4-a716-446655440000', path: '/old/path' },
         settings: { model: 'claude-3-opus' },
-        template: null,
+        config: null,
       };
 
       vi.mocked(mockConfigService.readProjectConfig).mockResolvedValue(null);
@@ -377,5 +377,78 @@ describe('ImportStrategy type', () => {
   it('should accept valid strategies', () => {
     const strategies: ImportStrategy[] = ['merge', 'overwrite', 'skip'];
     expect(strategies).toHaveLength(3);
+  });
+});
+
+describe('migrateExportPayload', () => {
+  it('should return payload unchanged if already new format (has config field)', () => {
+    const newPayload: ExportPayload = {
+      metadata: { version: '1.0', exportedAt: '2026-04-14T00:00:00.000Z' },
+      project: { id: '550e8400-e29b-41d4-a716-446655440000', path: '/test/project' },
+      settings: { model: 'claude-3-opus' },
+      config: {
+        name: 'my-config',
+        apiKey: 'sk-test-key',
+        baseUrl: 'https://api.test.com',
+        mode: 'unified',
+        modelName: 'claude-3-opus',
+      },
+    };
+
+    const result = migrateExportPayload(newPayload);
+
+    expect(result.config).toEqual(newPayload.config);
+    expect(result.metadata.version).toBe('1.0');
+  });
+
+  it('should migrate legacy payload with template to config', () => {
+    const legacyPayload = {
+      metadata: { version: '1.0', exportedAt: '2026-04-14T00:00:00.000Z' },
+      project: { id: '550e8400-e29b-41d4-a716-446655440000', path: '/test/project' },
+      settings: { model: 'claude-3-opus' },
+      template: {
+        name: 'custom-provider',
+        provider: {
+          name: 'Custom API', // provider.name → modelName
+          baseUrl: 'https://api.custom.com',
+          authType: 'header',
+          env: {
+            ANTHROPIC_API_KEY: 'sk-test-key',
+          },
+        },
+      },
+    };
+
+    const result = migrateExportPayload(legacyPayload);
+
+    expect(result.config).toBeDefined();
+    expect(result.config?.name).toBe('custom-provider');
+    expect(result.config?.modelName).toBe('Custom API'); // provider.name → modelName
+    expect(result.config?.apiKey).toBe('sk-test-key');
+    expect(result.config?.baseUrl).toBe('https://api.custom.com');
+    expect(result.config?.mode).toBe('unified');
+  });
+
+  it('should handle legacy payload with null template', () => {
+    const legacyPayload = {
+      metadata: { version: '1.0', exportedAt: '2026-04-14T00:00:00.000Z' },
+      project: { id: '550e8400-e29b-41d4-a716-446655440000', path: '/test/project' },
+      settings: { model: 'claude-3-opus' },
+      config: null,
+    };
+
+    const result = migrateExportPayload(legacyPayload);
+
+    expect(result.config).toBeNull();
+  });
+
+  it('should throw error for invalid payload (neither template nor config)', () => {
+    const invalidPayload = {
+      metadata: { version: '1.0', exportedAt: '2026-04-14T00:00:00.000Z' },
+      project: { id: '550e8400-e29b-41d4-a716-446655440000', path: '/test/project' },
+      settings: { model: 'claude-3-opus' },
+    };
+
+    expect(() => migrateExportPayload(invalidPayload)).toThrow('Invalid export payload');
   });
 });

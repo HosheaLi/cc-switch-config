@@ -12,7 +12,7 @@
  *
  * Dependencies (constructor injected):
  * - ProjectIndex for project lookup
- * - TemplateStore for template lookup
+ * - ApiConfigStore for config lookup
  * - ConfigService for config read/write
  */
 
@@ -21,10 +21,10 @@ import { ServiceError } from './types.js';
 import { ExportPayloadSchema } from '../types/export-schema.js';
 import { deepMergeConfig } from '../types/merge.js';
 import type { ProjectIndex } from '../store/index.js';
-import type { TemplateStore } from '../store/index.js';
+import type { ApiConfigStore } from '../store/index.js';
 import type { ConfigService } from './config-service.js';
 import type { ExportPayload, ConflictField, ExportMetadata } from '../types/export-schema.js';
-import type { ClaudeSettings, TemplateConfig } from '../types/index.js';
+import type { ClaudeSettings, ApiConfig } from '../types/index.js';
 
 /**
  * Import strategy options.
@@ -51,12 +51,12 @@ export class ExportService {
    * Create ExportService with injected dependencies.
    *
    * @param projectIndex - ProjectIndex for project lookup
-   * @param templateStore - TemplateStore for template lookup
+   * @param apiConfigStore - ApiConfigStore for config lookup
    * @param configService - ConfigService for config operations
    */
   constructor(
     private projectIndex: ProjectIndex,
-    private templateStore: TemplateStore,
+    private apiConfigStore: ApiConfigStore,
     private configService: ConfigService
   ) {}
 
@@ -91,10 +91,10 @@ export class ExportService {
     // Read project config
     const settings = await this.configService.readProjectConfig(project.path) ?? {};
 
-    // Get template if activeConfig is set
-    let template: TemplateConfig | null = null;
+    // Get config if activeConfig is set
+    let apiConfig: ApiConfig | null = null;
     if (project.activeConfig) {
-      template = await this.templateStore.get(project.activeConfig);
+      apiConfig = await this.apiConfigStore.get(project.activeConfig);
     }
 
     // Build export metadata
@@ -116,7 +116,7 @@ export class ExportService {
       metadata,
       project: projectRef,
       settings,
-      template,
+      config: apiConfig,
     };
 
     return payload;

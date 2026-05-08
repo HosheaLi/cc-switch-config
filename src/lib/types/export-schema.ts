@@ -13,7 +13,8 @@
 
 import { z } from 'zod';
 import { ClaudeSettingsSchema } from './config.js';
-import { TemplateConfigSchema } from './provider.js';
+import { ApiConfigSchema } from './api-config.js';
+import type { ApiConfig } from './api-config.js';
 
 /**
  * Export Metadata Schema.
@@ -60,25 +61,108 @@ export type ProjectRef = z.infer<typeof ProjectRefSchema>;
  * Export Payload Schema.
  *
  * Complete export payload containing all configuration data.
- * Per D-06: Single JSON file with metadata, project ref, settings, and template.
+ * Per D-06: Single JSON file with metadata, project ref, settings, and config.
  *
  * Fields:
  * - metadata: Export metadata (required)
  * - project: Project reference (required)
  * - settings: Claude configuration (required, validated by ClaudeSettingsSchema)
- * - template: Applied template config (nullable - may not have template)
+ * - config: Applied API config (nullable - may not have config)
  *
  * Uses strict mode to reject unknown fields.
- * Template is nullable to support projects without applied template.
+ * Config is nullable to support projects without applied config.
  */
 export const ExportPayloadSchema = z.object({
   metadata: ExportMetadataSchema,
   project: ProjectRefSchema,
   settings: ClaudeSettingsSchema,      // Actual config
-  template: TemplateConfigSchema.nullable(), // Applied template (if any)
+  config: ApiConfigSchema.nullable(), // Applied API config (if any)
 }).strict();
 
 export type ExportPayload = z.infer<typeof ExportPayloadSchema>;
+
+/**
+ * Legacy Export Payload Schema (v1.0 with template field).
+ *
+ * Used for migration from old export files that used template field.
+ * Per D-06: Support backward compatibility during migration.
+ */
+export const LegacyExportPayloadSchema = z.object({
+  metadata: ExportMetadataSchema,
+  project: ProjectRefSchema,
+  settings: ClaudeSettingsSchema,
+  template: z.any().nullable(), // Legacy template field (untyped for flexibility)
+}).strict();
+
+/**
+ * Migrate legacy export payload to new format.
+ *
+ * Detects old format (contains 'template' field) and converts to new format
+ * with 'config' field using TemplateConfig → ApiConfig field mapping.
+ *
+ * Per CFG-06: Migration utility for backward compatibility.
+ *
+ * Field mapping (TemplateConfig → ApiConfig):
+ * - name → name
+ * - provider.name → modelName
+ * - provider.baseUrl → baseUrl
+ * - provider.env.ANTHROPIC_API_KEY → apiKey
+ * - Added mode: 'unified'
+ *
+ * @param payload - Legacy or new payload (unknown type for flexibility)
+ * @returns New ExportPayload with config field
+ * @throws Error if payload is invalid or migration fails
+ */
+export function migrateExportPayload(payload: unknown): ExportPayload {
+  // Check if already new format (has config field)
+  if (payload && typeof payload === 'object' && 'config' in payload) {
+    // Already new format - validate and return
+    const result = ExportPayloadSchema.safeParse(payload);
+    if (!result.success) {
+      throw new Error(`Invalid export payload: ${result.error.message}`);
+    }
+    return result.data;
+  }
+
+  // Check if legacy format (has template field)
+  if (payload && typeof payload === 'object' && 'template' in payload) {
+    const legacy = payload as any;
+
+    // Convert template to config if template exists
+    let config: ApiConfig | null = null;
+    if (legacy.template && legacy.template.provider) {
+      const template = legacy.template;
+
+      // Field mapping (per PATTERNS.md Pattern A)
+      config = {
+        name: template.name,
+        apiKey: template.provider.env?.ANTHROPIC_API_KEY || '',
+        baseUrl: template.provider.baseUrl || '',
+        mode: 'unified',
+        modelName: template.provider.name, // provider.name → modelName
+      };
+    }
+
+    // Build new payload
+    const newPayload = {
+      metadata: legacy.metadata,
+      project: legacy.project,
+      settings: legacy.settings,
+      config,
+    };
+
+    // Validate new payload
+    const result = ExportPayloadSchema.safeParse(newPayload);
+    if (!result.success) {
+      throw new Error(`Migration failed: ${result.error.message}`);
+    }
+
+    return result.data;
+  }
+
+  // Invalid payload format
+  throw new Error('Invalid export payload: neither template nor config field present');
+}
 
 /**
  * Conflict Field Interface.
