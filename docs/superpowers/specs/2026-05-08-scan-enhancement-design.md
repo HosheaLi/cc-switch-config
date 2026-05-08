@@ -11,6 +11,16 @@
 2. **缺少全选功能：** 选择项目注册时没有批量选择选项，手动逐个选择效率低
 3. **无法识别已有配置：** 已有 API provider 配置的项目仍显示在列表中，可能被重复配置
 
+## 术语定义
+
+| 术语 | 含义 | 说明 |
+|------|------|------|
+| **new（新项目）** | 扫描发现但未注册 | 不在 ProjectIndex 中，需要注册 |
+| **unconfigured（未配置）** | 已注册但无 apiProvider | 在 ProjectIndex 中，但 settings.json 无 apiProvider 字段 |
+| **configured（已配置）** | 已注册且有 apiProvider | 在 ProjectIndex 中，settings.json 有有效 apiProvider 配置 |
+| **父项目** | 路径包含子项目的项目 | 例如 `~/code/A` 是 `~/code/A/B` 的父项目 |
+| **子项目** | 路径被父项目包含的项目 | 例如 `~/code/A/B` 是 `~/code/A` 的子项目 |
+
 ## 设计目标
 
 1. 清晰展示父子项目关系，用层级标记和视觉区分
@@ -120,9 +130,10 @@ private findParentPath(
   allPaths: string[]
 ): string | undefined {
   // 从当前路径向上逐级检查是否有父项目
-  const parts = projectPath.split('/');
+  // 使用 path.sep 保证跨平台兼容
+  const parts = projectPath.split(path.sep);
   for (let i = parts.length - 2; i >= 0; i--) {
-    const candidatePath = parts.slice(0, i + 1).join('/');
+    const candidatePath = parts.slice(0, i + 1).join(path.sep);
     // 排除自身，查找是否存在
     if (candidatePath !== projectPath && allPaths.includes(candidatePath)) {
       return candidatePath;
@@ -243,7 +254,16 @@ private async walkDirectory(
 **性能考虑：**
 - 预估每次 settings.json 读取 < 5ms
 - 100 项目约 500ms（可接受）
-- 如需优化：Promise.all 并行检查配置状态
+
+**性能优化策略：**
+- `walkDirectory` 已检查配置文件是否存在，可在此阶段直接读取配置信息
+- 扩展 results 临时字段：`{ path, depth, settingsInfo?: { hasProvider, provider } }`
+- `checkConfigStatus` 使用已有信息，避免重复文件读取
+- 优化后：100 项目约 300ms（减少 40% 重复读取开销）
+
+**并行优化（可选）：**
+- 使用 Promise.all 并行检查配置状态
+- 适合大型项目目录（>100 项目）
 
 ### 2. 选择组件增强（全选功能）
 
