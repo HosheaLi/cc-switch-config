@@ -14,10 +14,11 @@ import fs from 'fs-extra';
 import chalk from 'chalk';
 import { ExportService, detectConflicts, type ImportStrategy } from '../../lib/services/export-service.js';
 import { ProjectIndex } from '../../lib/store/project.js';
-import { TemplateStore } from '../../lib/store/template.js';
+import { ApiConfigStore } from '../../lib/store/api-config.js';
 import { ConfigService } from '../../lib/services/config-service.js';
 import { readConfig, writeConfig } from '../../lib/store/config.js';
 import { handleCLIError } from '../output/error.js';
+import { migrateExportPayload } from '../../lib/types/export-schema.js';
 import type { ConflictField } from '../../lib/types/export-schema.js';
 import type { ExportPayload } from '../../lib/types/export-schema.js';
 
@@ -68,7 +69,10 @@ export function registerImportCommand(program: Command): void {
  */
 async function importConfig(file: string, options: ImportOptions): Promise<void> {
   // Read file content
-  const payload: unknown = await fs.readJSON(file);
+  const payloadRaw: unknown = await fs.readJSON(file);
+
+  // Per CFG-06: Migrate legacy format (template → config)
+  const payload = migrateExportPayload(payloadRaw);
 
   // Validate basic structure to get project path
   if (typeof payload !== 'object' || payload === null) {
@@ -84,13 +88,13 @@ async function importConfig(file: string, options: ImportOptions): Promise<void>
   }
 
   // Determine target path
-  const targetPath = options.target ?? basicPayload.project!.path;
+  const targetPath = options.target ?? payload.project.path;
 
   // Initialize dependencies
   const projectIndex = new ProjectIndex();
-  const templateStore = new TemplateStore();
+  const apiConfigStore = new ApiConfigStore();
   const configService = new ConfigService(readConfig, writeConfig);
-  const service = new ExportService(projectIndex, templateStore, configService);
+  const service = new ExportService(projectIndex, apiConfigStore, configService);
 
   // Determine strategy
   let strategy: ImportStrategy;
@@ -100,7 +104,7 @@ async function importConfig(file: string, options: ImportOptions): Promise<void>
     strategy = options.strategy;
   } else {
     // Interactive mode: detect conflicts and decide
-    const importedSettings = (payload as ExportPayload).settings ?? {};
+    const importedSettings = payload.settings ?? {};
     const existingSettings = await configService.readProjectConfig(targetPath) ?? {};
 
     const conflicts = detectConflicts(importedSettings, existingSettings);
