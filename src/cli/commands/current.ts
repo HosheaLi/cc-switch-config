@@ -10,7 +10,7 @@
  */
 
 import type { Command } from 'commander';
-import chalk from 'chalk';
+import { colors, formatters } from '../theme/index.js';
 import { AppState } from '../../lib/store/state.js';
 import { ProjectService } from '../../lib/services/index.js';
 import { ProjectIndex } from '../../lib/store/project.js';
@@ -31,8 +31,8 @@ export async function executeCurrentCommand(
   const activeProjectId = appState.getActiveProject();
 
   if (!activeProjectId) {
-    console.log(chalk.yellow('No active project set.'));
-    console.log(chalk.gray('Use cc-config switch to select a project.'));
+    console.log(colors.warning('No active project set.'));
+    console.log(colors.muted('Use cc-config switch to select a project.'));
     process.exit(0);
   }
 
@@ -40,23 +40,23 @@ export async function executeCurrentCommand(
   const project = await projectService.getProjectById(activeProjectId);
 
   if (!project) {
-    console.log(chalk.yellow(`Active project ID ${activeProjectId} not found in index.`));
-    console.log(chalk.gray('The project may have been removed.'));
+    console.log(colors.warning(`Active project ID ${activeProjectId} not found in index.`));
+    console.log(colors.muted('The project may have been removed.'));
     process.exit(0);
   }
 
   // Display current status
-  console.log(chalk.bold('Current Project:'));
-  console.log(chalk.white(`  Path: ${project.path}`));
+  console.log(colors.bold('Current Project:'));
+  console.log(colors.foreground(`  Path: ${project.path}`));
 
   if (project.activeConfig) {
-    console.log(chalk.green(`  Template: ${project.activeConfig}`));
+    console.log(colors.success(`  Template: ${project.activeConfig}`));
   } else {
-    console.log(chalk.gray(`  Template: none`));
+    console.log(colors.muted(`  Template: none`));
   }
 
   // Show last modified timestamp
-  console.log(chalk.gray(`  Last Modified: ${project.lastModified}`));
+  console.log(colors.muted(`  Last Modified: ${project.lastModified}`));
 }
 
 /**

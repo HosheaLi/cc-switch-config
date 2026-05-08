@@ -16,8 +16,8 @@
  */
 
 import type { Command } from 'commander';
-import chalk from 'chalk';
 import prompts from 'prompts';
+import { colors, formatters, separator } from '../theme/index.js';
 import { ApiService } from '../../lib/services/api-service.js';
 import { ApiConfigStore } from '../../lib/store/api-config.js';
 import { readConfig, writeConfig } from '../../lib/store/config.js';
@@ -71,9 +71,9 @@ export function displayValidationErrors(error: ValidationError): void {
   // D-12/D-13: Output to stderr with colors
   for (const [groupTitle, messages] of Object.entries(groups)) {
     if (messages.length > 0) {
-      console.error(chalk.red(`✖ ${groupTitle}`));
+      console.error(colors.danger(`✖ ${groupTitle}`));
       for (const msg of messages) {
-        console.error(chalk.gray(`  ${msg}`));
+        console.error(colors.muted(`  ${msg}`));
       }
       console.error(); // Blank line between groups
     }
@@ -115,7 +115,7 @@ export function registerConfigCommand(program: Command): void {
         };
 
         await service.createConfig(result.name, apiConfig);
-        console.log(chalk.green(`✓ 配置 "${result.name}" 已创建`));
+        console.log(formatters.success(`配置 "${result.name}" 已创建`));
 
       } catch (error) {
         handleCLIError(error);
@@ -137,33 +137,33 @@ export function registerConfigCommand(program: Command): void {
 
         // D-07: Empty list handling
         if (names.length === 0) {
-          console.log(chalk.yellow('没有保存的配置'));
-          console.log(chalk.gray('使用 cc-config config add 创建配置'));
+          console.log(colors.warning('没有保存的配置'));
+          console.log(colors.muted('使用 cc-config config add 创建配置'));
           process.exit(0);
         }
 
         // D-05: Table format output
-        console.log(chalk.cyan('\n可用配置'));
-        console.log(chalk.gray('─'.repeat(50)));
+        console.log(colors.accent('\n可用配置'));
+        console.log(separator(50));
 
         // Header row
-        console.log(chalk.cyan(
+        console.log(colors.accent(
           `  ${'名称'.padEnd(16)} ${'模型'.padEnd(20)} API Key`
         ));
-        console.log(chalk.gray('─'.repeat(50)));
+        console.log(separator(50));
 
         for (const [name, cfg] of Object.entries(configs)) {
           const maskedKey = maskApiKey(cfg.apiKey); // CFG-04/SEC-01
           const modelName = cfg.mode === 'unified'
             ? (cfg.modelName ?? '未设置')
             : 'granular';
-          console.log(chalk.white(
+          console.log(colors.foreground(
             `  ${name.padEnd(16)} ${modelName.padEnd(20)} ${maskedKey}`
           ));
         }
 
-        console.log(chalk.gray('─'.repeat(50)));
-        console.log(chalk.gray(`共 ${names.length} 个配置\n`));
+        console.log(separator(50));
+        console.log(colors.muted(`共 ${names.length} 个配置\n`));
 
       } catch (error) {
         handleCLIError(error);
@@ -184,7 +184,7 @@ export function registerConfigCommand(program: Command): void {
         // Check config exists first
         const existing = await service.getConfig(name);
         if (!existing) {
-          console.error(chalk.red(`配置 "${name}" 不存在`));
+          console.error(colors.danger(`配置 "${name}" 不存在`));
           process.exit(ExitCodes.NOT_FOUND);
         }
 
@@ -198,17 +198,17 @@ export function registerConfigCommand(program: Command): void {
           });
 
           if (!confirmed.value) {
-            console.log(chalk.gray('已取消'));
+            console.log(colors.muted('已取消'));
             process.exit(0);
           }
         }
 
         // D-10: Risk warning before deletion
-        console.log(chalk.yellow(`正在删除配置 "${name}"...`));
-        console.log(chalk.gray('使用此配置的项目需要更新'));
+        console.log(colors.warning(`正在删除配置 "${name}"...`));
+        console.log(colors.muted('使用此配置的项目需要更新'));
 
         await service.deleteConfig(name);
-        console.log(chalk.green(`✓ 配置 "${name}" 已删除`));
+        console.log(formatters.success(`配置 "${name}" 已删除`));
 
       } catch (error) {
         handleCLIError(error);

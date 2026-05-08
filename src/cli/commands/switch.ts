@@ -16,7 +16,7 @@
  */
 
 import type { Command } from 'commander';
-import chalk from 'chalk';
+import { colors, formatters, separator } from '../theme/index.js';
 import { ConfigService } from '../../lib/services/config-service.js';
 import { ApiConfigStore } from '../../lib/store/api-config.js';
 import { ProjectIndex } from '../../lib/store/project.js';
@@ -57,8 +57,8 @@ export function registerSwitchCommand(program: Command): void {
         // D-02: Project lookup by path or name
         const projectEntry = await findProject(projectIndex, project);
         if (!projectEntry) {
-          console.error(chalk.red(`未找到项目 '${project}'。`));
-          console.log(chalk.gray('已注册项目列表: cc-config list'));
+          console.error(colors.danger(`未找到项目 '${project}'。`));
+          console.log(colors.muted('已注册项目列表: cc-config list'));
           process.exit(ExitCodes.NOT_FOUND);
         }
 
@@ -67,7 +67,7 @@ export function registerSwitchCommand(program: Command): void {
         if (!config) {
           config = await selectApiConfig(allConfigs, '选择要应用的配置');
           if (!config) {
-            console.log(chalk.yellow('未选择配置，操作已取消。'));
+            console.log(colors.warning('未选择配置，操作已取消。'));
             process.exit(ExitCodes.SUCCESS);
           }
         }
@@ -75,8 +75,8 @@ export function registerSwitchCommand(program: Command): void {
         // Validate config exists
         const apiConfig = await apiConfigStore.get(config);
         if (!apiConfig) {
-          console.error(chalk.red(`配置 '${config}' 不存在。`));
-          console.log(chalk.gray('可用配置列表: cc-config config list'));
+          console.error(colors.danger(`配置 '${config}' 不存在。`));
+          console.log(colors.muted('可用配置列表: cc-config config list'));
           process.exit(ExitCodes.NOT_FOUND);
         }
 
@@ -92,9 +92,9 @@ export function registerSwitchCommand(program: Command): void {
         // D-04/D-05/D-06: Generate and render diff
         const diffLines = generateUnifiedDiff(existingConfig ?? {}, maskedPreview);
         console.log();
-        console.log(chalk.cyan('配置变更预览：'));
-        console.log(chalk.gray(`项目: ${projectEntry.name}`));
-        console.log(chalk.gray(`配置: ${config}`));
+        console.log(colors.accent('配置变更预览：'));
+        console.log(colors.muted(`项目: ${projectEntry.name}`));
+        console.log(colors.muted(`配置: ${config}`));
         console.log();
         renderDiff(diffLines, '.claude/settings.json');
 
@@ -104,7 +104,7 @@ export function registerSwitchCommand(program: Command): void {
 
         if (confirmed === null || !confirmed) {
           // D-09: Cancelled or rejected
-          console.log(chalk.yellow('操作已取消，未修改配置'));
+          console.log(colors.warning('操作已取消，未修改配置'));
           process.exit(ExitCodes.SUCCESS);
         }
 
@@ -115,9 +115,9 @@ export function registerSwitchCommand(program: Command): void {
         await projectIndex.update(projectEntry.id, { activeConfig: config });
 
         // Success message
-        console.log(chalk.green(`✓ 已切换配置: ${config}`));
-        console.log(chalk.gray(`项目: ${projectEntry.name}`));
-        console.log(chalk.gray(`路径: ${projectEntry.path}`));
+        console.log(formatters.success(`已切换配置: ${config}`));
+        console.log(colors.muted(`项目: ${projectEntry.name}`));
+        console.log(colors.muted(`路径: ${projectEntry.path}`));
 
       } catch (error) {
         handleCLIError(error);

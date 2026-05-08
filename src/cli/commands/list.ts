@@ -7,7 +7,7 @@
  */
 
 import type { Command } from 'commander';
-import chalk from 'chalk';
+import { colors } from '../theme/index.js';
 import { ProjectService } from '../../lib/services/index.js';
 import { formatProjectTable } from '../output/table.js';
 import { handleCLIError } from '../output/error.js';
@@ -39,7 +39,7 @@ export function registerListCommand(program: Command): void {
           console.log(table);
 
           if (projects.length > 0) {
-            console.log(chalk.gray(`\n${projects.length} project(s) registered.`));
+            console.log(colors.muted(`\n${projects.length} project(s) registered.`));
           }
         }
       } catch (error) {

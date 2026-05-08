@@ -10,7 +10,7 @@
  */
 
 import type { Command } from 'commander';
-import chalk from 'chalk';
+import { colors, formatters } from '../theme/index.js';
 import { AppState } from '../../lib/store/state.js';
 import { ProjectIndex } from '../../lib/store/project.js';
 import { UndoService } from '../../lib/services/undo-service.js';
@@ -43,8 +43,8 @@ export async function executeUndoCommand(
   const activeProjectId = state.getActiveProject();
 
   if (!activeProjectId) {
-    console.log(chalk.yellow('No active project set.'));
-    console.log(chalk.gray('Use cc-config switch to select a project.'));
+    console.log(colors.warning('No active project set.'));
+    console.log(colors.muted('Use cc-config switch to select a project.'));
     process.exit(0);
     return;
   }
@@ -53,8 +53,8 @@ export async function executeUndoCommand(
   const project = await index.getById(activeProjectId);
 
   if (!project) {
-    console.log(chalk.yellow(`Active project ID ${activeProjectId} not found in index.`));
-    console.log(chalk.gray('The project may have been removed.'));
+    console.log(colors.warning(`Active project ID ${activeProjectId} not found in index.`));
+    console.log(colors.muted('The project may have been removed.'));
     process.exit(0);
     return;
   }
@@ -82,16 +82,16 @@ export async function executeUndoCommand(
     }
 
     // Output success message per UI-SPEC.md
-    console.log(chalk.green('Restored settings.json from backup:'));
-    console.log(chalk.white(`  Backup: ${result.backupFilename}`));
-    console.log(chalk.white(`  Time: ${timeAgo}`));
+    console.log(formatters.success('Restored settings.json from backup:'));
+    console.log(colors.foreground(`  Backup: ${result.backupFilename}`));
+    console.log(colors.foreground(`  Time: ${timeAgo}`));
     console.log();
-    console.log(chalk.gray('Previous configuration has been restored.'));
+    console.log(colors.muted('Previous configuration has been restored.'));
 
   } catch (error) {
     if (error instanceof ServiceError && error.code === 'NO_BACKUP') {
-      console.log(chalk.yellow('No backup available to undo.'));
-      console.log(chalk.gray('No previous configuration backup exists for this project.'));
+      console.log(colors.warning('No backup available to undo.'));
+      console.log(colors.muted('No previous configuration backup exists for this project.'));
       return;
     }
 
