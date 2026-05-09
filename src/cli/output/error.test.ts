@@ -32,8 +32,7 @@ describe('handleCLIError', () => {
       throw new Error(`process.exit:${code}`);
     });
 
-    const error = new ServiceError('Template not found', 'TEMPLATE_NOT_FOUND');
-    try {
+    const error = new ServiceError('Config not found', 'CONFIG_NOT_FOUND');    try {
       handleCLIError(error);
     } catch (e) {
       expect(e).toBeInstanceOf(Error);
@@ -82,7 +81,7 @@ describe('handleCLIError', () => {
       throw new Error(`process.exit:${code}`);
     });
 
-    const error = new ServiceError('Test error', 'TEMPLATE_NOT_FOUND');
+    const error = new ServiceError('Test error', 'CONFIG_NOT_FOUND');
     try {
       handleCLIError(error, ExitCodes.MISUSE);
     } catch (e) {

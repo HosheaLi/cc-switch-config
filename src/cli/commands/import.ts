@@ -11,12 +11,11 @@
 
 import type { Command } from 'commander';
 import fs from 'fs-extra';
-import { ExportService, detectConflicts, type ImportStrategy } from '../../lib/services/export-service.js';
-import { ProjectIndex } from '../../lib/store/project.js';
-import { ApiConfigStore } from '../../lib/store/api-config.js';
+import { ExportService, type ImportStrategy } from '../../lib/services/export-service.js';
 import { ConfigService } from '../../lib/services/config-service.js';
 import { readConfig, writeConfig } from '../../lib/store/config.js';
 import { handleCLIError, ExitCodes } from '../output/error.js';
+import { createServices } from '../utils/service-factory.js';
 import { migrateExportPayload } from '../../lib/types/export-schema.js';
 import type { ConflictField } from '../../lib/types/export-schema.js';
 import type { ExportPayload } from '../../lib/types/export-schema.js';
@@ -92,9 +91,7 @@ async function importConfig(file: string, options: ImportOptions): Promise<void>
   // Determine target path
   const targetPath = options.target ?? payload.project.path;
 
-  // Initialize dependencies
-  const projectIndex = new ProjectIndex();
-  const apiConfigStore = new ApiConfigStore();
+  const { projectIndex, apiConfigStore } = createServices();
   const configService = new ConfigService(readConfig, writeConfig);
   const service = new ExportService(projectIndex, apiConfigStore, configService);
 
@@ -109,7 +106,7 @@ async function importConfig(file: string, options: ImportOptions): Promise<void>
     const importedSettings = payload.settings ?? {};
     const existingSettings = await configService.readProjectConfig(targetPath) ?? {};
 
-    const conflicts = detectConflicts(importedSettings, existingSettings);
+    const conflicts = ExportService.detectConflicts(importedSettings, existingSettings);
 
     if (conflicts.length === 0) {
       // No conflicts: proceed with merge (default)

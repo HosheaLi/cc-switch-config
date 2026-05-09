@@ -8,7 +8,7 @@
  * - import { ConfigService, ServiceError } from './lib/services/index.js';
  * - import { ProjectService, ScanResult } from './lib/services/index.js';
  * - import { ProviderService, ConnectivityResult } from './lib/services/index.js';
- * - import { ExportService, detectConflicts } from './lib/services/index.js';
+ * - import { ExportService } from './lib/services/index.js';
  * - import { UndoService, UndoResult } from './lib/services/index.js';
  * - import { ApiService } from './lib/services/index.js';
  */
@@ -29,9 +29,6 @@ export type { ConnectivityResult } from './provider-service.js';
 export type { ScanResult } from './project-service.js';
 export type { ImportStrategy } from './export-service.js';
 export type { UndoResult } from './undo-service.js';
-
-// Standalone utility exports
-export { detectConflicts } from './export-service.js';
 
 // Re-export types that services use (convenience for callers)
 export type { ClaudeSettings } from '../types/config.js';

@@ -2,13 +2,13 @@
  * CLI Entry Point - Commander Setup
  *
  * Per UI-05: NO_COLOR handling centralized in theme module (not manual here).
+ * v0.2: 新增仪表盘和快速切换路由。
  */
 import { Command } from 'commander';
-import { AppState } from '../lib/store/state.js';
-import { ApiConfigStore } from '../lib/store/api-config.js';
-import { ProjectIndex } from '../lib/store/project.js';
 import { launchTUI } from './utils/cli-launch.js';
-import { launchPromptsTUI } from './prompts/wizards/main-wizard.js';
+import { runOnboardingWizard } from './prompts/wizards/onboarding-wizard.js';
+import { runQuickSwitch } from './dashboard/quick-switch.js';
+import { createServices } from './utils/service-factory.js';
 import { registerListCommand } from './commands/list.js';
 import { registerSwitchCommand } from './commands/switch.js';
 import { registerCurrentCommand } from './commands/current.js';
@@ -20,7 +20,14 @@ import { registerUndoCommand } from './commands/undo.js';
 import { registerRegisterCommand } from './commands/register.js';
 import { registerConfigCommand } from './commands/config.js';
 
-const VERSION = '0.1.0';
+import { VERSION } from '../version.js';
+
+/** Commander 已知子命令名称集合 */
+const KNOWN_COMMANDS = new Set([
+  'switch', 'sw', 'list', 'ls', 'current', 'cur',
+  'scan', 'export', 'import', 'undo', 'config', 'cfg',
+  'register', 'auto-check', 'help',
+]);
 
 export async function runCLI(argv: string[] = process.argv): Promise<void> {
   const program = new Command();
@@ -28,46 +35,35 @@ export async function runCLI(argv: string[] = process.argv): Promise<void> {
     .version(VERSION, '-v, --version', 'output the current version')
     .helpOption('-h, --help', 'display help for command').exitOverride();
 
-  // Phase 05 commands
   registerListCommand(program);
   registerSwitchCommand(program);
   registerCurrentCommand(program);
-
-  // Phase 11 commands
   registerConfigCommand(program);
-
-  // Phase 07 commands
   registerAutoCheckCommand(program);
   registerScanCommand(program);
   registerRegisterCommand(program);
   registerExportCommand(program);
   registerImportCommand(program);
-
-  // Phase 08 commands
   registerUndoCommand(program);
 
   const args = argv.slice(2);
 
   if (args.length === 0) {
-    // D-01: Trigger at no-args invocation
-    // D-02: Triple condition check for first-run detection
-    const appState = new AppState();
-    const apiConfigStore = new ApiConfigStore();
-    const projectIndex = new ProjectIndex();
+    const { appState, apiConfigStore, projectIndex } = createServices();
 
     const firstRunCompleted = appState.get('firstRunCompleted');
     const hasConfigs = (await apiConfigStore.list()).length > 0;
     const hasProjects = (await projectIndex.getAll()).length > 0;
 
     if (!firstRunCompleted && !hasConfigs && !hasProjects) {
-      // Launch first-run wizard
-      await launchPromptsTUI();
-      // D-04: Set flag after wizard completes
+      await runOnboardingWizard();
       appState.set('firstRunCompleted', true);
     } else {
-      // Normal TUI launch
       await launchTUI();
     }
+  } else if (args.length === 1 && !args[0].startsWith('-') && !KNOWN_COMMANDS.has(args[0])) {
+    // 快速切换: cc-config <config-name>
+    await runQuickSwitch(args[0]);
   } else {
     await program.parseAsync(argv);
   }

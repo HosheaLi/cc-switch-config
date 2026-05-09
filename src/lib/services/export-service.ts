@@ -17,6 +17,7 @@
  */
 
 import path from 'path';
+import { VERSION } from '../../version.js';
 import { ServiceError } from './types.js';
 import { ExportPayloadSchema } from '../types/export-schema.js';
 import { deepMergeConfig } from '../types/merge.js';
@@ -45,7 +46,7 @@ export type ImportStrategy = 'merge' | 'overwrite' | 'skip';
  */
 export class ExportService {
   /** Current tool version for export metadata */
-  private readonly TOOL_VERSION = '0.1.0';
+  private readonly toolVersion: string = VERSION;
 
   /**
    * Create ExportService with injected dependencies.
@@ -101,7 +102,7 @@ export class ExportService {
     const metadata: ExportMetadata = {
       version: '1.0',
       exportedAt: new Date().toISOString(),
-      toolVersion: this.TOOL_VERSION,
+      toolVersion: this.toolVersion,
     };
 
     // Build project reference
@@ -135,10 +136,6 @@ export class ExportService {
    * @param existing - Current project settings
    * @returns Array of ConflictField with key, imported value, existing value
    */
-  detectConflicts(imported: ClaudeSettings, existing: ClaudeSettings): ConflictField[] {
-    return ExportService.detectConflicts(imported, existing);
-  }
-
   /**
    * Static version of conflict detection (no instance required).
    *
@@ -338,14 +335,3 @@ export class ExportService {
   }
 }
 
-/**
- * Standalone conflict detection function.
- * Can be used without full ExportService instance.
- *
- * @param imported - Settings from import file
- * @param existing - Current project settings
- * @returns Array of ConflictField
- */
-export function detectConflicts(imported: ClaudeSettings, existing: ClaudeSettings): ConflictField[] {
-  return ExportService.detectConflicts(imported, existing);
-}

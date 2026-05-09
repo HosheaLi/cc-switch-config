@@ -8,11 +8,9 @@
 
 import type { Command } from 'commander';
 import { colors } from '../theme/index.js';
-import { ProjectService } from '../../lib/services/index.js';
 import { formatProjectTable } from '../output/table.js';
 import { handleCLIError } from '../output/error.js';
-import { ProjectIndex } from '../../lib/store/project.js';
-import { AppState } from '../../lib/store/state.js';
+import { createServices } from '../utils/service-factory.js';
 
 /**
  * Register list command with Commander program.
@@ -26,11 +24,9 @@ export function registerListCommand(program: Command): void {
     .option('-j, --json', 'output as JSON format')
     .action(async (options) => {
       try {
-        const projectIndex = new ProjectIndex();
-        const appState = new AppState();
-        const service = new ProjectService(projectIndex, appState);
+        const { projectService } = createServices();
 
-        const projects = await service.listProjects();
+        const projects = await projectService.listProjects();
 
         if (options.json) {
           console.log(JSON.stringify(projects, null, 2));

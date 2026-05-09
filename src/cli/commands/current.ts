@@ -13,8 +13,8 @@ import type { Command } from 'commander';
 import { colors, formatters } from '../theme/index.js';
 import { AppState } from '../../lib/store/state.js';
 import { ProjectService } from '../../lib/services/index.js';
-import { ProjectIndex } from '../../lib/store/project.js';
 import { handleCLIError } from '../output/error.js';
+import { createServices } from '../utils/service-factory.js';
 
 /**
  * Execute the current command logic.
@@ -72,9 +72,7 @@ export function registerCurrentCommand(program: Command): void {
     .description('Display the currently active project and configuration')
     .action(async () => {
       try {
-        const appState = new AppState();
-        const projectIndex = new ProjectIndex();
-        const projectService = new ProjectService(projectIndex, appState);
+        const { appState, projectService } = createServices();
         await executeCurrentCommand(appState, projectService);
       } catch (error) {
         handleCLIError(error);

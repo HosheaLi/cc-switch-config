@@ -8,40 +8,29 @@ import path from 'path';
 import os from 'os';
 import { Command } from 'commander';
 
-// Mock the services before importing the module
-vi.mock('../../lib/store/project.js', () => ({
-  ProjectIndex: vi.fn().mockImplementation(() => ({
-    register: vi.fn().mockResolvedValue({
-      id: 'test-uuid',
-      name: 'test-project',
-      path: '/test/project',
-      activeConfig: null,
-      lastModified: new Date().toISOString(),
-    }),
-    update: vi.fn().mockResolvedValue(true),
-    getAll: vi.fn().mockResolvedValue([]),
-    clearCache: vi.fn(),
-  })),
-}));
-
-vi.mock('../../lib/store/state.js', () => ({
-  AppState: vi.fn().mockImplementation(() => ({
-    get: vi.fn().mockReturnValue([]),
-    set: vi.fn(),
-    clear: vi.fn(),
-  })),
-}));
-
-vi.mock('../../lib/services/index.js', () => ({
-  ProjectService: vi.fn().mockImplementation(() => ({
-    registerProject: vi.fn().mockResolvedValue({
-      id: 'test-uuid',
-      name: 'test-project',
-      path: '/test/project',
-      activeConfig: null,
-      lastModified: new Date().toISOString(),
-    }),
-  })),
+vi.mock('../utils/service-factory.js', () => ({
+  createServices: vi.fn().mockReturnValue({
+    projectIndex: {
+      update: vi.fn().mockResolvedValue(true),
+      getAll: vi.fn().mockResolvedValue([]),
+    },
+    appState: {
+      get: vi.fn().mockReturnValue([]),
+      set: vi.fn(),
+      clear: vi.fn(),
+    },
+    projectService: {
+      registerProject: vi.fn().mockResolvedValue({
+        id: 'test-uuid',
+        name: 'test-project',
+        path: '/test/project',
+        activeConfig: null,
+        lastModified: new Date().toISOString(),
+      }),
+    },
+    apiConfigStore: {},
+    apiService: {},
+  }),
 }));
 
 import { registerRegisterCommand, executeRegister } from './register.js';
@@ -52,7 +41,7 @@ describe('registerRegisterCommand', () => {
 
   beforeEach(async () => {
     program = new Command();
-    program.exitOverride(); // Prevent actual exit during tests
+    program.exitOverride();
     tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'register-test-'));
   });
 
@@ -105,9 +94,8 @@ describe('executeRegister', () => {
 
     await executeRegister(projectPath, {});
 
-    // The mock should have been called
-    const { ProjectService } = await import('../../lib/services/index.js');
-    expect(vi.mocked(ProjectService)).toHaveBeenCalled();
+    const { createServices } = await import('../utils/service-factory.js');
+    expect(vi.mocked(createServices)).toHaveBeenCalled();
   });
 
   it('registers a project with .claude/settings.local.json', async () => {
@@ -117,19 +105,18 @@ describe('executeRegister', () => {
 
     await executeRegister(projectPath, {});
 
-    const { ProjectService } = await import('../../lib/services/index.js');
-    expect(vi.mocked(ProjectService)).toHaveBeenCalled();
+    const { createServices } = await import('../utils/service-factory.js');
+    expect(vi.mocked(createServices)).toHaveBeenCalled();
   });
 
   it('registers a project without .claude directory', async () => {
     const projectPath = path.join(tempDir, 'project3');
     await fs.ensureDir(projectPath);
 
-    // Should succeed but with warning
     await executeRegister(projectPath, {});
 
-    const { ProjectService } = await import('../../lib/services/index.js');
-    expect(vi.mocked(ProjectService)).toHaveBeenCalled();
+    const { createServices } = await import('../utils/service-factory.js');
+    expect(vi.mocked(createServices)).toHaveBeenCalled();
   });
 
   it('throws error for non-existent path', async () => {

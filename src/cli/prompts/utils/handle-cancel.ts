@@ -34,12 +34,12 @@ export function defaultOnCancel(): void {
  */
 export async function promptWithCancel<T>(
   promptConfig: prompts.PromptObject,
-  onCancel?: () => void
+  onCancel?: () => void | boolean
 ): Promise<PromptResult<T>> {
   const key = promptConfig.name as string;
 
   const result = await prompts(promptConfig, {
-    onCancel: onCancel ?? defaultOnCancel,
+    onCancel: onCancel ?? createReturnOnCancel,
   });
 
   const value = result[key];

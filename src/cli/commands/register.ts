@@ -7,8 +7,8 @@
 
 import type { Command } from 'commander';
 import { ProjectService } from '../../lib/services/index.js';
-import { ProjectIndex, AppState } from '../../lib/store/index.js';
 import { handleCLIError } from '../output/error.js';
+import { createServices } from '../utils/service-factory.js';
 import { colors } from '../theme/index.js';
 import fs from 'fs-extra';
 import path from 'path';
@@ -48,9 +48,7 @@ export async function executeRegister(
   projectPath: string,
   options: RegisterOptions
 ): Promise<void> {
-  const projectIndex = new ProjectIndex();
-  const appState = new AppState();
-  const service = new ProjectService(projectIndex, appState);
+  const { projectIndex, appState, projectService } = createServices();
 
   // Expand ~ to home directory
   const expandedPath = projectPath.startsWith('~')
@@ -74,7 +72,7 @@ export async function executeRegister(
   }
 
   // Register the project
-  const entry = await service.registerProject(expandedPath);
+  const entry = await projectService.registerProject(expandedPath);
 
   console.log(colors.success(`Project registered successfully!`));
   console.log(colors.foreground(`  Name: ${entry.name}`));

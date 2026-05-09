@@ -46,10 +46,9 @@
  */
 
 import type { Command } from 'commander';
-import { ProjectIndex } from '../../lib/store/project.js';
-import { AppState } from '../../lib/store/state.js';
 import { detectAutoSwitch, applyAutoSwitch, formatSwitchMessage } from '../utils/auto-switch.js';
 import { handleCLIError } from '../output/error.js';
+import { createServices } from '../utils/service-factory.js';
 
 /**
  * Register auto-check command with Commander program.
@@ -86,9 +85,7 @@ export function registerAutoCheckCommand(program: Command): void {
  * @param options.root - Override scan directory (default: process.cwd())
  */
 export async function autoCheck(options: { silent: boolean; root?: string }): Promise<void> {
-  // Create instances
-  const projectIndex = new ProjectIndex();
-  const appState = new AppState();
+  const { projectIndex, appState } = createServices();
 
   // Get target directory
   const cwd = options.root ?? process.cwd();

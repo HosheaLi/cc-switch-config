@@ -163,15 +163,15 @@ export function migrateExportPayload(payload: unknown): ExportPayload {
     // Convert template to config if template exists
     let config: ApiConfig | null = null;
     if (legacy.template && isValidLegacyTemplate(legacy.template) && legacy.template.provider) {
-      const template = legacy.template;
+      const { name, provider } = legacy.template;
 
       // Field mapping (per PATTERNS.md Pattern A)
       config = {
-        name: template.name,
-        apiKey: template.provider.env?.ANTHROPIC_API_KEY || '',
-        baseUrl: template.provider.baseUrl || '',
+        name,
+        apiKey: provider.env?.ANTHROPIC_API_KEY || '',
+        baseUrl: provider.baseUrl || '',
         mode: 'unified',
-        modelName: template.provider.name, // provider.name → modelName
+        modelName: provider.name, // provider.name → modelName
       };
     }
 

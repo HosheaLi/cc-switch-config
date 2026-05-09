@@ -169,7 +169,6 @@ export class ProjectService {
       const subdirs = entries
         .filter(e => e.isDirectory())
         .filter(e => !skipDirs.includes(e.name))
-        .filter(e => !e.name.startsWith('.'))
         .map(e => path.join(dir, e.name));
 
       // D-05: Promise.all parallel scan

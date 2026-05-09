@@ -18,11 +18,9 @@
 import type { Command } from 'commander';
 import prompts from 'prompts';
 import { colors, formatters, separator } from '../theme/index.js';
-import { ApiService } from '../../lib/services/api-service.js';
-import { ApiConfigStore } from '../../lib/store/api-config.js';
-import { readConfig, writeConfig } from '../../lib/store/config.js';
 import { inputFullApiConfig } from '../prompts/components/input-api-key.js';
 import { handleCLIError, ExitCodes } from '../output/error.js';
+import { createServices } from '../utils/service-factory.js';
 import { maskApiKey } from '../../lib/security/api-key.js';
 import type { ApiConfig } from '../../lib/types/api-config.js';
 import { ValidationError } from '../../lib/types/validation.js';
@@ -98,8 +96,7 @@ export function registerConfigCommand(program: Command): void {
     .description('Add a new API configuration')
     .action(async () => {
       try {
-        const apiConfigStore = new ApiConfigStore();
-        const service = new ApiService(apiConfigStore, readConfig, writeConfig);
+        const { apiService } = createServices();
 
         // D-14: Reuse inputFullApiConfig (SEC-04 password input)
         const result = await inputFullApiConfig();
@@ -114,7 +111,7 @@ export function registerConfigCommand(program: Command): void {
           modelName: result.modelName,
         };
 
-        await service.createConfig(result.name, apiConfig);
+        await apiService.createConfig(result.name, apiConfig);
         console.log(formatters.success(`配置 "${result.name}" 已创建`));
 
       } catch (error) {
@@ -129,10 +126,9 @@ export function registerConfigCommand(program: Command): void {
     .description('List all API configurations')
     .action(async () => {
       try {
-        const apiConfigStore = new ApiConfigStore();
-        const service = new ApiService(apiConfigStore, readConfig, writeConfig);
+        const { apiService } = createServices();
 
-        const configs = await service.getAllConfigs();
+        const configs = await apiService.getAllConfigs();
         const names = Object.keys(configs);
 
         // D-07: Empty list handling
@@ -178,11 +174,10 @@ export function registerConfigCommand(program: Command): void {
     .option('-f, --force', 'skip confirmation prompt')
     .action(async (name: string, options: { force?: boolean }) => {
       try {
-        const apiConfigStore = new ApiConfigStore();
-        const service = new ApiService(apiConfigStore, readConfig, writeConfig);
+        const { apiService } = createServices();
 
         // Check config exists first
-        const existing = await service.getConfig(name);
+        const existing = await apiService.getConfig(name);
         if (!existing) {
           console.error(colors.danger(`配置 "${name}" 不存在`));
           process.exit(ExitCodes.NOT_FOUND);
@@ -207,7 +202,7 @@ export function registerConfigCommand(program: Command): void {
         console.log(colors.warning(`正在删除配置 "${name}"...`));
         console.log(colors.muted('使用此配置的项目需要更新'));
 
-        await service.deleteConfig(name);
+        await apiService.deleteConfig(name);
         console.log(formatters.success(`配置 "${name}" 已删除`));
 
       } catch (error) {

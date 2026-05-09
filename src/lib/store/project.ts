@@ -297,6 +297,51 @@ export class ProjectIndex {
   }
 
   /**
+   * Get project by name.
+   * Searches through all projects for matching name.
+   *
+   * @param name - Project name to search for
+   * @returns Project entry or null if not found
+   */
+  async getByName(name: string): Promise<ProjectEntry | null> {
+    const data = await this.load();
+    for (const entry of Object.values(data.projects)) {
+      if (entry.name === name) {
+        return entry;
+      }
+    }
+    return null;
+  }
+
+  /**
+   * Resolve project identifier to entry.
+   * Attempts lookup by:
+   * 1. UUID (exact match)
+   * 2. Name (exact match)
+   * 3. Path (normalized)
+   *
+   * @param identifier - Project UUID, name, or path
+   * @returns Project entry or null if not found
+   */
+  async resolve(identifier: string): Promise<ProjectEntry | null> {
+    const data = await this.load();
+    const projects = Object.values(data.projects);
+
+    // Try UUID first
+    const byId = projects.find(p => p.id === identifier);
+    if (byId) return byId;
+
+    // Try name
+    const byName = projects.find(p => p.name === identifier);
+    if (byName) return byName;
+
+    // Try path (normalize to handle macOS /var -> /private/var symlink)
+    const resolved = await fs.realpath(identifier).catch(() => identifier);
+    const byPath = projects.find(p => p.path === resolved);
+    return byPath ?? null;
+  }
+
+  /**
    * Clear the internal cache.
    * Forces reload from disk on next operation.
    */

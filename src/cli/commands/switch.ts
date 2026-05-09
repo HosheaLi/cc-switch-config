@@ -16,20 +16,19 @@
  */
 
 import type { Command } from 'commander';
+import type { ProjectIndex } from '../../lib/store/project.js';
 import { colors, formatters } from '../theme/index.js';
 import { ConfigService } from '../../lib/services/config-service.js';
-import { ApiConfigStore } from '../../lib/store/api-config.js';
-import { ProjectIndex } from '../../lib/store/project.js';
 import { readConfig, writeConfig } from '../../lib/store/config.js';
 import { generateUnifiedDiff } from '../utils/diff.js';
 import { renderDiff } from '../utils/diff-render.js';
 import { selectApiConfig } from '../prompts/components/select-api-config.js';
 import { confirmAction } from '../prompts/components/confirm-action.js';
 import { handleCLIError, ExitCodes } from '../output/error.js';
-import { maskApiKey } from '../../lib/security/api-key.js';
+import { createServices } from '../utils/service-factory.js';
+import { maskApiKeyInConfig } from '../utils/mask-config.js';
 import { replaceEnvModel } from '../../lib/types/replacement.js';
 import type { ApiConfig } from '../../lib/types/api-config.js';
-import type { ClaudeSettings } from '../../lib/types/config.js';
 
 /**
  * Register switch command with Commander program.
@@ -49,9 +48,7 @@ export function registerSwitchCommand(program: Command): void {
     .argument('[config]', '配置名称') // D-01, D-03: config optional
     .action(async (project: string, config?: string) => {
       try {
-        // Initialize stores and services
-        const projectIndex = new ProjectIndex();
-        const apiConfigStore = new ApiConfigStore();
+        const { projectIndex, apiConfigStore } = createServices();
         const configService = new ConfigService(readConfig, writeConfig);
 
         // D-02: Project lookup by path or name
@@ -149,27 +146,3 @@ async function findProject(
   return all.find(p => p.name === input) ?? null;
 }
 
-/**
- * Mask API key in config for display.
- *
- * Per CFG-04: API key masked in all display contexts.
- * Masks ANTHROPIC_AUTH_TOKEN in env object before rendering diff.
- *
- * @param config - ClaudeSettings to mask
- * @returns Config with masked API key
- */
-function maskApiKeyInConfig(config: ClaudeSettings): ClaudeSettings {
-  if (!config.env || typeof config.env !== 'object') return config;
-
-  const env = config.env as Record<string, string>;
-  if (env.ANTHROPIC_AUTH_TOKEN) {
-    return {
-      ...config,
-      env: {
-        ...env,
-        ANTHROPIC_AUTH_TOKEN: maskApiKey(env.ANTHROPIC_AUTH_TOKEN),
-      },
-    };
-  }
-  return config;
-}

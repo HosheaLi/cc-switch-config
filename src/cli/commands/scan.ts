@@ -12,9 +12,9 @@ import type { Command } from 'commander';
 import Table from 'cli-table3';
 import { ProjectService } from '../../lib/services/index.js';
 import type { ScanResult } from '../../lib/services/index.js';
-import { ProjectIndex, AppState } from '../../lib/store/index.js';
 import { handleCLIError } from '../output/error.js';
 import { launchScanTUI } from '../utils/cli-launch.js';
+import { createServices } from '../utils/service-factory.js';
 import { colors } from '../theme/index.js';
 import { truncatePath } from '../utils/string-utils.js';
 
@@ -73,10 +73,7 @@ export function registerScanCommand(program: Command): void {
  * @param options - Scan options from CLI
  */
 export async function scanProjectsCLI(options: ScanOptions): Promise<void> {
-  // Create service instances
-  const projectIndex = new ProjectIndex();
-  const appState = new AppState();
-  const service = new ProjectService(projectIndex, appState);
+  const { projectService } = createServices();
 
   // Parse depth option
   const depth = options.depth !== undefined ? parseInt(options.depth, 10) : 3;
@@ -85,7 +82,7 @@ export async function scanProjectsCLI(options: ScanOptions): Promise<void> {
   const overrideDirs = options.root ? [options.root] : undefined;
 
   // Execute scan
-  const results = await service.scanProjects(depth, overrideDirs);
+  const results = await projectService.scanProjects(depth, overrideDirs);
 
   // Handle auto-register mode
   if (options.register) {
@@ -96,7 +93,7 @@ export async function scanProjectsCLI(options: ScanOptions): Promise<void> {
     }
     for (const result of newProjects) {
       try {
-        await service.registerProject(result.path);
+        await projectService.registerProject(result.path);
         console.log(colors.success(`✓ Registered: ${result.path}`));
       } catch (err) {
         console.error(colors.danger(`✗ Failed to register ${result.path}: ${err instanceof Error ? err.message : String(err)}`));
@@ -108,7 +105,7 @@ export async function scanProjectsCLI(options: ScanOptions): Promise<void> {
 
   // Handle TUI mode
   if (options.tui) {
-    await launchScanTUI(results, service);
+    await launchScanTUI(results, projectService);
     return;
   }
 

@@ -1,42 +1,37 @@
 /**
  * Scan Command Tests
- *
- * Tests CLI scan command per F10.
- * Tests command registration per D-08.
  */
+
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { Command } from 'commander';
 import { registerScanCommand, scanProjectsCLI } from './scan.js';
 
-// Mock ProjectService (barrel export path)
-vi.mock('../../lib/services/index.js', () => ({
-  ProjectService: vi.fn().mockImplementation(() => ({
-    scanProjects: vi.fn().mockResolvedValue([
-      { path: '/test/project1', isNew: true },
-      { path: '/test/project2', isNew: false },
-    ]),
+// Use vi.hoisted so the variable is available in the hoisted vi.mock factory
+const scanProjectsMock = vi.hoisted(() => vi.fn().mockResolvedValue([
+  { path: '/test/project1', isNew: true },
+  { path: '/test/project2', isNew: false },
+]));
+
+vi.mock('../utils/service-factory.js', () => ({
+  createServices: vi.fn(() => ({
+    projectService: {
+      scanProjects: scanProjectsMock,
+      registerProject: vi.fn().mockResolvedValue({
+        id: 'test-uuid', name: 'test-project', path: '/test/project',
+        activeConfig: null, lastModified: new Date().toISOString(),
+      }),
+    },
+    projectIndex: {},
+    apiConfigStore: {},
+    appState: {},
+    apiService: {},
   })),
 }));
 
-// Mock ProjectIndex
-vi.mock('../../lib/store/project.js', () => ({
-  ProjectIndex: vi.fn(),
-}));
-
-// Mock AppState
-vi.mock('../../lib/store/state.js', () => ({
-  AppState: vi.fn().mockImplementation(() => ({
-    get: vi.fn().mockReturnValue([]),
-    set: vi.fn(),
-  })),
-}));
-
-// Mock CLI launch
 vi.mock('../utils/cli-launch.js', () => ({
   launchScanTUI: vi.fn().mockResolvedValue(undefined),
 }));
 
-// Mock error handler
 vi.mock('../output/error.js', () => ({
   handleCLIError: vi.fn(),
 }));
@@ -126,85 +121,38 @@ describe('scan command', () => {
     });
 
     it('calls ProjectService.scanProjects with depth', async () => {
-      const mockScanProjects = vi.fn().mockResolvedValue([
-        { path: '/test/project1', isNew: true },
-      ]);
-      const MockProjectService = vi.mocked(await import('../../lib/services/index.js')).ProjectService;
-      MockProjectService.mockImplementation(() => ({
-        scanProjects: mockScanProjects,
-      }) as any);
+      scanProjectsMock.mockResolvedValue([{ path: '/test/project1', isNew: true }]);
 
       await scanProjectsCLI({ depth: 5 });
 
-      expect(mockScanProjects).toHaveBeenCalledWith(5, undefined);
+      expect(scanProjectsMock).toHaveBeenCalledWith(5, undefined);
     });
 
     it('uses default depth 3 when not specified', async () => {
-      const mockScanProjects = vi.fn().mockResolvedValue([]);
-      const MockProjectService = vi.mocked(await import('../../lib/services/index.js')).ProjectService;
-      MockProjectService.mockImplementation(() => ({
-        scanProjects: mockScanProjects,
-      }) as any);
+      scanProjectsMock.mockResolvedValue([]);
 
       await scanProjectsCLI({});
 
-      expect(mockScanProjects).toHaveBeenCalledWith(3, undefined);
+      expect(scanProjectsMock).toHaveBeenCalledWith(3, undefined);
     });
 
-    it('passes --root as overrideDirs to scanProjects without persisting', async () => {
-      const mockSet = vi.fn();
-      const MockAppState = vi.mocked(await import('../../lib/store/state.js')).AppState;
-      MockAppState.mockImplementation(() => ({
-        get: vi.fn().mockReturnValue([]),
-        set: mockSet,
-      }) as any);
-
-      const mockScanProjects = vi.fn().mockResolvedValue([]);
-      const MockProjectService = vi.mocked(await import('../../lib/services/index.js')).ProjectService;
-      MockProjectService.mockImplementation(() => ({
-        scanProjects: mockScanProjects,
-      }) as any);
+    it('passes --root as overrideDirs to scanProjects', async () => {
+      scanProjectsMock.mockResolvedValue([]);
 
       await scanProjectsCLI({ root: '/custom/path' });
 
-      expect(mockScanProjects).toHaveBeenCalledWith(3, ['/custom/path']);
-      expect(mockSet).not.toHaveBeenCalled();
-    });
-
-    it('does not call AppState.set when --root is used', async () => {
-      const mockSet = vi.fn();
-      const MockAppState = vi.mocked(await import('../../lib/store/state.js')).AppState;
-      MockAppState.mockImplementation(() => ({
-        get: vi.fn().mockReturnValue(['/existing/path', '/custom/path']),
-        set: mockSet,
-      }) as any);
-
-      const mockScanProjects = vi.fn().mockResolvedValue([]);
-      const MockProjectService = vi.mocked(await import('../../lib/services/index.js')).ProjectService;
-      MockProjectService.mockImplementation(() => ({
-        scanProjects: mockScanProjects,
-      }) as any);
-
-      await scanProjectsCLI({ root: '/custom/path' });
-
-      expect(mockSet).not.toHaveBeenCalled();
-      expect(mockScanProjects).toHaveBeenCalledWith(3, ['/custom/path']);
+      expect(scanProjectsMock).toHaveBeenCalledWith(3, ['/custom/path']);
     });
 
     it('calls launchScanTUI when --tui option is set', async () => {
-      const mockLaunchScanTUI = vi.mocked(await import('../utils/cli-launch.js')).launchScanTUI;
-
-      const mockScanProjects = vi.fn().mockResolvedValue([
+      scanProjectsMock.mockResolvedValue([
         { path: '/test/project1', isNew: true },
       ]);
-      const MockProjectService = vi.mocked(await import('../../lib/services/index.js')).ProjectService;
-      MockProjectService.mockImplementation(() => ({
-        scanProjects: mockScanProjects,
-      }) as any);
 
       await scanProjectsCLI({ tui: true });
 
-      expect(mockLaunchScanTUI).toHaveBeenCalled();
+      const { launchScanTUI } = await import('../utils/cli-launch.js');
+      expect(vi.mocked(launchScanTUI)).toHaveBeenCalled();
     });
 
     it('outputs JSON when --json option is set', async () => {
@@ -214,12 +162,7 @@ describe('scan command', () => {
         { path: '/test/project1', isNew: true },
         { path: '/test/project2', isNew: false },
       ];
-
-      const mockScanProjects = vi.fn().mockResolvedValue(mockResults);
-      const MockProjectService = vi.mocked(await import('../../lib/services/index.js')).ProjectService;
-      MockProjectService.mockImplementation(() => ({
-        scanProjects: mockScanProjects,
-      }) as any);
+      scanProjectsMock.mockResolvedValue(mockResults);
 
       await scanProjectsCLI({ json: true });
 

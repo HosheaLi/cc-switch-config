@@ -2,6 +2,8 @@
 
 A CLI/TUI tool for managing Claude Code project-level API provider configurations.
 
+English | [中文](./README_CN.md)
+
 ## Overview
 
 CC Config Switch helps you manage different API providers and model configurations for different projects. Instead of manually editing `.claude/settings.json` files for each project, you can:

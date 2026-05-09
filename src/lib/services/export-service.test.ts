@@ -6,7 +6,7 @@
  */
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { ExportService, detectConflicts, type ImportStrategy } from './export-service.js';
+import { ExportService, type ImportStrategy } from './export-service.js';
 import { ServiceError } from './types.js';
 import type { ProjectIndex, ProjectEntry } from '../store/index.js';
 import type { ApiConfigStore } from '../store/index.js';
@@ -74,7 +74,7 @@ describe('ExportService', () => {
       const payload = await service.exportProject(project.id);
 
       expect(payload.metadata.version).toBe('1.0');
-      expect(payload.metadata.toolVersion).toBe('0.1.0');
+      expect(payload.metadata.toolVersion).toBe('0.2.0');
       expect(payload.project.id).toBe(project.id);
       expect(payload.project.path).toBe(project.path);
       expect(payload.project.name).toBe('project');
@@ -161,7 +161,7 @@ describe('ExportService', () => {
       const imported: ClaudeSettings = { model: 'claude-3-opus' };
       const existing: ClaudeSettings = { model: 'claude-3-opus' };
 
-      const conflicts = service.detectConflicts(imported, existing);
+      const conflicts = ExportService.detectConflicts(imported, existing);
 
       expect(conflicts).toEqual([]);
     });
@@ -174,7 +174,7 @@ describe('ExportService', () => {
         env: { ANTHROPIC_MODEL: 'claude-2-opus', ANTHROPIC_BASE_URL: 'https://old.api' },
       };
 
-      const conflicts = service.detectConflicts(imported, existing);
+      const conflicts = ExportService.detectConflicts(imported, existing);
 
       expect(conflicts.length).toBe(2);
       expect(conflicts.find(c => c.key === 'env.ANTHROPIC_MODEL')).toBeDefined();
@@ -185,7 +185,7 @@ describe('ExportService', () => {
       const imported: ClaudeSettings = { model: 'claude-3-opus' };
       const existing: ClaudeSettings = { model: 'claude-2-opus' };
 
-      const conflicts = service.detectConflicts(imported, existing);
+      const conflicts = ExportService.detectConflicts(imported, existing);
 
       expect(conflicts.length).toBe(1);
       expect(conflicts[0].key).toBe('model');
@@ -205,7 +205,7 @@ describe('ExportService', () => {
         },
       };
 
-      const conflicts = service.detectConflicts(imported, existing);
+      const conflicts = ExportService.detectConflicts(imported, existing);
 
       expect(conflicts.length).toBe(1);
       expect(conflicts[0].key).toBe('mcpServers.filesystem');
@@ -219,7 +219,7 @@ describe('ExportService', () => {
         env: { OLD_VAR: 'old-value' },
       };
 
-      const conflicts = service.detectConflicts(imported, existing);
+      const conflicts = ExportService.detectConflicts(imported, existing);
 
       // NEW_VAR is not in existing, so no conflict (will be added on merge)
       expect(conflicts).toEqual([]);
@@ -233,7 +233,7 @@ describe('ExportService', () => {
         permissions: [{ allow: 'Bash(ls)' }],
       };
 
-      const conflicts = service.detectConflicts(imported, existing);
+      const conflicts = ExportService.detectConflicts(imported, existing);
 
       expect(conflicts.length).toBe(1);
       expect(conflicts[0].key).toBe('permissions');
@@ -247,7 +247,7 @@ describe('ExportService', () => {
         hooks: [],
       };
 
-      const conflicts = service.detectConflicts(imported, existing);
+      const conflicts = ExportService.detectConflicts(imported, existing);
 
       // Empty array vs non-empty is a conflict
       expect(conflicts.length).toBe(1);
@@ -358,7 +358,7 @@ describe('detectConflicts standalone function', () => {
     const imported: ClaudeSettings = { model: 'claude-3-opus' };
     const existing: ClaudeSettings = { model: 'claude-2-opus' };
 
-    const conflicts = detectConflicts(imported, existing);
+    const conflicts = ExportService.detectConflicts(imported, existing);
 
     expect(conflicts.length).toBe(1);
     expect(conflicts[0].key).toBe('model');
@@ -367,7 +367,7 @@ describe('detectConflicts standalone function', () => {
   it('should return empty array for identical settings', () => {
     const settings: ClaudeSettings = { model: 'claude-3-opus', env: { KEY: 'value' } };
 
-    const conflicts = detectConflicts(settings, settings);
+    const conflicts = ExportService.detectConflicts(settings, settings);
 
     expect(conflicts).toEqual([]);
   });

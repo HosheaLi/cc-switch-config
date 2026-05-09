@@ -1,10 +1,14 @@
 {
   "name": "cc-config-switch",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "type": "module",
   "description": "CLI/TUI tool for managing Claude Code project-level API provider configurations",
   "author": "HosheaLi",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/HosheaLi/cc-config-switch.git"
+  },
   "bin": {
     "cc-config": "./dist/index.js"
   },
@@ -13,6 +17,13 @@
   },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "files": [
+    "dist/",
+    "README.md",
+    "USAGE.md",
+    "LICENSE",
+    "CHANGELOG.md"
+  ],
   "engines": {
     "node": ">=18.17"
   },
@@ -25,7 +36,8 @@
     "lint": "tsc --noEmit",
     "typecheck": "tsc --noEmit",
     "bench": "vitest bench scripts/",
-    "docs": "typedoc"
+    "docs": "typedoc",
+    "prepublishOnly": "npm run test && npm run build"
   },
   "dependencies": {
     "chokidar": "^5.0.0",

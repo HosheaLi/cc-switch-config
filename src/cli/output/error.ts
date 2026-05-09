@@ -62,11 +62,11 @@ export function handleCLIError(error: unknown, code?: number): void {
  */
 function mapErrorToExitCode(code: string): number {
   const codeMap: Record<string, number> = {
-    // Template errors
-    TEMPLATE_NOT_FOUND: ExitCodes.NOT_FOUND,
-    TEMPLATE_CREATE_FAILED: ExitCodes.GENERAL_ERROR,
-    TEMPLATE_UPDATE_FAILED: ExitCodes.GENERAL_ERROR,
-    TEMPLATE_APPLY_FAILED: ExitCodes.CONFIG_ERROR,
+    // Config errors
+    CONFIG_NOT_FOUND: ExitCodes.NOT_FOUND,
+    CONFIG_CREATE_FAILED: ExitCodes.GENERAL_ERROR,
+    CONFIG_UPDATE_FAILED: ExitCodes.GENERAL_ERROR,
+    CONFIG_APPLY_FAILED: ExitCodes.CONFIG_ERROR,
 
     // Project errors
     PROJECT_NOT_FOUND: ExitCodes.NOT_FOUND,

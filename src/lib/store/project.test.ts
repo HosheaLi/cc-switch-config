@@ -256,4 +256,56 @@ describe('ProjectIndex', () => {
       expect(data.version).toBe(1);
     });
   });
+
+  describe('getByName', () => {
+    it('should find project by name', async () => {
+      const registered = await projectIndex.register(testProjectDir);
+
+      const found = await projectIndex.getByName(registered.name);
+
+      expect(found).toBeDefined();
+      expect(found?.id).toBe(registered.id);
+    });
+
+    it('should return null for non-existent name', async () => {
+      const found = await projectIndex.getByName('non-existent-project');
+
+      expect(found).toBeNull();
+    });
+  });
+
+  describe('resolve', () => {
+    it('should resolve project by UUID', async () => {
+      const registered = await projectIndex.register(testProjectDir);
+
+      const resolved = await projectIndex.resolve(registered.id);
+
+      expect(resolved).toBeDefined();
+      expect(resolved?.id).toBe(registered.id);
+    });
+
+    it('should resolve project by name', async () => {
+      const registered = await projectIndex.register(testProjectDir);
+
+      const resolved = await projectIndex.resolve(registered.name);
+
+      expect(resolved).toBeDefined();
+      expect(resolved?.id).toBe(registered.id);
+    });
+
+    it('should resolve project by path', async () => {
+      const registered = await projectIndex.register(testProjectDir);
+
+      const resolved = await projectIndex.resolve(testProjectDir);
+
+      expect(resolved).toBeDefined();
+      expect(resolved?.id).toBe(registered.id);
+    });
+
+    it('should return null for non-existent identifier', async () => {
+      const resolved = await projectIndex.resolve('non-existent');
+
+      expect(resolved).toBeNull();
+    });
+  });
 });

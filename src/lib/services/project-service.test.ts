@@ -117,9 +117,10 @@ describe('ProjectService', () => {
       expect(deepResults.map((r) => r.path)).toContain(deepProject);
     });
 
-    it('should skip node_modules and hidden directories', async () => {
-      // Create directories that should be skipped
+    it('should skip DEFAULT_SKIP_DIRS but scan other dot-directories', async () => {
+      // Create directories that should be skipped (in DEFAULT_SKIP_DIRS)
       const nodeModulesProject = path.join(tempDir, 'node_modules', 'some-package');
+      // Hidden dirs NOT in DEFAULT_SKIP_DIRS are now scanned
       const hiddenProject = path.join(tempDir, '.hidden-project');
 
       await fs.ensureDir(path.join(nodeModulesProject, '.claude'));
@@ -137,7 +138,7 @@ describe('ProjectService', () => {
       const results = await projectService.scanProjects();
 
       expect(results.map((r) => r.path)).not.toContain(nodeModulesProject);
-      expect(results.map((r) => r.path)).not.toContain(hiddenProject);
+      expect(results.map((r) => r.path)).toContain(hiddenProject);
       expect(results.map((r) => r.path)).toContain(validProject);
     });
 

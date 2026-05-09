@@ -15,6 +15,3 @@ export * from './components/index.js';
 
 // Wizards
 export * from './wizards/index.js';
-
-// Main entry point
-export { launchPromptsTUI, runMainWizard } from './wizards/main-wizard.js';

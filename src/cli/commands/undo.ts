@@ -16,6 +16,7 @@ import { ProjectIndex } from '../../lib/store/project.js';
 import { UndoService } from '../../lib/services/undo-service.js';
 import { ServiceError } from '../../lib/services/types.js';
 import { handleCLIError } from '../output/error.js';
+import { createServices } from '../utils/service-factory.js';
 
 /**
  * Execute the undo command logic.
@@ -31,8 +32,9 @@ export async function executeUndoCommand(
   undoService?: UndoService
 ): Promise<void> {
   // Create instances if not provided
-  const state = appState ?? new AppState();
-  const index = projectIndex ?? new ProjectIndex();
+  const defaultSvc = (!appState || !projectIndex) ? createServices() : null;
+  const state = appState ?? defaultSvc!.appState;
+  const index = projectIndex ?? defaultSvc!.projectIndex;
 
   // Create UndoService with default config path resolver
   const service = undoService ?? new UndoService((projectPath) =>

@@ -12,12 +12,10 @@
 import type { Command } from 'commander';
 import fs from 'fs-extra';
 import { ExportService } from '../../lib/services/export-service.js';
-import { ProjectIndex } from '../../lib/store/project.js';
-import { ApiConfigStore } from '../../lib/store/api-config.js';
 import { ConfigService } from '../../lib/services/config-service.js';
 import { readConfig, writeConfig } from '../../lib/store/config.js';
-import { AppState } from '../../lib/store/state.js';
 import { handleCLIError, ExitCodes } from '../output/error.js';
+import { createServices } from '../utils/service-factory.js';
 import { colors } from '../theme/index.js';
 
 /**
@@ -62,25 +60,30 @@ export function registerExportCommand(program: Command): void {
 /**
  * Execute export operation.
  *
- * @param projectId - Project UUID (optional, defaults to active project)
+ * @param projectId - Project UUID, name, or path (optional, defaults to active project)
  * @param options - Export options (output, stdout)
  */
 async function exportConfig(projectId: string | undefined, options: ExportOptions): Promise<void> {
-  // Initialize dependencies
-  const projectIndex = new ProjectIndex();
-  const apiConfigStore = new ApiConfigStore();
+  const { projectIndex, apiConfigStore, appState } = createServices();
   const configService = new ConfigService(readConfig, writeConfig);
-  const appState = new AppState();
 
   // Get project ID (use active if not specified)
   let targetId: string | undefined = projectId;
   if (!targetId) {
     const activeProject = appState.getActiveProject();
     if (!activeProject) {
-      console.error(colors.warning('No active project. Specify a project ID or use "switch" first.'));
+      console.error(colors.warning('No active project. Specify a project ID, name, or path.'));
       process.exit(ExitCodes.NOT_FOUND);
     }
     targetId = activeProject;
+  } else {
+    // Resolve identifier (UUID, name, or path) to actual project
+    const project = await projectIndex.resolve(targetId);
+    if (!project) {
+      console.error(colors.warning(`Project not found: ${targetId}`));
+      process.exit(ExitCodes.NOT_FOUND);
+    }
+    targetId = project.id;
   }
 
   // Create export service
