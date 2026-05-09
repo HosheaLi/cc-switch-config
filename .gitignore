@@ -15,6 +15,9 @@ coverage/
 .DS_Store
 Thumbs.db
 
+# npm pack output
+*.tgz
+
 # Environment files (local config)
 .env
 .env.local
