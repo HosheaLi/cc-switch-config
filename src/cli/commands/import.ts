@@ -69,6 +69,12 @@ export function registerImportCommand(program: Command): void {
  * @param options - Import options (strategy, target)
  */
 async function importConfig(file: string, options: ImportOptions): Promise<void> {
+  // Check file exists first
+  if (!await fs.pathExists(file)) {
+    console.error(colors.danger(`Import file not found: ${file}`));
+    process.exit(ExitCodes.NOT_FOUND);
+  }
+
   // Read file content
   const payloadRaw: unknown = await fs.readJSON(file);
 

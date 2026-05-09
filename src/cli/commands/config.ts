@@ -124,11 +124,18 @@ export function registerConfigCommand(program: Command): void {
     .command('list')
     .alias('l')  // D-04: subcommand alias
     .description('List all API configurations')
-    .action(async () => {
+    .option('-j, --json', 'output as JSON format')
+    .action(async (options) => {
       try {
         const { apiService } = createServices();
 
         const configs = await apiService.getAllConfigs();
+
+        if (options.json) {
+          console.log(JSON.stringify(configs, null, 2));
+          return;
+        }
+
         const names = Object.keys(configs);
 
         // D-07: Empty list handling

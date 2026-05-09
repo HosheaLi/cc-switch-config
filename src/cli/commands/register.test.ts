@@ -77,9 +77,13 @@ describe('registerRegisterCommand', () => {
 
 describe('executeRegister', () => {
   let tempDir: string;
+  let mockExit: ReturnType<typeof vi.spyOn>;
+  let mockConsoleError: ReturnType<typeof vi.spyOn>;
 
   beforeEach(async () => {
     tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'register-exec-test-'));
+    mockExit = vi.spyOn(process, 'exit').mockImplementation(() => undefined as never);
+    mockConsoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
   });
 
   afterEach(async () => {
@@ -109,14 +113,14 @@ describe('executeRegister', () => {
     expect(vi.mocked(createServices)).toHaveBeenCalled();
   });
 
-  it('registers a project without .claude directory', async () => {
+  it('rejects project without .claude directory', async () => {
     const projectPath = path.join(tempDir, 'project3');
     await fs.ensureDir(projectPath);
 
     await executeRegister(projectPath, {});
 
-    const { createServices } = await import('../utils/service-factory.js');
-    expect(vi.mocked(createServices)).toHaveBeenCalled();
+    expect(mockExit).toHaveBeenCalledWith(2); // ExitCodes.MISUSE
+    expect(mockConsoleError).toHaveBeenCalled();
   });
 
   it('throws error for non-existent path', async () => {

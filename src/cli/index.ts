@@ -18,6 +18,7 @@ import { registerExportCommand } from './commands/export.js';
 import { registerImportCommand } from './commands/import.js';
 import { registerUndoCommand } from './commands/undo.js';
 import { registerRegisterCommand } from './commands/register.js';
+import { registerUnregisterCommand } from './commands/unregister.js';
 import { registerConfigCommand } from './commands/config.js';
 
 import { VERSION } from '../version.js';
@@ -26,7 +27,7 @@ import { VERSION } from '../version.js';
 const KNOWN_COMMANDS = new Set([
   'switch', 'sw', 'list', 'ls', 'current', 'cur',
   'scan', 'export', 'import', 'undo', 'config', 'cfg',
-  'register', 'auto-check', 'help',
+  'register', 'unregister', 'auto-check', 'help',
 ]);
 
 export async function runCLI(argv: string[] = process.argv): Promise<void> {
@@ -42,6 +43,7 @@ export async function runCLI(argv: string[] = process.argv): Promise<void> {
   registerAutoCheckCommand(program);
   registerScanCommand(program);
   registerRegisterCommand(program);
+  registerUnregisterCommand(program);
   registerExportCommand(program);
   registerImportCommand(program);
   registerUndoCommand(program);

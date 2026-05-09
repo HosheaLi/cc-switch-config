@@ -52,8 +52,8 @@ cc-config list
 # Show current project's configuration
 cc-config current
 
-# Switch to a template (apply to current directory)
-cc-config switch my-template
+# Switch project configuration
+cc-config switch my-project my-config
 
 # Undo last configuration change
 cc-config undo
@@ -85,34 +85,31 @@ Shows:
 - Active template name
 - Last modified time
 
-### `cc-config switch <template>`
+### `cc-config switch`
 
-Apply a template to the current project directory.
+Apply a configuration template to a project.
 
 ```bash
-cc-config switch <template-name> [--silent]
+cc-config switch <project-name-or-path> <config-name>
+```
+
+### `cc-config config`
+
+Manage API provider configurations.
+
+```bash
+# List all configurations
+cc-config config list
+
+# Add a new configuration (interactive CLI)
+cc-config config add
+
+# Remove a configuration
+cc-config config remove <name> [--force]
 ```
 
 Options:
-- `--silent`: Suppress output messages
-
-### `cc-config template`
-
-Manage provider templates.
-
-```bash
-# List all templates
-cc-config template list
-
-# Create a new template (interactive CLI)
-cc-config template create <name>
-
-# Delete a template
-cc-config template delete <name> [--force]
-```
-
-Options:
-- `--force`: Skip confirmation prompt for delete
+- `--force`: Skip confirmation prompt for remove
 
 ### `cc-config undo`
 

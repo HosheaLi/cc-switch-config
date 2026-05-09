@@ -7,7 +7,7 @@
 
 import type { Command } from 'commander';
 import { ProjectService } from '../../lib/services/index.js';
-import { handleCLIError } from '../output/error.js';
+import { handleCLIError, ExitCodes } from '../output/error.js';
 import { createServices } from '../utils/service-factory.js';
 import { colors } from '../theme/index.js';
 import fs from 'fs-extra';
@@ -61,8 +61,16 @@ export async function executeRegister(
     throw new Error(`Path does not exist: ${expandedPath}`);
   }
 
-  // Check for .claude directory
+  // Check for .claude directory (required)
   const claudeDir = path.join(expandedPath, '.claude');
+  if (!await fs.pathExists(claudeDir)) {
+    console.error(colors.danger(`No .claude/ directory found at ${expandedPath}`));
+    console.error(colors.muted('Only directories with .claude/ can be registered.'));
+    console.error(colors.muted('Initialize Claude Code in this project first.'));
+    process.exit(ExitCodes.MISUSE);
+  }
+
+  // Check for settings files (warn if missing)
   const hasSettings = await fs.pathExists(path.join(claudeDir, 'settings.json')) ||
     await fs.pathExists(path.join(claudeDir, 'settings.local.json'));
 

@@ -95,18 +95,21 @@ cc-config switch <项目名或路径> <模板名>
 
 ### `cc-config config`
 
-管理 API 提供商配置模板。
+管理 API 提供商配置。
 
 ```bash
-# 列出所有模板
+# 列出所有配置
 cc-config config list
 
-# 创建新模板（交互式 CLI）
-cc-config config create <名称>
+# 添加新配置（交互式 CLI）
+cc-config config add
 
-# 删除模板
-cc-config config delete <名称>
+# 删除配置
+cc-config config remove <名称> [--force]
 ```
+
+选项：
+- `--force`: 跳过删除确认提示
 
 ### `cc-config undo`
 
