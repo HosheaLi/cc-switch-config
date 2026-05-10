@@ -6,6 +6,7 @@
 
 import path from 'path';
 import fs from 'fs';
+import os from 'os';
 import type { Choice } from 'prompts';
 import { promptWithCancel } from '../utils/handle-cancel.js';
 import { formatDirectoryChoice, addCancelOption, isCancelSelection } from '../utils/format-choices.js';
@@ -82,15 +83,16 @@ export async function inputCustomDirectory(
       if (!value || value.trim().length === 0) {
         return '路径不能为空';
       }
-      // 展开路径并检查是否存在
-      const expanded = value.trim();
-      if (expanded.startsWith('~')) {
-        // 提示用户路径格式，但不阻止继续（展开后再验证）
-        return true;
+      const trimmed = value.trim();
+
+      // Expand ~ before validation
+      let expandedPath = trimmed;
+      if (trimmed.startsWith('~')) {
+        expandedPath = path.join(os.homedir(), trimmed.slice(1));
       }
-      // 检查绝对路径是否存在
+
       try {
-        const resolved = path.resolve(expanded);
+        const resolved = path.resolve(expandedPath);
         if (!fs.existsSync(resolved)) {
           return `目录不存在: ${resolved}`;
         }
