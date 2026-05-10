@@ -21,22 +21,30 @@ cc-config switch <模板名>
 
 ## 命令参考
 
+### 快速切换
+
+```bash
+cc-config <配置名>                    # 快速切换当前项目配置（无需 switch 子命令）
+```
+
 ### 项目管理
 
 ```bash
 cc-config list [--json]              # 列出已注册项目
 cc-config current                    # 显示当前项目配置
 cc-config register <path> [-t 模板]   # 手动注册项目目录
+cc-config unregister <项目名>         # 注销已注册项目
 cc-config scan [目录] [--register] [--tui] [--json]  # 扫描项目
 cc-config undo                       # 撤销上次配置变更
 ```
 
-### 模板管理
+### 配置管理
 
 ```bash
-cc-config template list              # 列出所有模板
-cc-config template create <名称>     # 交互式创建模板
-cc-config template delete <名称> [--force]  # 删除模板
+cc-config config add                 # 交互式创建配置
+cc-config config list [-j]           # 列出所有配置（-j JSON 格式）
+cc-config config remove <名称> [--force]  # 删除配置
+cc-config cfg add/cfg list/cfg rm    # 同上（别名）
 ```
 
 ### 配置切换
@@ -72,6 +80,10 @@ cc-config import <文件> [--merge] [--strategy merge|overwrite|skip]  # 导入�
 | Diff 预览 | `n` / `Esc` | 取消 |
 | 扫描选择 | `Space` | 切换选中 |
 | 扫描选择 | `Enter` | 注册选中项目 |
+
+## 快速切换自动注册
+
+执行 `cc-config <配置名>` 时，如果当前目录未注册但检测到 `.claude/` 目录，会自动注册该项目。
 
 ## 典型场景
 

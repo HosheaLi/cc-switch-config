@@ -41,9 +41,20 @@ This opens an interactive interface where you can:
 - Preview configuration changes before applying
 - View validation errors if configuration is invalid
 
+### Quick Switch (v0.2+)
+
+The simplest CLI command:
+
+```bash
+# Quick-switch current project to a config
+cc-config my-config-name
+```
+
+This auto-registers the project if it has a `.claude/` directory.
+
 ### CLI Commands
 
-If you prefer command-line operations:
+If you prefer explicit commands:
 
 ```bash
 # List all registered projects
@@ -54,6 +65,10 @@ cc-config current
 
 # Switch project configuration
 cc-config switch my-project my-config
+
+# Register/unregister a project
+cc-config register <path> [-t template]
+cc-config unregister <name>
 
 # Undo last configuration change
 cc-config undo
@@ -223,6 +238,8 @@ Full lifecycle management for configurations:
 ### Interactive TUI Selector
 
 Visual interface with:
+- Dashboard home screen (v0.2+) for quick overview and operations
+- First-run onboarding wizard (v0.2+) guiding new users through setup
 - Keyboard navigation (arrow keys + vim j/k)
 - Fuzzy search for quick filtering
 - Real-time preview panel

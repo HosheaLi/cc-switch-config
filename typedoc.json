@@ -1,6 +1,6 @@
 {
   "$schema": "https://typedoc.org/schema.json",
-  "entryPoints": ["src/lib", "src/cli", "src/tui"],
+  "entryPoints": ["src/lib", "src/cli"],
   "out": "docs/api",
   "exclude": ["**/*.test.ts", "**/*.test.tsx", "**/node_modules/**"],
   "excludePrivate": true,
