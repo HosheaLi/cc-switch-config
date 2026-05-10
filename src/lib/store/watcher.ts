@@ -263,6 +263,12 @@ export class FileWatcher {
       this.watcher.on('ready', () => {
         clearTimeout(timeout);
       });
+
+      // Reject on error during initialization to prevent 5-second hang
+      this.watcher.once('error', (err: unknown) => {
+        clearTimeout(timeout);
+        reject(err instanceof Error ? err : new Error(String(err)));
+      });
     });
   }
 
