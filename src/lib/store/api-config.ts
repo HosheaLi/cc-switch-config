@@ -220,6 +220,57 @@ export class ApiConfigStore {
   }
 
   /**
+   * Batch set multiple configurations in a single operation.
+   *
+   * Creates a single backup before all writes, then saves all configs atomically.
+   * Prevents the per-item backup overwrite issue that occurs when calling set()
+   * in a loop. Per SEC-03: Uses atomic write pattern.
+   *
+   * @param configs - Record of config name to ApiConfig
+   */
+  async setBatch(configs: Record<string, ApiConfig>): Promise<void> {
+    if (Object.keys(configs).length === 0) {
+      return;
+    }
+
+    const now = new Date().toISOString();
+    const data = await this.load();
+
+    // Single backup before batch operation
+    const fileExists = await exists(this.filePath);
+    if (fileExists) {
+      await createBackup(this.filePath);
+    }
+
+    for (const [name, config] of Object.entries(configs)) {
+      // Validate each config
+      const result = ApiConfigSchema.safeParse(config);
+      if (!result.success) {
+        const issues = result.error.issues;
+        const message = `Invalid API configuration for "${name}"`;
+        throw new ValidationError(message, issues);
+      }
+
+      const validatedConfig = result.data;
+      const isUpdate = data.configs[name] !== undefined;
+
+      // Manage timestamps
+      if (isUpdate) {
+        validatedConfig.createdAt = data.configs[name]?.createdAt ?? now;
+        validatedConfig.updatedAt = now;
+      } else {
+        validatedConfig.createdAt = now;
+        validatedConfig.updatedAt = now;
+      }
+
+      data.configs[name] = validatedConfig;
+    }
+
+    // Single atomic save
+    await this.save(data);
+  }
+
+  /**
    * Delete an API configuration by name.
    *
    * - Returns false if config doesn't exist

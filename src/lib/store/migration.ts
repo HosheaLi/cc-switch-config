@@ -132,6 +132,7 @@ export async function migrateTemplatesToApiConfigs(
 
   const apiConfigStore = new ApiConfigStore(customApiConfigsPath);
   const templates = templatesFile.templates ?? {};
+  const convertedConfigs: Record<string, ApiConfig> = {};
 
   for (const [name, template] of Object.entries(templates)) {
     try {
@@ -154,14 +155,17 @@ export async function migrateTemplatesToApiConfigs(
         continue;
       }
 
-      // Write to ApiConfigStore
-      await apiConfigStore.set(name, parseResult.data);
-      result.migrated++;
+      // Collect in memory for single batch write
+      convertedConfigs[name] = parseResult.data;
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       result.errors.push(`Template "${name}" conversion failed: ${message}`);
     }
   }
+
+  // Single batch write (avoids per-item backup overwrite issue)
+  await apiConfigStore.setBatch(convertedConfigs);
+  result.migrated = Object.keys(convertedConfigs).length;
 
   // 5. Rename templates.json to templates.json.migrated
   try {
