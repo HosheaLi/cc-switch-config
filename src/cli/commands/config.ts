@@ -16,7 +16,7 @@
  */
 
 import type { Command } from 'commander';
-import prompts from 'prompts';
+import { promptWithCancel } from '../prompts/utils/handle-cancel.js';
 import { colors, formatters, separator } from '../theme/index.js';
 import { inputFullApiConfig } from '../prompts/components/input-api-key.js';
 import { handleCLIError, ExitCodes } from '../output/error.js';
@@ -192,14 +192,14 @@ export function registerConfigCommand(program: Command): void {
 
         // D-08: Confirmation flow (NOT template.ts exit pattern)
         if (!options.force) {
-          const confirmed = await prompts({
+          const result = await promptWithCancel<boolean>({
             type: 'confirm',
             name: 'value',
             message: `确认删除配置 "${name}"？`,
             initial: false,
           });
 
-          if (!confirmed.value) {
+          if (!result.value) {
             console.log(colors.muted('已取消'));
             process.exit(0);
           }
