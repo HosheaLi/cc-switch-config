@@ -31,10 +31,11 @@ export async function executeUndoCommand(
   projectIndex?: ProjectIndex,
   undoService?: UndoService
 ): Promise<void> {
-  // Create instances if not provided
-  const defaultSvc = (!appState || !projectIndex) ? createServices() : null;
-  const state = appState ?? defaultSvc!.appState;
-  const index = projectIndex ?? defaultSvc!.projectIndex;
+  // Create instances if not provided (both or neither, mutually exclusive)
+  const defaultSvc = (appState === undefined && projectIndex === undefined)
+    ? createServices() : null;
+  const state = appState ?? defaultSvc?.appState ?? new AppState();
+  const index = projectIndex ?? defaultSvc?.projectIndex ?? new ProjectIndex();
 
   // Create UndoService with default config path resolver
   const service = undoService ?? new UndoService((projectPath) =>
