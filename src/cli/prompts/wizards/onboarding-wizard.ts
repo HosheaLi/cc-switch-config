@@ -54,8 +54,14 @@ export async function runOnboardingWizard(): Promise<void> {
     }
 
     const spinner = createSpinner('扫描中...');
-    const results = await svc.projectService.scanProjects(undefined, [directory]);
-    spinner.stop();
+    let results;
+    try {
+      results = await svc.projectService.scanProjects(undefined, [directory]);
+      spinner.succeed(`扫描完成: ${results.length} 个项目`);
+    } catch (error) {
+      spinner.fail('扫描失败');
+      throw error;
+    }
 
     const newProjects = results.filter(r => r.isNew);
     console.log(colors.muted(`发现 ${results.length} 个项目 (${newProjects.length} 新)`));

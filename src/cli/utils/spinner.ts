@@ -15,24 +15,30 @@ export interface Spinner {
 export function createSpinner(message: string): Spinner {
   let frame = 0;
   const frames = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏'];
+  let cleared = false;
 
   const interval = setInterval(() => {
     process.stdout.write(`\r${frames[frame]} ${message}`);
     frame = (frame + 1) % frames.length;
   }, 80);
 
+  const clear = () => {
+    if (!cleared) {
+      clearInterval(interval);
+      process.stdout.write('\r' + ' '.repeat(60) + '\r');
+      cleared = true;
+    }
+  };
+
   return {
     succeed: (msg: string) => {
-      clearInterval(interval);
+      clear();
       process.stdout.write(`\r${colors.success('✓')} ${msg}\n`);
     },
     fail: (msg: string) => {
-      clearInterval(interval);
+      clear();
       process.stdout.write(`\r${colors.danger('✗')} ${msg}\n`);
     },
-    stop: () => {
-      clearInterval(interval);
-      process.stdout.write('\r' + ' '.repeat(60) + '\r');
-    },
+    stop: clear,
   };
 }
