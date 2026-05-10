@@ -115,6 +115,10 @@ export function registerConfigCommand(program: Command): void {
         console.log(formatters.success(`配置 "${result.name}" 已创建`));
 
       } catch (error) {
+        if (error instanceof ValidationError) {
+          displayValidationErrors(error);
+          process.exit(ExitCodes.CONFIG_ERROR);
+        }
         handleCLIError(error);
       }
     });
