@@ -49,7 +49,6 @@ export async function executeUndoCommand(
     console.log(colors.warning('No active project set.'));
     console.log(colors.muted('Use cc-config switch to select a project.'));
     process.exit(0);
-    return;
   }
 
   // Get project details
