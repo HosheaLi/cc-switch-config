@@ -30,8 +30,8 @@ export interface ColorSupport {
 export function detectColorSupport(): ColorSupport {
   const env = process.env;
 
-  // D-08, D-09: NO_COLOR 完全禁用颜色
-  if (env.NO_COLOR && env.NO_COLOR !== '') {
+  // D-08, D-09: NO_COLOR 完全禁用颜色 (per spec, presence disables regardless of value)
+  if (env.NO_COLOR !== undefined) {
     return { enabled: false, truecolor: false, reason: 'NO_COLOR set' };
   }
 
