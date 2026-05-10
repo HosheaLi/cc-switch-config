@@ -52,7 +52,14 @@ export async function executeRegister(
 
   // Expand ~ to home directory
   const expandedPath = projectPath.startsWith('~')
-    ? path.join(process.env.HOME ?? '', projectPath.slice(1))
+    ? (() => {
+        const home = process.env.HOME;
+        if (!home) {
+          console.error(colors.danger('Cannot expand ~: HOME environment variable is not set.'));
+          process.exit(ExitCodes.MISUSE);
+        }
+        return path.join(home, projectPath.slice(1));
+      })()
     : path.resolve(projectPath);
 
   // Check if path exists
