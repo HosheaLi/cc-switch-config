@@ -111,6 +111,12 @@ export function renderDiff(
           colors.warning(`~ ${stripAnsi(line.path)}: ${stripAnsi(formatValue(line.before))} -> ${stripAnsi(formatValue(line.after))}`)
         );
         break;
+
+      default: {
+        const _exhaustive: never = line;
+        console.log(colors.muted(`? ${line.path}: [unknown type]`));
+        break;
+      }
     }
   }
 }
