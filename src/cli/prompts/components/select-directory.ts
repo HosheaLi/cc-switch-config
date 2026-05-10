@@ -161,8 +161,7 @@ export async function quickSelectScanDirectory(): Promise<string | null> {
   // Filter to existing directories
   const validDirs = commonDirs.filter(dir => {
     try {
-      // Check if directory exists (simplified)
-      return true;
+      return fs.existsSync(dir);
     } catch {
       return false;
     }
