@@ -76,7 +76,11 @@ export async function scanProjectsCLI(options: ScanOptions): Promise<void> {
   const { projectService } = createServices();
 
   // Parse depth option
-  const depth = options.depth !== undefined ? parseInt(options.depth, 10) : 3;
+  let depth = options.depth !== undefined ? parseInt(options.depth, 10) : 3;
+  if (isNaN(depth) || depth < 1) {
+    console.error(colors.danger('Invalid depth value. Using default depth of 3.'));
+    depth = 3;
+  }
 
   // Use --root as temporary override without persisting to appState
   const overrideDirs = options.root ? [options.root] : undefined;
