@@ -102,13 +102,14 @@ export function registerConfigCommand(program: Command): void {
         const result = await inputFullApiConfig();
         if (!result) return; // User cancelled
 
-        // Create ApiConfig with unified mode (D-16)
+        // Create ApiConfig with chosen mode (unified or granular)
         const apiConfig: ApiConfig = {
           name: result.name,
           apiKey: result.apiKey,
           baseUrl: result.baseUrl,
-          mode: 'unified',
-          modelName: result.modelName,
+          mode: result.mode,
+          modelName: result.mode === 'unified' ? result.modelName : undefined,
+          env: result.mode === 'granular' ? result.env : undefined,
         };
 
         await apiService.createConfig(result.name, apiConfig);
@@ -163,7 +164,9 @@ export function registerConfigCommand(program: Command): void {
           const maskedKey = maskApiKey(cfg.apiKey); // CFG-04/SEC-01
           const modelName = cfg.mode === 'unified'
             ? (cfg.modelName ?? '未设置')
-            : 'granular';
+            : cfg.env
+              ? `granular (${Object.keys(cfg.env).filter(k => k.startsWith('ANTHROPIC_')).length} vars)`
+              : 'granular';
           console.log(colors.foreground(
             `  ${name.padEnd(16)} ${modelName.padEnd(20)} ${maskedKey}`
           ));

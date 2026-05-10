@@ -5,7 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.2.0] - 2026-05-09
+## [0.3.0] - 2026-05-10
+
+### Added
+
+- **配置创建支持两种模式**：`cc-config config add` 让用户选择统一模式（一个模型名应用于所有 env var）或独立模式（分别填写每个模型环境变量）
+- **Dashboard/onboarding 同步支持**：TUI 菜单和首次运行引导也支持模式选择
+- **配置列表增强**：独立模式配置显示为 `granular (N vars)`，而非仅显示 "granular"
+
+### Changed
+
+- `inputFullApiConfig` 返回类型扩展，包含 `mode`/`modelName`/`env` 字段
 
 ### Changed
 

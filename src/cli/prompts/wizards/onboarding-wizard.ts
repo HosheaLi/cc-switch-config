@@ -36,8 +36,9 @@ export async function runOnboardingWizard(): Promise<void> {
       name: config.name,
       apiKey: config.apiKey,
       baseUrl: config.baseUrl,
-      mode: 'unified',
-      modelName: config.modelName,
+      mode: config.mode,
+      modelName: config.mode === 'unified' ? config.modelName : undefined,
+      env: config.mode === 'granular' ? config.env : undefined,
     });
 
     console.log(formatters.success(`配置 "${config.name}" 已创建`));

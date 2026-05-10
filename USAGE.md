@@ -41,11 +41,16 @@ cc-config undo                       # 撤销上次配置变更
 ### 配置管理
 
 ```bash
-cc-config config add                 # 交互式创建配置
+cc-config config add                 # 交互式创建配置（支持统一/独立两种模式）
 cc-config config list [-j]           # 列出所有配置（-j JSON 格式）
 cc-config config remove <名称> [--force]  # 删除配置
 cc-config cfg add/cfg list/cfg rm    # 同上（别名）
 ```
+
+创建配置时支持两种模式：
+
+- **统一模式 (unified)**：输入一个模型名称，自动应用于全部 6 个模型环境变量 (`ANTHROPIC_MODEL`, `ANTHROPIC_DEFAULT_SONNET_MODEL`, `ANTHROPIC_DEFAULT_HAIKU_MODEL`, `ANTHROPIC_DEFAULT_OPUS_MODEL`, `ANTHROPIC_REASONING_MODEL`)
+- **独立模式 (granular)**：分别填写每个模型环境变量，适用于不同模型使用不同名称的场景（如主模型用 `glm-5`，Haiku 用 `glm-5-flash`）
 
 ### 配置切换
 

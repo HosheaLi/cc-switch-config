@@ -38,6 +38,7 @@ vi.mock('../prompts/components/input-api-key.js', () => ({
     name: 'test-config',
     apiKey: 'test-api-key-123',
     baseUrl: 'https://api.anthropic.com',
+    mode: 'unified',
     modelName: 'claude-sonnet-4-6',
   }),
 }));
@@ -146,6 +147,7 @@ describe('config command', () => {
         name: 'test-config',
         apiKey: 'test-api-key-123',
         baseUrl: 'https://api.anthropic.com',
+        mode: 'unified',
         modelName: 'claude-sonnet-4-6',
       });
 
@@ -176,6 +178,7 @@ describe('config command', () => {
         name: 'test-config',
         apiKey: 'test-api-key-123',
         baseUrl: 'https://api.anthropic.com',
+        mode: 'unified',
         modelName: 'claude-sonnet-4-6',
       });
 
