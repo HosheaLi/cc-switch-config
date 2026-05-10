@@ -6,7 +6,6 @@
 
 import path from 'path';
 import fs from 'fs';
-import prompts from 'prompts';
 import type { Choice } from 'prompts';
 import { promptWithCancel } from '../utils/handle-cancel.js';
 import { formatDirectoryChoice, addCancelOption, isCancelSelection } from '../utils/format-choices.js';
@@ -127,24 +126,16 @@ export async function selectMultipleDirectories(
 
   const choices: Choice[] = directories.map(dir => formatDirectoryChoice(dir));
 
-  const result = await prompts(
-    {
-      type: 'multiselect',
-      name: 'directories',
-      message,
-      choices,
-      initial: 0,
-      instructions: false,
-    },
-    {
-      onCancel: () => {
-        console.log('\n操作已取消。');
-        return false;
-      },
-    }
-  );
+  const result = await promptWithCancel<string[]>({
+    type: 'multiselect',
+    name: 'directories',
+    message,
+    choices,
+    initial: 0,
+    instructions: false,
+  });
 
-  return result.directories ?? null;
+  return result.value ?? null;
 }
 
 /**
