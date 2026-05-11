@@ -155,10 +155,8 @@ export class ProjectService {
 
     // Check if this directory has .claude/settings.json or .claude/settings.local.json
     const claudeDir = path.join(dir, '.claude');
-    const settingsPath = path.join(claudeDir, 'settings.json');
-    const localSettingsPath = path.join(claudeDir, 'settings.local.json');
-
-    if (await fs.pathExists(settingsPath) || await fs.pathExists(localSettingsPath)) {
+    if (await fs.pathExists(path.join(claudeDir, 'settings.json')) ||
+        await fs.pathExists(path.join(claudeDir, 'settings.local.json'))) {
       found.push(dir);
     }
 
@@ -262,12 +260,12 @@ export class ProjectService {
    * Update project configuration.
    *
    * @param id - Project UUID
-   * @param updates - Fields to update (activeConfig)
+   * @param updates - Fields to update (name, path, activeConfig)
    * @returns true if updated, false if project not found
    */
   async updateProject(
     id: string,
-    updates: Partial<Pick<ProjectEntry, 'activeConfig'>>
+    updates: Partial<Pick<ProjectEntry, 'name' | 'path' | 'activeConfig'>>
   ): Promise<boolean> {
     return this.projectIndex.update(id, updates);
   }

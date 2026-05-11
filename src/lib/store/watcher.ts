@@ -20,7 +20,7 @@
  *   onDelete: (filepath) => console.log('File deleted:', filepath),
  * });
  *
- * await watcher.start(['~/.claude/settings.json', '/project/.claude/settings.json']);
+ * await watcher.start(['~/.claude/settings.json', '/project/.claude/settings.local.json']);
  * // Later...
  * await watcher.stop();
  * ```
@@ -63,7 +63,7 @@ export interface WatcherOptions {
 
   /**
    * Callback for project config file changes.
-   * Called when a project's .claude/settings.json changes.
+   * Called when a project's .claude/settings.local.json changes.
    * The projectId can be extracted from the filepath.
    */
   onProjectChange?: WatcherCallback;
@@ -133,11 +133,17 @@ export class FileWatcher {
   /**
    * Get the project config file path for a given project directory.
    *
+   * 全局项目 (~/.claude) 指向 settings.json，其他项目指向 settings.local.json
+   *
    * @param projectPath - Absolute path to project root
-   * @returns Absolute path to project's .claude/settings.json
+   * @returns Absolute path to project's settings file
    */
   static getProjectConfigPath(projectPath: string): string {
-    return path.join(projectPath, '.claude', 'settings.json');
+    const homeClaude = path.join(os.homedir(), '.claude');
+    if (path.resolve(projectPath) === homeClaude) {
+      return path.join(homeClaude, 'settings.json');
+    }
+    return path.join(projectPath, '.claude', 'settings.local.json');
   }
 
   /**

@@ -51,7 +51,7 @@ export class ConfigService {
   ) {}
 
   /**
-   * Read project config from .claude/settings.json.
+   * Read project config from .claude/settings.local.json.
    *
    * Per D-02: Throws ServiceError on failure.
    * Returns null if config doesn't exist.
@@ -76,7 +76,7 @@ export class ConfigService {
   }
 
   /**
-   * Write project config to .claude/settings.json.
+   * Write project config to .claude/settings.local.json.
    *
    * Validates config before writing (via writeConfigFn).
    * Creates backup if file exists.

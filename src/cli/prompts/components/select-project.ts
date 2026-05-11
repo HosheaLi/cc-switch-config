@@ -27,11 +27,12 @@ export async function selectProject(
   message: string = '选择项目'
 ): Promise<string | null> {
   if (projects.length === 0) {
-    console.log('没有可用项目。');
+    console.log('没有已注册的项目。请先扫描并注册项目。');
     return null;
   }
 
-  const choices: Choice[] = projects.map(formatProjectChoice);
+  const sorted = [...projects].sort((a, b) => a.name.localeCompare(b.name, 'zh-CN'));
+  const choices: Choice[] = sorted.map(formatProjectChoice);
   const promptType = getPromptType(projects.length);
 
   const config: prompts.PromptObject = {
@@ -67,7 +68,8 @@ export async function selectMultipleProjects(
     return null;
   }
 
-  const choices: Choice[] = projects.map(formatProjectChoice);
+  const sorted = [...projects].sort((a, b) => a.name.localeCompare(b.name, 'zh-CN'));
+  const choices: Choice[] = sorted.map(formatProjectChoice);
 
   const result = await prompts(
     {
@@ -102,7 +104,8 @@ export async function selectFromScanResults(
     return null;
   }
 
-  const choices: Choice[] = newProjects.map(r => ({
+  const sorted = [...newProjects].sort((a, b) => (a.name || a.path).localeCompare(b.name || b.path, 'zh-CN'));
+  const choices: Choice[] = sorted.map(r => ({
     title: r.name || r.path.split('/').pop() || r.path,
     value: r.path,
     description: r.path,

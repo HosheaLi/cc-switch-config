@@ -6,6 +6,7 @@
  */
 
 import path from 'path';
+import os from 'os';
 import fs from 'fs-extra';
 import { createServices } from '../utils/service-factory.js';
 import { createSpinner } from '../utils/spinner.js';
@@ -14,6 +15,8 @@ import { selectApiConfig } from '../prompts/components/select-api-config.js';
 import { selectDirectory } from '../prompts/components/select-directory.js';
 import { confirmAction, confirmWithDetails } from '../prompts/components/confirm-action.js';
 import { inputFullApiConfig } from '../prompts/components/input-api-key.js';
+import { inputImportApiConfig } from '../prompts/components/import-api-config.js';
+import { inputEditProject } from '../prompts/components/edit-project.js';
 import { promptWithCancel, defaultOnCancel } from '../prompts/utils/handle-cancel.js';
 import { maskApiKey } from '../../lib/security/api-key.js';
 import { maskApiKeyInConfig } from '../utils/mask-config.js';
@@ -30,10 +33,13 @@ import type { ProjectEntry } from '../../lib/store/project.js';
 
 import { VERSION } from '../../version.js';
 
+const HOME_CLAUDE = path.join(os.homedir(), '.claude');
 const SEP = '━'.repeat(44);
+const PAGE_SIZE = 8;
 
 export async function runDashboard(): Promise<void> {
   const svc = createServices();
+  let projectPage = 0;
 
   while (true) {
     const configs = await svc.apiService.getAllConfigs();
@@ -41,28 +47,45 @@ export async function runDashboard(): Promise<void> {
     const cwd = process.cwd();
     const currentProject = projects.find(p => p.path === cwd) ?? null;
 
+    // 比对每个项目的实际配置与 API 配置模板
+    const matchedConfigs = new Map<string, MatchResult>();
+    for (const p of projects) {
+      matchedConfigs.set(p.id, await findMatchingConfig(p.path, configs));
+    }
+
+    // 重置越界的页码
+    const totalP = Math.max(1, Math.ceil(projects.length / PAGE_SIZE));
+    if (projectPage >= totalP) projectPage = totalP - 1;
+
     // === 渲染状态面板 ===
     console.clear();
     renderHeader();
-    await renderCurrentStatus(currentProject, configs, cwd);
+    await renderCurrentStatus(currentProject, configs, cwd, matchedConfigs);
     renderConfigList(configs, currentProject?.activeConfig);
-    renderProjectList(projects, cwd);
+    renderProjectList(projects, configs, cwd, projectPage, matchedConfigs);
     renderActionMenu();
 
     // === 操作菜单 ===
+    const totalPages = Math.max(1, Math.ceil(projects.length / PAGE_SIZE));
+    const menuChoices: Array<{ title: string; value: string; description?: string }> = [
+      { title: '切换项目配置', value: 'switch', description: '为项目选择并应用 API 配置' },
+      { title: '管理 API 配置', value: 'configs', description: '添加/删除/导入 API 配置模板' },
+      { title: '项目管理', value: 'projects', description: '查看/编辑/删除已注册项目' },
+      { title: '扫描并注册项目', value: 'scan', description: '扫描目录发现 Claude Code 项目' },
+      { title: '导出/导入配置', value: 'export', description: '导出或导入项目配置' },
+    ];
+    if (totalPages > 1) {
+      const pageLabel = `翻页 (第 ${projectPage + 1}/${totalPages} 页)`;
+      menuChoices.push({ title: pageLabel, value: 'page' });
+    }
+    menuChoices.push({ title: '退出', value: 'quit', description: '退出 cc-config' });
+
     const actionResult = await promptWithCancel<string>(
       {
         type: 'select',
         name: 'action',
         message: '选择操作',
-        choices: [
-          { title: '切换项目配置', value: 'switch', description: '为项目选择并应用 API 配置' },
-          { title: '管理 API 配置', value: 'configs', description: '添加/删除 API 配置模板' },
-          { title: '扫描并注册项目', value: 'scan', description: '扫描目录发现 Claude Code 项目' },
-          { title: '查看全部项目', value: 'list', description: '以详细表格展示所有已注册项目' },
-          { title: '导出/导入配置', value: 'export', description: '导出或导入项目配置' },
-          { title: '退出', value: 'quit', description: '退出 cc-config' },
-        ],
+        choices: menuChoices,
         initial: 0,
       },
       defaultOnCancel
@@ -77,14 +100,17 @@ export async function runDashboard(): Promise<void> {
       case 'switch':
         await handleSwitch(svc, projects, configs);
         break;
+      case 'page':
+        projectPage = (projectPage + 1) % totalPages;
+        break;
       case 'configs':
         await handleConfigs(svc);
         break;
+      case 'projects':
+        await handleProjects(svc);
+        break;
       case 'scan':
         await handleScan(svc);
-        break;
-      case 'list':
-        await handleList(svc.projectService);
         break;
       case 'export':
         await handleExport(svc);
@@ -110,23 +136,31 @@ function renderHeader(): void {
 async function renderCurrentStatus(
   currentProject: ProjectEntry | null,
   configs: Record<string, ApiConfig>,
-  cwd: string
+  cwd: string,
+  matchedConfigs?: Map<string, MatchResult>
 ): Promise<void> {
   if (currentProject) {
-    const activeConfig = currentProject.activeConfig;
-    console.log(colors.bold('  当前项目: ') + colors.foreground(currentProject.name));
-    if (activeConfig) {
-      const cfg = configs[activeConfig];
-      const desc = cfg ? `${cfg.modelName ?? 'granular'} @ ${cfg.baseUrl}` : activeConfig;
-      console.log(colors.bold('  活跃配置: ') + colors.success(activeConfig) + colors.muted(`  (${desc})`));
+    const isGlobal = currentProject.path === HOME_CLAUDE;
+    const projectLabel = isGlobal
+      ? `${colors.foreground(currentProject.name)} ${colors.muted('(全局)')}`
+      : colors.foreground(currentProject.name);
+    console.log(colors.bold('  当前项目: ') + projectLabel);
+
+    // 检查实际配置是否匹配某个 API 配置模板
+    const matched = matchedConfigs?.get(currentProject.id);
+    if (matched === '__custom__') {
+      console.log(colors.bold('  活跃配置: ') + colors.muted('自定义配置（未匹配到 API 配置模板）'));
+    } else if (matched) {
+      const cfg = configs[matched];
+      const desc = cfg ? `${cfg.modelName ?? 'granular'} @ ${cfg.baseUrl}` : matched;
+      console.log(colors.bold('  活跃配置: ') + colors.success(matched) + colors.muted(`  (${desc})`) + colors.success('  ✓ 已匹配'));
     } else {
-      console.log(colors.bold('  活跃配置: ') + colors.warning('未设置'));
+      console.log(colors.bold('  活跃配置: ') + colors.warning('未配置'));
     }
   } else {
     console.log(colors.bold('  当前目录: ') + colors.muted(cwd));
-    const claudeDir = path.join(cwd, '.claude');
-    const hasClaude = await fs.pathExists(path.join(claudeDir, 'settings.json')) ||
-      await fs.pathExists(path.join(claudeDir, 'settings.local.json'));
+    const hasClaude = await fs.pathExists(path.join(cwd, '.claude', 'settings.json')) ||
+      await fs.pathExists(path.join(cwd, '.claude', 'settings.local.json'));
     if (hasClaude) {
       console.log(colors.muted('  检测到 .claude/ 配置目录，尚未注册'));
     } else {
@@ -156,24 +190,40 @@ function renderConfigList(configs: Record<string, ApiConfig>, activeConfig?: str
   console.log();
 }
 
-function renderProjectList(projects: ProjectEntry[], cwd: string): void {
+function renderProjectList(projects: ProjectEntry[], configs: Record<string, ApiConfig>, cwd: string, page: number, matchedConfigs?: Map<string, MatchResult>): void {
   console.log(colors.accent(SEP));
   console.log(colors.bold(`  已注册项目 (${projects.length})`));
   console.log(colors.accent(SEP));
   if (projects.length === 0) {
     console.log(colors.muted('  暂无注册项目，请先扫描'));
   } else {
-    const displayProjects = projects.slice(0, 10);
-    for (const p of displayProjects) {
+    const total = Math.ceil(projects.length / PAGE_SIZE);
+    const currentPage = Math.min(page, Math.max(0, total - 1));
+    const sorted = [...projects].sort((a, b) => a.name.localeCompare(b.name, 'zh-CN'));
+    const start = currentPage * PAGE_SIZE;
+    const pageItems = sorted.slice(start, start + PAGE_SIZE);
+
+    for (const p of pageItems) {
       const isCurrent = p.path === cwd;
       const marker = isCurrent ? colors.success('  ▶') : '   ';
-      const cfgName = p.activeConfig ?? colors.muted('-');
+      const isGlobal = p.path === HOME_CLAUDE;
+      const nameDisplay = isGlobal
+        ? `${colors.foreground(p.name)} ${colors.muted('(全局)')}`
+        : colors.foreground(p.name.padEnd(20));
+      const matched = matchedConfigs?.get(p.id);
+      const cfgDisplay = matched === '__custom__'
+        ? colors.muted('自定义')
+        : matched
+          ? `${colors.success('✓')} ${colors.foreground(matched)}`
+          : colors.muted('未配置');
       const limit = maxPathLen();
       const truncatedPath = p.path.length > limit ? '...' + p.path.slice(-(limit - 3)) : p.path;
-      console.log(`${marker} ${colors.foreground(p.name.padEnd(20))} ${cfgName.toString().padEnd(18)} ${colors.muted(truncatedPath)}`);
+      const pathDisplay = isGlobal ? colors.muted('~/.claude') : colors.muted(truncatedPath);
+      console.log(`${marker} ${nameDisplay}  ${cfgDisplay}  ${pathDisplay}`);
     }
-    if (projects.length > 10) {
-      console.log(colors.muted(`  ... 还有 ${projects.length - 10} 个项目`));
+
+    if (total > 1) {
+      console.log(colors.muted(`  ── 第 ${currentPage + 1}/${total} 页 (共 ${projects.length} 个项目)`));
     }
   }
   console.log();
@@ -198,11 +248,33 @@ async function handleSwitch(
     return;
   }
 
+  if (projects.length === 0) {
+    console.log(formatters.warning('没有已注册的项目。请先扫描并注册项目。'));
+    await waitForEnter();
+    return;
+  }
+
   const projectPath = await selectProject(projects, '选择要切换的项目');
   if (!projectPath) return;
 
   const project = projects.find(p => p.path === projectPath);
   if (!project) return;
+
+  // 非全局项目：检查 .claude/settings.local.json 是否存在，不存在则询问创建
+  if (project.path !== HOME_CLAUDE) {
+    const localConfigPath = path.join(project.path, '.claude', 'settings.local.json');
+    if (!await fs.pathExists(localConfigPath)) {
+      console.log(formatters.warning('该项目尚未创建项目级配置文件 (.claude/settings.local.json)'));
+      const create = await confirmAction('是否创建 .claude 目录和 settings.local.json？', true);
+      if (!create) {
+        console.log(colors.warning('已取消切换操作'));
+        return;
+      }
+      await fs.ensureDir(path.join(project.path, '.claude'));
+      await fs.writeJSON(localConfigPath, {});
+      console.log(formatters.success(`已创建 ${localConfigPath}`));
+    }
+  }
 
   const configName = await selectApiConfig(configs, '选择要应用的配置');
   if (!configName) return;
@@ -211,6 +283,39 @@ async function handleSwitch(
   if (!apiConfig) return;
 
   const configService = new ConfigService(readConfig, writeConfig);
+
+  // 全局项目用直接 JSON 读写（schema 不兼容），项目级配置走标准流程
+  if (project.path === HOME_CLAUDE) {
+    const globalPath = path.join(HOME_CLAUDE, 'settings.json');
+    const raw = await fs.readJSON(globalPath).catch(() => ({})) as Record<string, unknown>;
+    const existingEnv = raw.env as Record<string, string> | undefined;
+
+    const newConfig = replaceEnvModel({ env: existingEnv ?? {} }, apiConfig);
+
+    const maskedPreview = maskApiKeyInConfig(newConfig);
+    const diffLines = generateUnifiedDiff({ env: existingEnv ?? {} }, maskedPreview);
+    console.log();
+    console.log(colors.accent('配置变更预览：'));
+    console.log(colors.muted(`项目: ${project.name}`));
+    console.log(colors.muted(`配置: ${configName}`));
+    console.log();
+    renderDiff(diffLines);
+
+    console.log();
+    const confirmed = await confirmAction('确认应用以上变更？', false);
+    if (!confirmed) {
+      console.log(colors.warning('操作已取消，未修改配置'));
+      return;
+    }
+
+    await fs.writeJSON(globalPath, { ...raw, env: newConfig.env, model: newConfig.model }, { spaces: 2 });
+    await svc.projectIndex.update(project.id, { activeConfig: configName });
+
+    console.log(formatters.success(`已切换: ${project.name} → ${configName}`));
+    await waitForEnter();
+    return;
+  }
+
   const existingConfig = await configService.readProjectConfig(projectPath);
   const newConfig = replaceEnvModel(existingConfig ?? {}, apiConfig);
 
@@ -246,7 +351,9 @@ async function handleConfigs(svc: ReturnType<typeof createServices>): Promise<vo
       message: 'API 配置管理',
       choices: [
         { title: '添加配置', value: 'add', description: '创建新的 API 配置模板' },
+        { title: '导入配置', value: 'import', description: '从 JSON 粘贴导入 API 配置模板' },
         { title: '查看配置', value: 'view', description: '查看所有配置的详细信息' },
+        { title: '编辑配置', value: 'edit', description: '修改现有 API 配置' },
         { title: '删除配置', value: 'remove', description: '删除一个 API 配置模板' },
         { title: '返回仪表盘', value: 'back' },
       ],
@@ -257,18 +364,45 @@ async function handleConfigs(svc: ReturnType<typeof createServices>): Promise<vo
 
     switch (result.value) {
       case 'add': {
-        const config = await inputFullApiConfig();
-        if (!config) break;
-        await svc.apiService.createConfig(config.name, {
-          name: config.name,
-          apiKey: config.apiKey,
-          baseUrl: config.baseUrl,
-          mode: config.mode,
-          modelName: config.mode === 'unified' ? config.modelName : undefined,
-          env: config.mode === 'granular' ? config.env : undefined,
-        });
-        console.log(formatters.success(`配置 "${config.name}" 已创建`));
-        await waitForEnter();
+        try {
+          const config = await inputFullApiConfig();
+          if (!config) break;
+          await svc.apiService.createConfig(config.name, {
+            name: config.name,
+            apiKey: config.apiKey,
+            baseUrl: config.baseUrl,
+            mode: config.mode,
+            modelName: config.mode === 'unified' ? config.modelName : undefined,
+            env: config.mode === 'granular' ? config.env : undefined,
+          });
+          console.log(formatters.success(`配置 "${config.name}" 已创建`));
+          await waitForEnter();
+        } catch (err) {
+          console.log(formatters.error(`创建失败: ${err instanceof Error ? err.message : String(err)}`));
+          await waitForEnter();
+        }
+        break;
+      }
+      case 'import': {
+        try {
+          const allConfigs = await svc.apiService.getAllConfigs();
+          const existingNames = Object.keys(allConfigs);
+          const config = await inputImportApiConfig(existingNames);
+          if (!config) break;
+          await svc.apiService.createConfig(config.name, {
+            name: config.name,
+            apiKey: config.apiKey,
+            baseUrl: config.baseUrl,
+            mode: config.mode,
+            modelName: config.mode === 'unified' ? config.modelName : undefined,
+            env: config.mode === 'granular' ? config.env : undefined,
+          });
+          console.log(formatters.success(`配置 "${config.name}" 已通过导入创建`));
+          await waitForEnter();
+        } catch (err) {
+          console.log(formatters.error(`导入失败: ${err instanceof Error ? err.message : String(err)}`));
+          await waitForEnter();
+        }
         break;
       }
       case 'view': {
@@ -279,27 +413,183 @@ async function handleConfigs(svc: ReturnType<typeof createServices>): Promise<vo
           await waitForEnter();
           break;
         }
-        console.log(colors.accent('\n━━ API 配置详情 ━━'));
-        for (const name of names) {
+        console.log(colors.accent('\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'));
+        for (const [idx, name] of names.entries()) {
+          if (idx > 0) {
+            console.log(colors.muted('  ─────────────────────────────────'));
+          }
           const cfg = allConfigs[name];
-          console.log(colors.bold(`\n  ${name}`));
-          console.log(colors.muted(`    模型: ${cfg.modelName ?? 'granular'}`));
-          console.log(colors.muted(`    URL:  ${cfg.baseUrl}`));
-          console.log(colors.muted(`    Key:  ${maskApiKey(cfg.apiKey)}`));
+          console.log(colors.bold(`  ${name}`));
+          console.log(colors.muted(`  URL:     ${cfg.baseUrl}`));
+          console.log(colors.muted(`  Key:     ${maskApiKey(cfg.apiKey)}`));
+          console.log(colors.muted(`  模式:    ${cfg.mode === 'unified' ? '统一 (unified)' : '独立 (granular)'}`));
+
+          if (cfg.mode === 'unified') {
+            console.log(colors.muted(`  模型:    ${cfg.modelName}`));
+          } else if (cfg.env) {
+            // Group env vars: model vars first, then others
+            const modelVarKeys = ['ANTHROPIC_MODEL', 'ANTHROPIC_DEFAULT_SONNET_MODEL', 'ANTHROPIC_DEFAULT_HAIKU_MODEL', 'ANTHROPIC_DEFAULT_OPUS_MODEL', 'ANTHROPIC_REASONING_MODEL', 'CLAUDE_CODE_SUBAGENT_MODEL'];
+            const shownKeys = new Set<string>();
+            console.log(colors.muted(`  模型变量:`));
+            for (const mk of modelVarKeys) {
+              if (cfg.env[mk]) {
+                console.log(colors.muted(`    ${mk}=${cfg.env[mk]}`));
+                shownKeys.add(mk);
+              }
+            }
+            const extraKeys = Object.keys(cfg.env).filter(k => !shownKeys.has(k) && k !== 'ANTHROPIC_AUTH_TOKEN' && k !== 'ANTHROPIC_BASE_URL');
+            if (extraKeys.length > 0) {
+              console.log(colors.muted(`  其他变量:`));
+              for (const ek of extraKeys) {
+                console.log(colors.muted(`    ${ek}=${cfg.env[ek]}`));
+              }
+            }
+          }
+
+          if (cfg.createdAt) {
+            const created = new Date(cfg.createdAt).toLocaleString('zh-CN');
+            console.log(colors.muted(`  创建时间: ${created}`));
+          }
+          if (cfg.updatedAt) {
+            const updated = new Date(cfg.updatedAt).toLocaleString('zh-CN');
+            console.log(colors.muted(`  更新时间: ${updated}`));
+          }
         }
+        console.log(colors.accent('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'));
         console.log();
         await waitForEnter();
         break;
       }
+      case 'edit': {
+        try {
+          const allConfigs = await svc.apiService.getAllConfigs();
+          const name = await selectApiConfig(allConfigs, '选择要编辑的配置');
+          if (!name) break;
+          const config = await inputFullApiConfig();
+          if (!config) break;
+          await svc.apiService.updateConfig(name, {
+            name: config.name,
+            apiKey: config.apiKey,
+            baseUrl: config.baseUrl,
+            mode: config.mode,
+            modelName: config.mode === 'unified' ? config.modelName : undefined,
+            env: config.mode === 'granular' ? config.env : undefined,
+          });
+          console.log(formatters.success(`配置 "${name}" 已更新`));
+          await waitForEnter();
+        } catch (err) {
+          console.log(formatters.error(`更新失败: ${err instanceof Error ? err.message : String(err)}`));
+          await waitForEnter();
+        }
+        break;
+      }
       case 'remove': {
-        const allConfigs = await svc.apiService.getAllConfigs();
-        const name = await selectApiConfig(allConfigs, '选择要删除的配置');
-        if (!name) break;
-        const confirmed = await confirmWithDetails('删除配置', `将永久删除配置 "${name}"`, true);
-        if (!confirmed) break;
-        await svc.apiService.deleteConfig(name);
-        console.log(formatters.success(`配置 "${name}" 已删除`));
+        try {
+          const allConfigs = await svc.apiService.getAllConfigs();
+          const name = await selectApiConfig(allConfigs, '选择要删除的配置');
+          if (!name) break;
+          const confirmed = await confirmWithDetails('删除配置', `将永久删除配置 "${name}"`, true);
+          if (!confirmed) break;
+          await svc.apiService.deleteConfig(name);
+          console.log(formatters.success(`配置 "${name}" 已删除`));
+          await waitForEnter();
+        } catch (err) {
+          console.log(formatters.error(`删除失败: ${err instanceof Error ? err.message : String(err)}`));
+          await waitForEnter();
+        }
+        break;
+      }
+    }
+  }
+}
+
+async function handleProjects(svc: ReturnType<typeof createServices>): Promise<void> {
+  while (true) {
+    console.log();
+    const result = await promptWithCancel<string>({
+      type: 'select',
+      name: 'projAction',
+      message: '项目管理',
+      choices: [
+        { title: '查看项目', value: 'view', description: '查看所有已注册项目的详细信息' },
+        { title: '编辑项目', value: 'edit', description: '修改项目名称或路径' },
+        { title: '删除项目', value: 'remove', description: '从注册列表中移除项目' },
+        { title: '返回仪表盘', value: 'back' },
+      ],
+      initial: 0,
+    });
+
+    if (result.cancelled || result.value === null || result.value === 'back') return;
+
+    switch (result.value) {
+      case 'view': {
+        const projects = await svc.projectService.listProjects();
+        if (projects.length === 0) {
+          console.log(formatters.warning('没有已注册的项目。'));
+          await waitForEnter();
+          break;
+        }
+        console.log(colors.accent('\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'));
+        for (const [idx, p] of projects.entries()) {
+          if (idx > 0) {
+            console.log(colors.muted('  ─────────────────────────────────'));
+          }
+          console.log(colors.bold(`  ${p.name}`));
+          console.log(colors.muted(`  ID:        ${p.id}`));
+          console.log(colors.muted(`  路径:      ${p.path}`));
+          console.log(colors.muted(`  配置:      ${p.activeConfig ?? colors.muted('未设置')}`));
+          const modified = new Date(p.lastModified).toLocaleString('zh-CN');
+          console.log(colors.muted(`  更新:      ${modified}`));
+        }
+        console.log(colors.accent('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'));
+        console.log();
         await waitForEnter();
+        break;
+      }
+      case 'edit': {
+        try {
+          const projects = await svc.projectService.listProjects();
+          if (projects.length === 0) {
+            console.log(formatters.warning('没有可编辑的项目。'));
+            await waitForEnter();
+            break;
+          }
+          const projectPath = await selectProject(projects, '选择要编辑的项目');
+          if (!projectPath) break;
+          const project = projects.find(p => p.path === projectPath);
+          if (!project) break;
+          const updates = await inputEditProject(project, projects);
+          if (!updates) break;
+          await svc.projectService.updateProject(project.id, updates);
+          console.log(formatters.success(`项目 "${updates.name}" 已更新`));
+          await waitForEnter();
+        } catch (err) {
+          console.log(formatters.error(`编辑失败: ${err instanceof Error ? err.message : String(err)}`));
+          await waitForEnter();
+        }
+        break;
+      }
+      case 'remove': {
+        try {
+          const projects = await svc.projectService.listProjects();
+          if (projects.length === 0) {
+            console.log(formatters.warning('没有可删除的项目。'));
+            await waitForEnter();
+            break;
+          }
+          const projectPath = await selectProject(projects, '选择要删除的项目');
+          if (!projectPath) break;
+          const project = projects.find(p => p.path === projectPath);
+          if (!project) break;
+          const confirmed = await confirmWithDetails('删除项目', `将永久删除项目 "${project.name}"\n路径: ${project.path}`, true);
+          if (!confirmed) break;
+          await svc.projectService.removeProject(project.id);
+          console.log(formatters.success(`项目 "${project.name}" 已删除`));
+          await waitForEnter();
+        } catch (err) {
+          console.log(formatters.error(`删除失败: ${err instanceof Error ? err.message : String(err)}`));
+          await waitForEnter();
+        }
         break;
       }
     }
@@ -407,10 +697,70 @@ async function handleExport(svc: ReturnType<typeof createServices>): Promise<voi
 
 // === 工具函数 ===
 
+/**
+ * 匹配结果类型：
+ * - string: 匹配到的 API 配置模板名称
+ * - '__custom__': 配置文件存在且有 env，但不匹配任何模板
+ * - null: 配置文件不存在或没有 env 块
+ */
+type MatchResult = string | '__custom__' | null;
+
+/**
+ * 读取项目实际配置，与 API 配置模板比对。
+ * 比对依据：只比对 8 个标准 env key，忽略自定义变量。
+ */
+async function findMatchingConfig(
+  projectPath: string,
+  configs: Record<string, ApiConfig>
+): Promise<MatchResult> {
+  const configPath = projectPath === HOME_CLAUDE
+    ? path.join(HOME_CLAUDE, 'settings.json')
+    : path.join(projectPath, '.claude', 'settings.local.json');
+  const raw = await fs.readJSON(configPath).catch(() => null);
+  const env: Record<string, string> | undefined = raw?.env;
+
+  if (!env) return null;
+
+  for (const [name, tmpl] of Object.entries(configs)) {
+    const expected = replaceEnvModel({}, tmpl);
+    if (expected.env && envMatches(expected.env, env)) {
+      return name;
+    }
+  }
+  return '__custom__';
+}
+
+// 标准 8 个 env key，用于比对过滤
+const STANDARD_ENV_KEYS = [
+  'ANTHROPIC_MODEL',
+  'ANTHROPIC_DEFAULT_SONNET_MODEL',
+  'ANTHROPIC_DEFAULT_HAIKU_MODEL',
+  'ANTHROPIC_DEFAULT_OPUS_MODEL',
+  'ANTHROPIC_REASONING_MODEL',
+  'CLAUDE_CODE_SUBAGENT_MODEL',
+  'ANTHROPIC_AUTH_TOKEN',
+  'ANTHROPIC_BASE_URL',
+] as const;
+
+/**
+ * 比对实际 env 是否匹配某个 API 配置模板（只比对 8 个标准 key，忽略自定义变量）。
+ */
+function envMatches(expected: Record<string, string>, actual: Record<string, string>): boolean {
+  for (const key of STANDARD_ENV_KEYS) {
+    if (expected[key] !== actual[key]) return false;
+  }
+  return true;
+}
+
 async function waitForEnter(): Promise<void> {
   console.log(colors.muted('\n按 Enter 继续...'));
+  // prompts 会 pause stdin，需要 resume 后才能接收到 data 事件
+  if (process.stdin.isPaused()) {
+    process.stdin.resume();
+  }
   await new Promise<void>((resolve) => {
     const onData = () => {
+      process.stdin.pause();
       process.stdin.removeListener('data', onData);
       resolve();
     };

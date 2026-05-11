@@ -42,6 +42,7 @@ async function inputGranularEnv(): Promise<Record<string, string> | null> {
     { key: 'ANTHROPIC_DEFAULT_HAIKU_MODEL', label: 'ANTHROPIC_DEFAULT_HAIKU_MODEL (Haiku)', initial: '' },
     { key: 'ANTHROPIC_DEFAULT_OPUS_MODEL', label: 'ANTHROPIC_DEFAULT_OPUS_MODEL (Opus)', initial: '' },
     { key: 'ANTHROPIC_REASONING_MODEL', label: 'ANTHROPIC_REASONING_MODEL (推理)', initial: '' },
+    { key: 'CLAUDE_CODE_SUBAGENT_MODEL', label: 'CLAUDE_CODE_SUBAGENT_MODEL (子Agent)', initial: '' },
   ];
 
   console.log(colors.muted('\n--- 模型环境变量 (按需填写，留空则跳过) ---'));
@@ -114,7 +115,7 @@ export async function inputConfigName(
         return `名称 "${trimmed}" 已存在`;
       }
       // 放宽验证：允许中文、字母、数字、下划线、连字符、空格
-      if (!/^[\w一-龥\-\s]+$/.test(trimmed)) {
+      if (!/^[\w一-鿿\-\s]+$/.test(trimmed)) {
         return '名称包含无效字符';
       }
       if (trimmed.length > 50) {
@@ -208,7 +209,7 @@ export async function inputFullApiConfig(): Promise<{
   if (!mode) return null;
 
   if (mode === 'unified') {
-    // Unified mode: single model name → 6 env vars
+    // Unified mode: single model name → 6 model env vars
     const modelName = await inputModelName('模型名称');
     if (!modelName) return null;
 

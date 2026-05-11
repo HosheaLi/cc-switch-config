@@ -39,7 +39,7 @@ export async function executeUndoCommand(
 
   // Create UndoService with default config path resolver
   const service = undoService ?? new UndoService((projectPath) =>
-    `${projectPath}/.claude/settings.json`
+    `${projectPath}/.claude/settings.local.json`
   );
 
   // Get active project from AppState

@@ -60,7 +60,7 @@ describe('ApiService', () => {
     tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'api-service-test-'));
     configFile = path.join(tempDir, 'api-configs.json');
     projectDir = path.join(tempDir, 'project');
-    projectConfigPath = path.join(projectDir, '.claude', 'settings.json');
+    projectConfigPath = path.join(projectDir, '.claude', 'settings.local.json');
     await fs.ensureDir(path.dirname(projectConfigPath));
 
     // Initialize mock config storage

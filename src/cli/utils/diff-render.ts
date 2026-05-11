@@ -76,7 +76,7 @@ function truncateString(str: string): string {
  */
 export function renderDiff(
   diffLines: DiffLine[],
-  filePath: string = '.claude/settings.json'
+  filePath: string = '.claude/settings.local.json'
 ): void {
   // Header (D-05)
   console.log(colors.muted(`--- a/${filePath}`));

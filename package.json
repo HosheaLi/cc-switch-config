@@ -1,6 +1,6 @@
 {
   "name": "cc-config-switch",
-  "version": "0.2.0",
+  "version": "0.2.2",
   "type": "module",
   "description": "CLI/TUI tool for managing Claude Code project-level API provider configurations",
   "author": "HosheaLi",

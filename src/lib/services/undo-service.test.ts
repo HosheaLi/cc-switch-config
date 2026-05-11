@@ -24,7 +24,7 @@ describe('UndoService', () => {
   let mockRestoreBackup: ReturnType<typeof vi.spyOn>;
 
   const mockGetProjectConfigPath = vi.fn((projectPath: string) =>
-    `${projectPath}/.claude/settings.json`
+    `${projectPath}/.claude/settings.local.json`
   );
 
   beforeEach(() => {
@@ -45,9 +45,9 @@ describe('UndoService', () => {
       const result = await undoService.undo('/path/to/project');
 
       // Verify
-      expect(mockGetLatestBackup).toHaveBeenCalledWith('/path/to/project/.claude/settings.json');
+      expect(mockGetLatestBackup).toHaveBeenCalledWith('/path/to/project/.claude/settings.local.json');
       expect(mockRestoreBackup).toHaveBeenCalledWith(
-        '/path/to/project/.claude/settings.json',
+        '/path/to/project/.claude/settings.local.json',
         '/path/to/.backups/settings.json.2026-04-15T10-30-00-123Z'
       );
       expect(result.restored).toBe(true);

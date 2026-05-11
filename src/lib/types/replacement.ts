@@ -9,7 +9,7 @@
  * - replaceEnvModel: complete replacement (only env/model changed)
  *
  * Per D-13: Complete replacement of env/model fields (simple and clear).
- * Per D-14: unified mode generates standard 6-model env + apiKey + baseUrl.
+ * Per D-14: unified mode generates standard env with 6 model vars + apiKey + baseUrl.
  */
 
 import type { ClaudeSettings } from './config.js';
@@ -35,7 +35,7 @@ export function replaceEnvModel(
 ): ClaudeSettings {
   // Build env from apiConfig mode
   const newEnv = apiConfig.mode === 'unified'
-    ? buildUnifiedEnv(apiConfig) // D-14: 6 model vars + apiKey + baseUrl
+    ? buildUnifiedEnv(apiConfig) // D-14: 6 model vars + apiKey + baseUrl = 8 vars
     : apiConfig.env ?? {};       // granular mode: use provided env
 
   // D-13: Complete replacement - only env/model changed
@@ -54,6 +54,7 @@ export function replaceEnvModel(
  * - 6 model variables (all using same modelName)
  * - ANTHROPIC_AUTH_TOKEN (apiKey)
  * - ANTHROPIC_BASE_URL (baseUrl)
+ * = 8 total env vars
  *
  * Model variables:
  * - ANTHROPIC_MODEL
@@ -61,6 +62,7 @@ export function replaceEnvModel(
  * - ANTHROPIC_DEFAULT_HAIKU_MODEL
  * - ANTHROPIC_DEFAULT_OPUS_MODEL
  * - ANTHROPIC_REASONING_MODEL
+ * - CLAUDE_CODE_SUBAGENT_MODEL
  *
  * @param config - API configuration with unified mode
  * @returns Standard env object for Claude Code
@@ -73,12 +75,13 @@ export function buildUnifiedEnv(config: ApiConfig): Record<string, string> {
   }
 
   return {
-    // 6 model variables - all use same modelName per D-14
+    // 6 model variables - all use same modelName
     ANTHROPIC_MODEL: config.modelName,
     ANTHROPIC_DEFAULT_SONNET_MODEL: config.modelName,
     ANTHROPIC_DEFAULT_HAIKU_MODEL: config.modelName,
     ANTHROPIC_DEFAULT_OPUS_MODEL: config.modelName,
     ANTHROPIC_REASONING_MODEL: config.modelName,
+    CLAUDE_CODE_SUBAGENT_MODEL: config.modelName,
     // API key and base URL
     ANTHROPIC_AUTH_TOKEN: config.apiKey,
     ANTHROPIC_BASE_URL: config.baseUrl,

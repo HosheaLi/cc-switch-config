@@ -95,7 +95,7 @@ export function registerSwitchCommand(program: Command): void {
         console.log(colors.muted(`项目: ${projectEntry.name}`));
         console.log(colors.muted(`配置: ${configName}`));
         console.log();
-        renderDiff(diffLines, '.claude/settings.json');
+        renderDiff(diffLines, '.claude/settings.local.json');
 
         // D-07/D-08: Confirmation with safe default (false)
         console.log();

@@ -35,7 +35,7 @@ export interface UndoResult {
  *
  * Usage:
  * ```typescript
- * const service = new UndoService((p) => `${p}/.claude/settings.json`);
+ * const service = new UndoService((p) => `${p}/.claude/settings.local.json`);
  * const result = await service.undo('/path/to/project');
  * console.log(`Restored from ${result.backupFilename} (${result.backupTime})`);
  * ```

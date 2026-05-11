@@ -76,7 +76,7 @@ describe('FileWatcher', () => {
       const projectPath = '/path/to/project';
       const projectConfigPath = FileWatcher.getProjectConfigPath(projectPath);
 
-      expect(projectConfigPath).toBe('/path/to/project/.claude/settings.json');
+      expect(projectConfigPath).toBe('/path/to/project/.claude/settings.local.json');
     });
   });
 

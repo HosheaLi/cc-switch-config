@@ -24,7 +24,7 @@ describe('ConfigService', () => {
 
   beforeEach(async () => {
     tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'config-service-test-'));
-    configPath = path.join(tempDir, '.claude', 'settings.json');
+    configPath = path.join(tempDir, '.claude', 'settings.local.json');
     await fs.ensureDir(path.dirname(configPath));
 
     // Per D-01: Constructor injection with actual readConfig/writeConfig

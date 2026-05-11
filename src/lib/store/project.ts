@@ -223,17 +223,18 @@ export class ProjectIndex {
   /**
    * Update project metadata.
    *
-   * - Updates activeConfig and/or lastModified
+   * - Updates name, path, activeConfig and/or lastModified
+   * - Syncs pathIndex when path changes
    * - Automatically sets lastModified to now
    * - Creates backup before write
    *
    * @param id - Project UUID
-   * @param updates - Fields to update (activeConfig, lastModified)
+   * @param updates - Fields to update (name, path, activeConfig, lastModified)
    * @returns true if updated, false if project not found
    */
   async update(
     id: string,
-    updates: Partial<Pick<ProjectEntry, 'activeConfig' | 'lastModified'>>
+    updates: Partial<Pick<ProjectEntry, 'name' | 'path' | 'activeConfig' | 'lastModified'>>
   ): Promise<boolean> {
     const data = await this.load();
     const entry = data.projects[id];
@@ -243,6 +244,20 @@ export class ProjectIndex {
     }
 
     // Apply updates
+    if (updates.name !== undefined) {
+      entry.name = updates.name;
+    }
+
+    if (updates.path !== undefined) {
+      const oldPath = entry.path;
+      entry.path = updates.path;
+      // Sync pathIndex: remove old path mapping, add new
+      if (oldPath in data.pathIndex) {
+        delete data.pathIndex[oldPath];
+      }
+      data.pathIndex[updates.path] = id;
+    }
+
     if (updates.activeConfig !== undefined) {
       entry.activeConfig = updates.activeConfig;
     }
