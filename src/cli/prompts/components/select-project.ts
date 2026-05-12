@@ -68,7 +68,7 @@ export async function selectMultipleProjects(
   }
 
   const sorted = [...projects].sort((a, b) => a.name.localeCompare(b.name, 'zh-CN'));
-  const choices: Choice[] = sorted.map(formatProjectChoice);
+  const choices: Choice[] = sorted.map(p => formatProjectChoice(p));
 
   const result = await prompts(
     {

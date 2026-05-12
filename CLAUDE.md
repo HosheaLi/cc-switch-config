@@ -38,6 +38,10 @@ src/lib/              # 核心库 (services/store/types/security/file-system/con
 - API key: password-type input + masked display + 不暴露于 CLI args/logs
 - 主题: OpenCode Terminal Aesthetic (picocolors, NO_COLOR 支持)
 
+## Git 流程
+
+- **推送前检查版本号**: `git push` 前确认 `package.json` 的 `version` 已自增（对比已发布的最新 git tag），并确认 CHANGELOG.md 中对应版本已记录。若未自增则先执行 `npm version patch|minor|major`。
+
 ## 命令
 
 ```bash

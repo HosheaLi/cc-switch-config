@@ -99,7 +99,7 @@ export async function runDashboard(): Promise<void> {
 
     switch (actionResult.value) {
       case 'switch':
-        await handleSwitch(svc, projects, configs);
+        await handleSwitch(svc, projects, configs, matchedConfigs);
         break;
       case 'page':
         projectPage = (projectPage + 1) % totalPages;
@@ -108,13 +108,13 @@ export async function runDashboard(): Promise<void> {
         await handleConfigs(svc);
         break;
       case 'projects':
-        await handleProjects(svc);
+        await handleProjects(svc, matchedConfigs);
         break;
       case 'scan':
         await handleScan(svc);
         break;
       case 'export':
-        await handleExport(svc);
+        await handleExport(svc, matchedConfigs);
         break;
     }
   }
@@ -240,7 +240,8 @@ function renderActionMenu(): void {
 async function handleSwitch(
   svc: ReturnType<typeof createServices>,
   projects: ProjectEntry[],
-  configs: Record<string, ApiConfig>
+  configs: Record<string, ApiConfig>,
+  matchedConfigs: Map<string, MatchResult>
 ): Promise<void> {
   const configNames = Object.keys(configs);
   if (configNames.length === 0) {
@@ -489,7 +490,7 @@ async function handleConfigs(svc: ReturnType<typeof createServices>): Promise<vo
   }
 }
 
-async function handleProjects(svc: ReturnType<typeof createServices>): Promise<void> {
+async function handleProjects(svc: ReturnType<typeof createServices>, matchedConfigs: Map<string, MatchResult>): Promise<void> {
   while (true) {
     console.log();
     const result = await promptWithCancel<string>({
@@ -637,7 +638,7 @@ async function handleList(projectService: ReturnType<typeof createServices>['pro
   await waitForEnter();
 }
 
-async function handleExport(svc: ReturnType<typeof createServices>): Promise<void> {
+async function handleExport(svc: ReturnType<typeof createServices>, matchedConfigs: Map<string, MatchResult>): Promise<void> {
   const result = await promptWithCancel<string>({
     type: 'select',
     name: 'expAction',
