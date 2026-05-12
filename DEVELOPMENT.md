@@ -127,8 +127,8 @@ npx cc-config --version
 ### Cleanup
 
 ```bash
-npm unlink -g cc-config-switch
-rm cc-config-switch-*.tgz
+npm unlink -g cc-switch-config
+rm cc-switch-config-*.tgz
 ```
 
 ## Architecture Principles

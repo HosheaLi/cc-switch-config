@@ -1,7 +1,7 @@
 # Release Checklist
 
 > Refer to [release-pipeline.md](https://github.com/user/repo) for full release workflow.
-> Adapt commands below to the current project (cc-config-switch, TypeScript/Node.js).
+> Adapt commands below to the current project (cc-switch-config, TypeScript/Node.js).
 
 ## Pre-release Checklist
 
@@ -36,7 +36,7 @@ git push origin main && git push origin v<version>
 
 ```bash
 # Install from npm
-npm install -g cc-config-switch@<version>
+npm install -g cc-switch-config@<version>
 cc-config --version
 
 # Verify CLI works

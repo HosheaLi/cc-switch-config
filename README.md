@@ -1,8 +1,8 @@
 # cc-switch-config
 
 <p align="center">
-  <b>⚡ 秒级切换 · 135 KB 极致轻量 · 交互式 TUI</b><br>
-  <sub>Claude Code 项目级 API 配置管理工具</sub>
+  <b>⚡ Switch in Seconds · 135 KB Ultra-Light · Interactive TUI</b><br>
+  <sub>Project-level API configuration management for Claude Code</sub>
 </p>
 
 <p align="center">
@@ -14,95 +14,338 @@
 </p>
 
 <p align="center">
+  <a href="#features">Features</a> ·
+  <a href="#quick-start">Quick Start</a> ·
+  <a href="#cli-commands">CLI Commands</a> ·
+  <a href="#how-it-works">How It Works</a> ·
+  <a href="#shell-hooks">Shell Hooks</a> ·
+  <a href="#docs">Docs</a>
+</p>
+
+<p align="center">
   <a href="./README_CN.md">中文文档</a>
 </p>
 
 ---
 
-## 为什么选择 cc-config？
+https://github.com/user-attachments/assets/3c0c7e0f-a96d-4807-b8bd-da8099f4ab84
 
-你需要在多个项目之间切换 Claude Code 的 API 提供商——团队项目用 Anthropic API，个人项目用自定义端点，客户项目用转发服务。每次手动改 `settings.json`？太烦了。
+---
 
-**cc-switch-config** 是这个痛点的最简解。
+## The Problem
 
-| 特性 | 说明 |
-|------|------|
-| ⚡ **秒级切换** | 一条命令切换整个项目的 API 配置，无需手动编辑文件 |
-| 🪶 **极简轻量** | 包体积仅 **135 KB**，无臃肿依赖树 |
-| 🎨 **交互式 TUI** | 精美的终端仪表盘，支持模糊搜索、diff 预览、向导式操作 |
-| 🔒 **安全第一** | API Key 密码式输入、脱敏显示、永不写入日志 |
-| 💾 **自动备份** | 每次变更前自动创建备份，一条命令回滚 |
-| 📦 **配置复用** | 一次创建提供商模板，在任意项目中复用 |
-| 🔗 **Shell 钩子** | 进入项目目录自动切换配置，无感知 |
+You work across multiple projects, each requiring a different Claude Code API setup:
 
-## 快速开始
+| Scenario | API Provider | Typical Setup |
+|----------|-------------|---------------|
+| 🏢 **Team project** | Anthropic direct | Official API key + default model |
+| 🧑‍💻 **Personal project** | Custom endpoint | Self-hosted proxy, custom base URL |
+| 🤝 **Client project** | Relay service | Third-party API, different model config |
+| 🔬 **Experiment** | Different model | Switch between Sonnet/Opus/Haiku profiles |
+
+Editing `~/.claude/settings.json` by hand every time is tedious and error-prone.
+
+**cc-switch-config** solves this: one command to switch your entire Claude Code API configuration. No manual edits, no mistakes, no wasted time.
+
+---
+
+## Features
+
+| # | Feature | Description |
+|---|---------|-------------|
+| ⚡ | **Instant Switch** | `cc-config <profile>` — one command, done. No manual file editing. |
+| 🪶 | **Ultra Lightweight** | Only 8 runtime dependencies, **135 KB** install size. No bloat. |
+| 🎨 | **Interactive TUI** | Beautiful terminal dashboard with fuzzy search, diff preview, and guided wizard. |
+| 🔒 | **Security First** | Password-masked API key input, masked display everywhere, never written to logs or CLI args. |
+| 💾 | **Auto Backup** | Every change is backed up automatically. `cc-config undo` restores instantly. |
+| 📦 | **Config Reuse** | Create a provider template once (`cc-config config add`), reuse across any number of projects. |
+| 🔗 | **Shell Hooks** | Auto-switch API config when you `cd` into a project directory — zero manual steps. |
+| 🗂️ | **Two Config Modes** | **Unified mode** — one model name applies to all 6 Claude Code model env vars. **Granular mode** — set each model env var individually. |
+| 🔍 | **Bulk Scan** | Scan entire directory trees to discover `.claude/` projects and register them in bulk. |
+| 📤 | **Export/Import** | Share configs across your team via `export`/`import` with merge/overwrite/skip strategies. |
+| 🛡️ | **Atomic Writes** | Write-rename pattern ensures your config file is never left in a partial state. |
+
+---
+
+## Quick Start
 
 ```bash
-# 安装
+# Install globally
 npm install -g cc-switch-config
 
-# 启动 TUI 仪表盘
+# Launch the interactive TUI dashboard
 cc-config
 
-# 快速切换当前项目到 my-profile
-cc-config my-profile
+# Quick-switch the current project
+cc-config my-anthropic-profile
 
-# 列出所有注册项目
+# List all registered projects
 cc-config list
 ```
 
-## CLI 命令速览
+### First-Time Setup
 
 ```bash
-cc-config                   # 启动交互式 TUI 仪表盘
-cc-config <profile-name>    # 快速切换当前项目配置
+# 1. Create an API config template
+cc-config config add
+# → Follow the prompts: name, API key, base URL, model
 
-# 配置管理
-cc-config config add        # 创建配置（统一模式/独立模式）
-cc-config config list       # 列出所有配置模板
-cc-config config remove     # 删除配置
+# 2. Register your project
+cc-config register /path/to/your/project
 
-# 项目管理
-cc-config list              # 列出已注册项目
-cc-config register <path>   # 注册新项目
-cc-config switch <p> <cfg>  # 为项目应用配置
-cc-config current [--json]  # 查看当前项目配置
+# 3. Apply the config
+cc-config switch your-project your-config
 
-# 其他
-cc-config undo              # 撤销上次变更
-cc-config export [--stdout] # 导出配置为 JSON
-cc-config scan [--root]     # 扫描目录发现项目
+# 4. Done! Restart Claude Code to pick up the new config.
 ```
 
-## 工作原理
+---
 
-```
-~/.config/cc-config/
-  templates.json            ← 提供商模板（API Key + Base URL + 模型）
+## CLI Commands
 
-<your-project>/.claude/
-  settings.json             ← cc-config switch → 精确替换 env/model 字段
-  settings.local.json       ← 本地覆盖（优先）
+### Main Entry
 
-~/.local/share/cc-config/
-  projects.json             ← 已注册项目索引
-  backups/                  ← 自动备份，cc-config undo 恢复
+```bash
+cc-config                           # Launch interactive TUI dashboard
+cc-config <config-name>             # Quick-switch current project (most common workflow)
+cc-config --help                    # Show help
+cc-config --version                 # Show version
 ```
 
-核心原则：**只修改 `env` 和 `model` 字段**，保留 `permissions`、`hooks`、`mcpServers` 等非 API 配置不变。
+### Config Management
 
-## 文档
+```bash
+cc-config config add                # Create a new config template (unified or granular mode)
+cc-config config list               # List all config templates
+cc-config config list --json        # List as JSON (for scripting)
+cc-config config remove <name>      # Delete a config
+cc-config config remove <name> --force  # Force delete without confirmation
+cc-config cfg add                   # Alias for config add
+cc-config cfg list                  # Alias for config list
+cc-config cfg rm <name>             # Alias for config remove
+```
 
-| 文档 | 说明 |
-|------|------|
-| [使用指南](./USAGE.md) | 完整 CLI 命令参考、TUI 操作、场景示例 |
-| [开发指南](./DEVELOPMENT.md) | 架构设计、本地开发、测试、贡献 |
-| [变更日志](./CHANGELOG.md) | 版本历史与变更记录 |
+Switching modes:
 
-## 许可证
+```
+ Unified                          Granular
+ ┌─────────────────────────────┐   ┌──────────────────────────────┐
+ │ name: "anthropic-default"   │   │ name: "custom-setup"         │
+ │ apiKey: "sk-ant-****"       │   │ mode: "granular"             │
+ │ baseUrl: "https://..."      │   │ env:                         │
+ │ modelName: "claude-sonnet"  │   │   ANTHROPIC_MODEL: sonnet    │
+ │                             │   │   CLAUDE_CODE_SUBAGENT: haiku│
+ └─────────────────────────────┘   │   ... (each var individually)│
+                                   └──────────────────────────────┘
+```
 
-[MIT](./LICENSE)
+### Project Management
 
-## 贡献
+```bash
+cc-config list                      # List registered projects
+cc-config list --json               # List as JSON
+cc-config register <path>           # Register a project (.claude/ dir required)
+cc-config register <path> -t <tmpl> # Register and apply a template
+cc-config unregister <name>         # Unregister a project
+cc-config unregister <name> --force # Force unregister
+cc-config switch <project> <config> # Apply a config to a specific project
+cc-config current                   # Show current project's active config
+cc-config current --json            # Show as JSON
+cc-config scan [directory]          # Scan directory for .claude/ projects
+cc-config scan [directory] --register # Scan and auto-register
+cc-config scan [directory] --tui    # Scan and open TUI for selection
+cc-config scan [directory] --json   # Scan and output JSON
+```
 
-欢迎贡献！请先阅读 [DEVELOPMENT.md](./DEVELOPMENT.md) 了解本地开发配置。
+### Safety & Tools
+
+```bash
+cc-config undo                      # Restore the most recent backup
+cc-config export                    # Export config as JSON (writes to file)
+cc-config export --stdout           # Export to stdout (pipe to file, share)
+cc-config export <project-id>       # Export specific project's config
+cc-config import <file>             # Import config from JSON file
+cc-config import <file> --merge     # Import and merge with existing
+cc-config import <file> --strategy overwrite  # Overwrite on conflict
+cc-config import <file> --strategy skip       # Skip on conflict
+cc-config auto-check                # For shell hook integration (silent check)
+```
+
+---
+
+## How It Works
+
+cc-switch-config manages two data stores — **global config templates** and **per-project settings** — and bridges them with a precise editing engine.
+
+```
+Global Store (~/.config/cc-config/)
+└── templates.json        ← All your saved config templates
+    ├─ "anthropic-direct" → { apiKey, baseUrl, modelName }
+    ├─ "openrouter-proxy" → { apiKey, baseUrl, modelName }
+    └─ "custom-granular"  → { mode: "granular", env: { ... } }
+
+Per-Project Store (~/.config/cc-config/projects.json)
+└── projects             ← Registered project index
+    ├─ "project-alpha"   → { path, activeConfig }
+    └─ "project-beta"    → { path, activeConfig }
+
+Per-Project Config (~/.local/share/cc-config/)
+├── backups/             ← Automatic pre-change backups
+│   ├─ settings.json.20260512T1430.backup
+│   └─ settings.json.20260512T1502.backup
+└── projects.json        ← Projects metadata
+
+Target File (<project>/.claude/settings.json)
+└── { ... "env": { ... }, "model": "...", permissions, hooks, ... }
+    ↑ cc-config precisely edits ONLY these two fields
+```
+
+### What Gets Modified
+
+When you run `cc-config switch`, only two parts of your target `settings.json` are changed:
+
+- **`env` block**: Provider-specific environment variables (API key, base URL, model name mappings)
+- **`model` field** (unified mode): The default model for the project
+
+Everything else — `permissions`, `hooks`, `mcpServers`, `allowWriteToLocalDirectory`, `respectGitignore`, and any custom fields — is left **completely untouched**.
+
+### Safety Guarantees
+
+1. **Atomic writes**: New content is written to a temp file, then renamed over the target. If the process crashes mid-write, the original file is intact.
+2. **Auto-backup**: Before every modification, the current state is saved to `backups/` with a timestamp.
+3. **Undo**: `cc-config undo` restores the most recent backup.
+4. **No key exposure**: API keys are never passed as CLI arguments, never echoed in terminal output in full, and never written to log files.
+
+---
+
+## Shell Hooks
+
+Add this to your `.zshrc` or `.bashrc` for fully automatic config switching:
+
+```zsh
+# Auto-switch Claude Code API config when entering a project directory
+auto_cc_config() {
+  [[ -f .claude/settings.json ]] && cc-config auto-check 2>/dev/null
+}
+chpwd_functions+=(auto_cc_config)
+```
+
+Now whenever you `cd` into a project directory that has a `.claude/settings.json`, cc-switch-config silently checks if the correct config is active. If you've pre-registered the project and assigned a config, you never need to think about it.
+
+---
+
+## TUI Dashboard
+
+Launch with `cc-config` (no arguments) for the full interactive terminal UI.
+
+| Screen | Key | Action |
+|--------|-----|--------|
+| **Project List** | `↑/↓` or `j/k` | Navigate projects |
+| | `Enter` | Edit/switch config for selected project |
+| | `/` or `f` | Fuzzy-search projects |
+| | `s` | Scan for new projects |
+| | `u` | Undo last change for selected project |
+| | `Esc` / `q` | Exit |
+| **Config Select** | `↑/↓` | Browse available configs |
+| | `Enter` | Preview the diff before applying |
+| | `Esc` | Back to project list |
+| **Diff Preview** | `y` | Confirm and apply |
+| | `n` / `Esc` | Cancel |
+| **Scan Results** | `Space` | Toggle project selection |
+| | `Enter` | Register selected projects |
+
+---
+
+## Common Scenarios
+
+### Scenario 1: Different API for Each Project
+
+```bash
+cd ~/work/team-project
+cc-config switch anthropic-direct    # Team uses official Anthropic
+
+cd ~/personal/hobby-project
+cc-config switch openrouter-proxy    # Personal uses OpenRouter relay
+
+cd ~/clients/acme-corp
+cc-config switch acme-custom         # Client requires custom endpoint
+```
+
+### Scenario 2: Bulk Onboarding
+
+```bash
+# Scan an entire code directory and register all projects at once
+cc-config scan ~/code --register
+
+# Then apply the same config to a set of projects
+cc-config switch project-a default
+cc-config switch project-b default
+```
+
+### Scenario 3: Team Config Sharing
+
+```bash
+# Export your config (without exposing full API keys)
+cc-config export --stdout > team-config.json
+
+# Share the file with your team. They import it:
+cc-config import team-config.json --strategy merge
+```
+
+### Scenario 4: Experiment with Models
+
+```bash
+# Create multiple configs for the same provider, different models
+cc-config config add    # "sonnet-testing" → claude-sonnet-4
+cc-config config add    # "haiku-testing"  → claude-haiku-3.5
+cc-config config add    # "opus-testing"   → claude-opus-4
+
+# Switch between them instantly
+cc-config sonnet-testing   # ↔ cc-config haiku-testing
+```
+
+---
+
+## Docs
+
+| Document | Description |
+|----------|-------------|
+| [Usage Guide](./USAGE.md) | Complete CLI reference, TUI navigation, all scenarios |
+| [Development Guide](./DEVELOPMENT.md) | Architecture, local dev setup, testing, contributing |
+| [Changelog](./CHANGELOG.md) | Version history and release notes |
+
+---
+
+## Tech Stack
+
+| Layer | Technology |
+|-------|-----------|
+| Runtime | Node.js >= 18.17 (ESM) |
+| Language | TypeScript 6.x (strict mode, ES2022 target, NodeNext module) |
+| Build | tsup → single `dist/index.js` |
+| CLI framework | commander 14.x |
+| TUI | prompts, picocolors, cli-table3 |
+| Data validation | zod 4.x |
+| Testing | vitest 3.x + v8 coverage |
+| Config storage | conf 15.x (filesystem-backed JSON) |
+
+---
+
+## License
+
+[MIT](./LICENSE) © HosheaLi
+
+---
+
+## Contributing
+
+Contributions are welcome! Here's how to get started:
+
+1. **Set up**: `npm install && npm link`
+2. **Develop**: `npm run dev` (hot-reload via tsx watch)
+3. **Test**: `npm test` (all tests must pass)
+4. **Type check**: `npm run typecheck` (no errors)
+5. **Build**: `npm run build` (before commit)
+6. **PR**: Open a pull request with a clear description
+
+Please read [DEVELOPMENT.md](./DEVELOPMENT.md) for detailed contribution guidelines.
