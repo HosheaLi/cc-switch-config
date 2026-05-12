@@ -1,13 +1,13 @@
 {
-  "name": "cc-config-switch",
+  "name": "cc-config",
   "version": "0.4.0",
   "type": "module",
-  "description": "CLI/TUI tool for managing Claude Code project-level API provider configurations",
+  "description": "轻量级 Claude Code 项目级 API 配置切换工具 — 零依赖臃肿，秒级切换，交互式 TUI",
   "author": "HosheaLi",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/HosheaLi/P07_CCAPISwitch.git"
+    "url": "https://github.com/HosheaLi/cc-config.git"
   },
   "bin": {
     "cc-config": "./dist/index.js"
@@ -69,7 +69,10 @@
     "claude-code",
     "cli",
     "tui",
-    "config-management",
-    "api-provider"
+    "api-config",
+    "config-switch",
+    "project-level",
+    "lightweight",
+    "anthropic"
   ]
 }

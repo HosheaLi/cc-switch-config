@@ -1,4 +1,4 @@
-# CCAPISwitch — CLAUDE.md
+# cc-config — CLAUDE.md
 
 ## 项目概述
 
