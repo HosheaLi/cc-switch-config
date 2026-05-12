@@ -7,7 +7,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/HosheaLi/cc-config-switch.git"
+    "url": "https://github.com/HosheaLi/P07_CCAPISwitch.git"
   },
   "bin": {
     "cc-config": "./dist/index.js"
