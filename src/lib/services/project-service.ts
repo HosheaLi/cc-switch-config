@@ -165,13 +165,11 @@ export class ProjectService {
       found.push(dir);
     }
 
-    // D-10: When a subdirectory is itself named .claude and contains settings files,
-    // register it as an independent project. This handles scenarios like
-    // ~/.claude/.claude/ being registered as a cc-config project separate from
-    // the global ~/.claude config.
+    // 当遍历到名为 .claude 的子目录时，如果该目录本身包含
+    // settings.local.json，将其作为普通项目注册。例如扫描 ~/.claude 时
+    // 额外发现 ~/.claude/.claude/settings.local.json。
     if (path.basename(dir) === '.claude') {
-      if (await fs.pathExists(path.join(dir, 'settings.json')) ||
-          await fs.pathExists(path.join(dir, 'settings.local.json'))) {
+      if (await fs.pathExists(path.join(dir, 'settings.local.json'))) {
         if (!found.includes(dir)) {
           found.push(dir);
         }
