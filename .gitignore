@@ -29,5 +29,9 @@ npm-debug.log*
 # Backup directory (never commit backups)
 .backups/
 
+# E2E test artifacts
+my-app-config.json
+*-config.json
+
 # Claude Code local settings (tokens!)
 .claude/

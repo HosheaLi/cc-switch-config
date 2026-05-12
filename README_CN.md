@@ -1,4 +1,4 @@
-# cc-config
+# cc-switch-config
 
 <p align="center">
   <b>⚡ 秒级切换 · 135 KB 极致轻量 · 交互式 TUI</b><br>
@@ -6,11 +6,11 @@
 </p>
 
 <p align="center">
-  <a href="https://www.npmjs.com/package/cc-config"><img src="https://img.shields.io/npm/v/cc-config" alt="npm version"></a>
-  <a href="https://github.com/HosheaLi/cc-config"><img src="https://img.shields.io/github/stars/HosheaLi/cc-config?style=flat" alt="GitHub stars"></a>
+  <a href="https://www.npmjs.com/package/cc-switch-config"><img src="https://img.shields.io/npm/v/cc-switch-config" alt="npm version"></a>
+  <a href="https://github.com/HosheaLi/cc-switch-config"><img src="https://img.shields.io/github/stars/HosheaLi/cc-switch-config?style=flat" alt="GitHub stars"></a>
   <a href="./LICENSE"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT"></a>
   <a href="https://nodejs.org"><img src="https://img.shields.io/badge/node-%3E%3D18.17-brightgreen" alt="Node.js >= 18.17"></a>
-  <a href="https://img.shields.io/npm/dm/cc-config"><img src="https://img.shields.io/npm/dm/cc-config" alt="npm downloads"></a>
+  <a href="https://img.shields.io/npm/dm/cc-switch-config"><img src="https://img.shields.io/npm/dm/cc-switch-config" alt="npm downloads"></a>
 </p>
 
 <p align="center">
@@ -23,7 +23,7 @@
 
 每个项目有不同的 API 提供商——团队项目用 Anthropic 直连，个人项目用自定义端点，客户项目走转发代理。你不想每次都手动改 `settings.json`。
 
-**cc-config** 只做一件事：让你在项目之间秒切 API 配置。不臃肿，不复杂，装上就能用。
+**cc-switch-config** 只做一件事：让你在项目之间秒切 API 配置。不臃肿，不复杂，装上就能用。
 
 | 特性 | 说明 |
 |------|------|
@@ -39,7 +39,7 @@
 
 ```bash
 # 安装
-npm install -g cc-config
+npm install -g cc-switch-config
 
 # 启动 TUI 仪表盘（引导你完成扫描、配置、切换）
 cc-config
