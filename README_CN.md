@@ -39,7 +39,7 @@
 | 🤝 **客户项目** | 转发服务 | 第三方 API、不同模型配置 |
 | 🔬 **实验项目** | 不同模型 | 在 Sonnet/Opus/Haiku 间切换 |
 
-每次都手动改 `~/.claude/settings.json`？不仅烦，还容易出错。
+每次都手动改 `.claude/settings.local.json`？不仅烦，还容易出错。（cc-switch-config 写入的是 `settings.local.json` 文件，Claude Code 读取时该文件优先级高于 `settings.json`。）
 
 **cc-switch-config** 只做一件事：让你一条命令切换整个 Claude Code API 配置。不臃肿，不复杂，装上就能用。
 
@@ -230,18 +230,20 @@ cc-switch-config 维护两个数据存储——**全局配置模板**和**项目
 
 备份存储 (~/.local/share/cc-config/)
 ├── backups/                 ← 自动预操作备份
-│   ├─ settings.json.20260512T1430.backup
-│   └─ settings.json.20260512T1502.backup
+│   ├─ settings.local.json.20260512T1430.backup
+│   └─ settings.local.json.20260512T1502.backup
 └── projects.json            ← 项目元数据
 
-目标文件 (<project>/.claude/settings.json)
+目标文件 (<project>/.claude/settings.local.json)
 └── { ... "env": { ... }, "model": "...", permissions, hooks, ... }
     ↑ cc-config 精确修改 ONLY 这两个字段
 ```
 
+cc-switch-config 对项目级配置写入的是 `settings.local.json` 文件，这是项目级覆盖文件——Claude Code 读取时其优先级高于 `settings.json`，因此是项目级 API 配置的正确写入目标。唯一例外是当目标为全局 `~/.claude` 目录本身时，会直接写入 `settings.json`。
+
 ### 设计原则：最小修改
 
-执行 `cc-config switch` 时，目标 `settings.json` 中**仅修改两个字段**：
+执行 `cc-config switch` 时，目标 `.claude/settings.local.json` 中**仅修改两个字段**：
 
 - **`env` 块**：提供商相关的环境变量（API Key、Base URL、模型名映射）
 - **`model` 字段**（统一模式）：项目的默认模型
@@ -266,12 +268,12 @@ cc-switch-config 维护两个数据存储——**全局配置模板**和**项目
 ```zsh
 # 进入项目目录时自动切换 Claude Code API 配置
 auto_cc_config() {
-  [[ -f .claude/settings.json ]] && cc-config auto-check 2>/dev/null
+  [[ -f .claude/settings.local.json ]] && cc-config auto-check 2>/dev/null
 }
 chpwd_functions+=(auto_cc_config)
 ```
 
-现在，每次 `cd` 进入包含 `.claude/settings.json` 的目录时，cc-switch-config 会自动静默检查当前配置是否正确。只要预先注册了项目并分配了配置，之后你完全不需要操心 API 配置的事情。
+现在，每次 `cd` 进入包含 `.claude/settings.local.json` 的目录时，cc-switch-config 会自动静默检查当前配置是否正确。只要预先注册了项目并分配了配置，之后你完全不需要操心 API 配置的事情。
 
 ---
 

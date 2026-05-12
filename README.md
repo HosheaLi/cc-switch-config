@@ -43,7 +43,7 @@ You work across multiple projects, each requiring a different Claude Code API se
 | 🤝 **Client project** | Relay service | Third-party API, different model config |
 | 🔬 **Experiment** | Different model | Switch between Sonnet/Opus/Haiku profiles |
 
-Editing `~/.claude/settings.json` by hand every time is tedious and error-prone.
+Editing `.claude/settings.local.json` by hand every time is tedious and error-prone. (cc-switch-config writes to `settings.local.json`, the project-level override file that Claude Code reads with higher priority than `settings.json`.)
 
 **cc-switch-config** solves this: one command to switch your entire Claude Code API configuration. No manual edits, no mistakes, no wasted time.
 
@@ -191,18 +191,20 @@ Per-Project Store (~/.config/cc-config/projects.json)
 
 Per-Project Config (~/.local/share/cc-config/)
 ├── backups/             ← Automatic pre-change backups
-│   ├─ settings.json.20260512T1430.backup
-│   └─ settings.json.20260512T1502.backup
+│   ├── settings.local.json.20260512T1430.backup
+│   └── settings.local.json.20260512T1502.backup
 └── projects.json        ← Projects metadata
 
-Target File (<project>/.claude/settings.json)
+Target File (<project>/.claude/settings.local.json)
 └── { ... "env": { ... }, "model": "...", permissions, hooks, ... }
     ↑ cc-config precisely edits ONLY these two fields
 ```
 
+cc-switch-config writes to `settings.local.json` for all project-level configurations. This is the project-level override file — Claude Code reads it with higher priority than `settings.json`, making it the correct target for per-project API configuration. The only exception is when targeting the global `~/.claude` directory itself, in which case `settings.json` is written directly.
+
 ### What Gets Modified
 
-When you run `cc-config switch`, only two parts of your target `settings.json` are changed:
+When you run `cc-config switch`, only two parts of your target `.claude/settings.local.json` are changed:
 
 - **`env` block**: Provider-specific environment variables (API key, base URL, model name mappings)
 - **`model` field** (unified mode): The default model for the project
@@ -225,12 +227,12 @@ Add this to your `.zshrc` or `.bashrc` for fully automatic config switching:
 ```zsh
 # Auto-switch Claude Code API config when entering a project directory
 auto_cc_config() {
-  [[ -f .claude/settings.json ]] && cc-config auto-check 2>/dev/null
+  [[ -f .claude/settings.local.json ]] && cc-config auto-check 2>/dev/null
 }
 chpwd_functions+=(auto_cc_config)
 ```
 
-Now whenever you `cd` into a project directory that has a `.claude/settings.json`, cc-switch-config silently checks if the correct config is active. If you've pre-registered the project and assigned a config, you never need to think about it.
+Now whenever you `cd` into a project directory that has a `.claude/settings.local.json`, cc-switch-config silently checks if the correct config is active. If you've pre-registered the project and assigned a config, you never need to think about it.
 
 ---
 
