@@ -24,7 +24,7 @@ cc-config cfg rm <name>
 
 ### Config Modes
 
-- **Unified**: One model name → all 6 model env vars (`ANTHROPIC_MODEL`, `ANTHROPIC_DEFAULT_SONNET_MODEL`, `ANTHROPIC_DEFAULT_HAIKU_MODEL`, `ANTHROPIC_DEFAULT_OPUS_MODEL`, `ANTHROPIC_REASONING_MODEL`)
+- **Unified**: One model name → all 6 model env vars (`ANTHROPIC_MODEL`, `ANTHROPIC_DEFAULT_SONNET_MODEL`, `ANTHROPIC_DEFAULT_HAIKU_MODEL`, `ANTHROPIC_DEFAULT_OPUS_MODEL`, `ANTHROPIC_REASONING_MODEL`, `CLAUDE_CODE_SUBAGENT_MODEL`)
 - **Granular**: Each model env var specified individually
 
 ## Project Management
