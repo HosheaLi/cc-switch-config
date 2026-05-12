@@ -17,11 +17,13 @@ import { formatProjectChoice } from '../utils/format-choices.js';
  *
  * @param projects - List of projects to select from
  * @param message - Optional custom message
+ * @param matchedConfigs - Optional map of project id → matched config name for display
  * @returns Selected project path, or null if cancelled
  */
 export async function selectProject(
   projects: ProjectEntry[],
-  message: string = '选择项目'
+  message: string = '选择项目',
+  matchedConfigs?: Map<string, string | '__custom__' | null>
 ): Promise<string | null> {
   if (projects.length === 0) {
     console.log('没有已注册的项目。请先扫描并注册项目。');
@@ -29,7 +31,7 @@ export async function selectProject(
   }
 
   const sorted = [...projects].sort((a, b) => a.name.localeCompare(b.name, 'zh-CN'));
-  const choices: Choice[] = sorted.map(formatProjectChoice);
+  const choices: Choice[] = sorted.map(p => formatProjectChoice(p, matchedConfigs?.get(p.id)));
   const promptType = getPromptType(projects.length);
 
   const config: prompts.PromptObject = {

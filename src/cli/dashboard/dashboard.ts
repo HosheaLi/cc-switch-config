@@ -255,7 +255,7 @@ async function handleSwitch(
     return;
   }
 
-  const projectPath = await selectProject(projects, '选择要切换的项目');
+  const projectPath = await selectProject(projects, '选择要切换的项目', matchedConfigs);
   if (!projectPath) return;
 
   const project = projects.find(p => p.path === projectPath);
@@ -540,7 +540,7 @@ async function handleProjects(svc: ReturnType<typeof createServices>): Promise<v
             await waitForEnter();
             break;
           }
-          const projectPath = await selectProject(projects, '选择要编辑的项目');
+          const projectPath = await selectProject(projects, '选择要编辑的项目', matchedConfigs);
           if (!projectPath) break;
           const project = projects.find(p => p.path === projectPath);
           if (!project) break;
@@ -563,7 +563,7 @@ async function handleProjects(svc: ReturnType<typeof createServices>): Promise<v
             await waitForEnter();
             break;
           }
-          const projectPath = await selectProject(projects, '选择要删除的项目');
+          const projectPath = await selectProject(projects, '选择要删除的项目', matchedConfigs);
           if (!projectPath) break;
           const project = projects.find(p => p.path === projectPath);
           if (!project) break;
@@ -665,7 +665,7 @@ async function handleExport(svc: ReturnType<typeof createServices>): Promise<voi
     await waitForEnter();
     return;
   }
-  const projectPath = await selectProject(projects, '选择要导出的项目');
+  const projectPath = await selectProject(projects, '选择要导出的项目', matchedConfigs);
   if (!projectPath) return;
 
   const project = projects.find(p => p.path === projectPath);

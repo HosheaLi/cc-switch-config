@@ -16,21 +16,30 @@ const HOME_CLAUDE = path.join(os.homedir(), '.claude');
  * Format a project choice with name and config status.
  *
  * @param project - Project entry
+ * @param matchedConfig - Matched config name ('__custom__' → 自定义, null → 未配置, string → 已匹配)
  * @returns Formatted Choice object
  */
-export function formatProjectChoice(project: { name: string; path: string; activeConfig?: string | null }): Choice {
+export function formatProjectChoice(
+  project: { name: string; path: string; activeConfig?: string | null },
+  matchedConfig?: string | '__custom__' | null
+): Choice {
   const displayName = project.name || path.basename(project.path);
   const isGlobal = project.path === HOME_CLAUDE;
   const nameLabel = isGlobal
     ? `${displayName} (全局)`
     : displayName;
-  const configStatus = project.activeConfig
-    ? colors.success(`[${project.activeConfig}]`)
-    : colors.muted('[未配置]');
+  // 优先用实时匹配结果，回退到 activeConfig
+  const cfgDisplay = matchedConfig === '__custom__'
+    ? colors.muted('[自定义]')
+    : matchedConfig
+      ? colors.success(`[${matchedConfig}]`)
+      : project.activeConfig
+        ? colors.success(`[${project.activeConfig}]`)
+        : colors.muted('[未配置]');
   const descPath = isGlobal ? '~/.claude' : project.path;
 
   return {
-    title: `${nameLabel} ${configStatus}`,
+    title: `${nameLabel} ${cfgDisplay}`,
     value: project.path,
     description: descPath,
   };
