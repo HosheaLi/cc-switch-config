@@ -14,7 +14,7 @@
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true,
-    "noEmit": false,
+    "noEmit": true,
     "allowSyntheticDefaultImports": true,
     "ignoreDeprecations": "6.0",
     "types": ["node"]

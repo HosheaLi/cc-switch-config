@@ -53,26 +53,27 @@ const migrations: MigrationFunction[] = [
  * @param config - Config object to migrate
  * @returns Migrated config at current version, or DEFAULT_CONFIG for invalid input
  */
-export function migrateConfig(config: unknown): unknown {
+export function migrateConfig(rawConfig: unknown): unknown {
   // Handle invalid inputs
-  if (config === null || config === undefined) {
+  if (rawConfig === null || rawConfig === undefined) {
     return DEFAULT_CONFIG;
   }
 
-  if (typeof config !== 'object' || Array.isArray(config)) {
+  if (typeof rawConfig !== 'object' || Array.isArray(rawConfig)) {
     return DEFAULT_CONFIG;
   }
 
   // Get current version (0 if missing)
-  let currentVersion = getConfigVersion(config);
+  const initialVersion = getConfigVersion(rawConfig);
+  let currentVersion = initialVersion;
 
   // If already at current version, return unchanged
   if (currentVersion >= CONFIG_VERSION) {
-    return config;
+    return rawConfig;
   }
 
   // Apply migrations sequentially
-  let migratedConfig: Record<string, unknown> = config as Record<string, unknown>;
+  let migratedConfig: Record<string, unknown> = rawConfig as Record<string, unknown>;
 
   while (currentVersion < CONFIG_VERSION) {
     // Get migration for current version
@@ -92,19 +93,20 @@ export function migrateConfig(config: unknown): unknown {
       migratedConfig = migration(migratedConfig) as Record<string, unknown>;
 
       // Update version tracking
+      const prevVersion = currentVersion;
       currentVersion = getConfigVersion(migratedConfig);
 
       // Verify migration incremented version
-      if (currentVersion <= getConfigVersion(config)) {
+      if (currentVersion <= prevVersion) {
         console.error(
-          `Migration ${getConfigVersion(config)} did not increment version. Breaking to prevent infinite loop.`
+          `Migration ${prevVersion} did not increment version. Breaking to prevent infinite loop.`
         );
         return migratedConfig;
       }
     } catch (error) {
       // Migration failed - preserve original config
       console.error(`Migration ${currentVersion} failed:`, error);
-      return config;
+      return rawConfig;
     }
   }
 

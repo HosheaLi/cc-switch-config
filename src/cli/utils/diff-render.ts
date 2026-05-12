@@ -112,11 +112,9 @@ export function renderDiff(
         );
         break;
 
-      default: {
-        const _exhaustive: never = line;
+      default:
         console.log(colors.muted(`? ${line.path}: [unknown type]`));
         break;
-      }
     }
   }
 }

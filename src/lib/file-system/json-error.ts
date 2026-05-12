@@ -50,7 +50,7 @@ export class EnhancedJSONError extends Error {
  * @param position - Character position (0-based)
  * @returns Line number, column number, and line content
  */
-function getPositionContext(
+export function getPositionContext(
   content: string,
   position: number
 ): { line: number; column: number; lineContent: string } {

@@ -46,6 +46,7 @@ export async function executeUnregister(
   if (!project) {
     console.error(colors.danger(`Project not found: ${identifier}`));
     process.exit(ExitCodes.NOT_FOUND);
+    return; // Guard for tests where process.exit is mocked
   }
 
   // Confirmation

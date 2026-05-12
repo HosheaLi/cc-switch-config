@@ -41,7 +41,7 @@ describe('replaceEnvModel', () => {
       expect(result.env?.ANTHROPIC_AUTH_TOKEN).toBe('new-api-key');
       expect(result.env?.ANTHROPIC_BASE_URL).toBe('https://new.api.com');
       // Old env values should NOT be preserved (complete replacement)
-      expect(Object.keys(result.env ?? {}).length).toBe(7); // 5 model vars + apiKey + baseUrl
+      expect(Object.keys(result.env ?? {}).length).toBe(8); // 6 model vars + apiKey + baseUrl
       expect(result.env?.ANTHROPIC_MODEL).not.toBe('old-model');
 
       // Other fields preserved
@@ -299,6 +299,7 @@ describe('buildUnifiedEnv', () => {
         'ANTHROPIC_DEFAULT_HAIKU_MODEL',
         'ANTHROPIC_DEFAULT_OPUS_MODEL',
         'ANTHROPIC_REASONING_MODEL',
+        'CLAUDE_CODE_SUBAGENT_MODEL',
         'ANTHROPIC_AUTH_TOKEN',
         'ANTHROPIC_BASE_URL',
       ];
@@ -371,6 +372,7 @@ describe('buildUnifiedEnv', () => {
         ANTHROPIC_DEFAULT_HAIKU_MODEL: 'claude-3-5-sonnet-20241022',
         ANTHROPIC_DEFAULT_OPUS_MODEL: 'claude-3-5-sonnet-20241022',
         ANTHROPIC_REASONING_MODEL: 'claude-3-5-sonnet-20241022',
+        CLAUDE_CODE_SUBAGENT_MODEL: 'claude-3-5-sonnet-20241022',
         ANTHROPIC_AUTH_TOKEN: 'test-api-key',
         ANTHROPIC_BASE_URL: 'https://api.example.com',
       });

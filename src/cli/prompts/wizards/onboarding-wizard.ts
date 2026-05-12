@@ -193,10 +193,10 @@ async function importGlobalConfig(svc: ReturnType<typeof createServices>): Promi
   const existingConfigs = await svc.apiService.getAllConfigs();
   if (!existingConfigs[configName]) {
     const apiConfig = envToApiConfig(configName, env);
-    await svc.apiConfigStore.set(configName, apiConfig);
+    await svc.apiService.createConfig(configName, apiConfig);
     console.log(formatters.success(`已导入全局配置 "${configName}"`));
   } else {
-    console.log(colors.muted('全局配置 "${configName}" 已存在，跳过导入。'));
+    console.log(colors.muted(`全局配置 "${configName}" 已存在，跳过导入。`));
   }
 
   // b. 注册 ~/.claude 为项目

@@ -12,7 +12,9 @@
  * @param str - 待处理的字符串
  * @returns 无 ANSI 转义码的字符串
  */
-export const stripAnsi = (str: string): string => str.replace(/\x1b\[[0-9;]*m/g, '');
+// Match all CSI (Control Sequence Introducer) sequences, not just SGR color codes.
+// Pattern: ESC [ followed by parameter bytes (0-9, ;, space) ending with a final byte (A-Z, a-z).
+export const stripAnsi = (str: string): string => str.replace(/\x1b\[[\d;]*[A-Za-z]/g, '');
 
 /**
  * 截断路径字符串以适应表格显示

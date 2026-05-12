@@ -48,8 +48,9 @@ export function displayValidationErrors(error: ValidationError): void {
     const message = issue.message;
 
     // T-11-07: Sanitize apiKey values in messages
+    // Match common API key formats (sk-ant, sk-proj, sk- prefixes and long alphanumeric strings)
     const sanitizedMessage = path.includes('apiKey')
-      ? message.replace(/sk-[a-zA-Z0-9-]+/g, '***')
+      ? message.replace(/[a-zA-Z0-9_-]{20,}/g, '***')
       : message;
 
     // Route to appropriate group (D-11)
@@ -165,7 +166,10 @@ export function registerConfigCommand(program: Command): void {
           const modelName = cfg.mode === 'unified'
             ? (cfg.modelName ?? '未设置')
             : cfg.env
-              ? `granular (${Object.keys(cfg.env).filter(k => k.startsWith('ANTHROPIC_')).length} vars)`
+              ? (() => {
+                  const varCount = Object.keys(cfg.env).filter(k => k.startsWith('ANTHROPIC_')).length;
+                  return `granular (${varCount} vars)`;
+                })()
               : 'granular';
           console.log(colors.foreground(
             `  ${name.padEnd(16)} ${modelName.padEnd(20)} ${maskedKey}`

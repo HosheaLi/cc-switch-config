@@ -12,6 +12,7 @@
 
 import fs from 'fs-extra';
 import path from 'path';
+import { execFileSync } from 'child_process';
 
 /**
  * Token file name constant.
@@ -73,9 +74,17 @@ export async function checkGitTracking(
   projectDir: string,
   filepath: string
 ): Promise<boolean> {
-  const gitignorePath = path.join(projectDir, GITIGNORE);
   const filename = path.basename(filepath);
 
+  // Prefer git check-ignore for accurate pattern matching
+  try {
+    execFileSync('git', ['check-ignore', '-q', filename], { cwd: projectDir, stdio: 'pipe' });
+    return true;
+  } catch {
+    // git command failed or file not ignored — fall through to regex matching
+  }
+
+  const gitignorePath = path.join(projectDir, GITIGNORE);
   try {
     const gitignoreContent = await fs.readFile(gitignorePath, 'utf8');
     const patterns = gitignoreContent

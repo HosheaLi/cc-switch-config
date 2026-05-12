@@ -74,7 +74,7 @@ describe('ExportService', () => {
       const payload = await service.exportProject(project.id);
 
       expect(payload.metadata.version).toBe('1.0');
-      expect(payload.metadata.toolVersion).toBe('0.2.0');
+      expect(payload.metadata.toolVersion).toBe('0.2.2');
       expect(payload.project.id).toBe(project.id);
       expect(payload.project.path).toBe(project.path);
       expect(payload.project.name).toBe('project');

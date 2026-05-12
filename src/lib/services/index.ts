@@ -34,4 +34,5 @@ export type { UndoResult } from './undo-service.js';
 export type { ClaudeSettings } from '../types/config.js';
 export type { ApiConfig, MaskedApiConfig } from '../types/api-config.js';
 export type { ProjectEntry } from '../store/project.js';
-export type { ConflictField, ExportPayload, ExportMetadata, ExportPayloadSchema } from '../types/export-schema.js';
+export type { ConflictField, ExportPayload, ExportMetadata } from '../types/export-schema.js';
+export { ExportPayloadSchema } from '../types/export-schema.js';

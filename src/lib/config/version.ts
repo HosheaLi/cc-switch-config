@@ -29,8 +29,6 @@ export const CONFIG_VERSION = 1;
 export const DEFAULT_CONFIG: ClaudeSettings = {
   version: CONFIG_VERSION,
   env: {},
-  model: undefined,
-  mcpServers: {},
   permissions: [],
   hooks: [],
 };

@@ -93,16 +93,23 @@ export function validateNoCliApiKey(args: string[]): void {
       );
     }
 
-    // Check for assignment patterns (e.g., 'apiKey=secret', '--api-key=secret')
-    if (arg.includes('apiKey=') || arg.includes('api-key=')) {
+    // Check for assignment patterns (e.g., 'apiKey=secret', '--api-key=secret', 'ANTHROPIC_AUTH_TOKEN=')
+    if (
+      arg.includes('apiKey=') ||
+      arg.includes('api-key=') ||
+      arg.includes('api_key=') ||
+      arg.includes('ANTHROPIC_AUTH_TOKEN=') ||
+      arg.includes('ANTHROPIC_API_KEY=') ||
+      arg.includes('--token=')
+    ) {
       throw new ServiceError(
         'API key cannot be passed via command-line arguments. Use config file or stdin.',
         'SECURITY_VIOLATION'
       );
     }
 
-    // Check for -k=short form
-    if (arg.startsWith('-k=')) {
+    // Check for -k=short form and combined -k<value> form
+    if (arg.startsWith('-k')) {
       throw new ServiceError(
         'API key cannot be passed via command-line arguments. Use config file or stdin.',
         'SECURITY_VIOLATION'

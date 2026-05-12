@@ -34,19 +34,19 @@ describe('renderDiff', () => {
   // D-05: Header format
   // ========================================
   describe('header format', () => {
-    it('shows --- a/.claude/settings.json header', () => {
+    it('shows --- a/.claude/settings.local.json header', () => {
       renderDiff([]);
 
       expect(consoleLogSpy).toHaveBeenCalledWith(
-        expect.stringContaining('--- a/.claude/settings.json')
+        expect.stringContaining('--- a/.claude/settings.local.json')
       );
     });
 
-    it('shows +++ b/.claude/settings.json header', () => {
+    it('shows +++ b/.claude/settings.local.json header', () => {
       renderDiff([]);
 
       expect(consoleLogSpy).toHaveBeenCalledWith(
-        expect.stringContaining('+++ b/.claude/settings.json')
+        expect.stringContaining('+++ b/.claude/settings.local.json')
       );
     });
 

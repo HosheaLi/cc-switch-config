@@ -28,6 +28,7 @@ import { generateUnifiedDiff } from '../utils/diff.js';
 import { renderDiff } from '../utils/diff-render.js';
 import { formatProjectTable } from '../output/table.js';
 import { colors, formatters } from '../theme/index.js';
+import { getProjectConfigPath } from '../../lib/paths/claude.js';
 import type { ApiConfig } from '../../lib/types/api-config.js';
 import type { ProjectEntry } from '../../lib/store/project.js';
 
@@ -44,7 +45,7 @@ export async function runDashboard(): Promise<void> {
   while (true) {
     const configs = await svc.apiService.getAllConfigs();
     const projects = await svc.projectService.listProjects();
-    const cwd = process.cwd();
+    const cwd = await fs.realpath(process.cwd());
     const currentProject = projects.find(p => p.path === cwd) ?? null;
 
     // 比对每个项目的实际配置与 API 配置模板
@@ -260,19 +261,19 @@ async function handleSwitch(
   const project = projects.find(p => p.path === projectPath);
   if (!project) return;
 
-  // 非全局项目：检查 .claude/settings.local.json 是否存在，不存在则询问创建
+  // 非全局项目：检查配置文件是否存在，不存在则询问创建
   if (project.path !== HOME_CLAUDE) {
-    const localConfigPath = path.join(project.path, '.claude', 'settings.local.json');
-    if (!await fs.pathExists(localConfigPath)) {
-      console.log(formatters.warning('该项目尚未创建项目级配置文件 (.claude/settings.local.json)'));
-      const create = await confirmAction('是否创建 .claude 目录和 settings.local.json？', true);
+    const configPath = getProjectConfigPath(project.path);
+    if (!await fs.pathExists(configPath)) {
+      console.log(formatters.warning('该项目尚未创建项目级配置文件'));
+      const create = await confirmAction(`是否创建 .claude 目录和 settings.local.json？`, true);
       if (!create) {
         console.log(colors.warning('已取消切换操作'));
         return;
       }
       await fs.ensureDir(path.join(project.path, '.claude'));
-      await fs.writeJSON(localConfigPath, {});
-      console.log(formatters.success(`已创建 ${localConfigPath}`));
+      await fs.writeJSON(configPath, {});
+      console.log(formatters.success(`已创建 ${configPath}`));
     }
   }
 
@@ -283,38 +284,6 @@ async function handleSwitch(
   if (!apiConfig) return;
 
   const configService = new ConfigService(readConfig, writeConfig);
-
-  // 全局项目用直接 JSON 读写（schema 不兼容），项目级配置走标准流程
-  if (project.path === HOME_CLAUDE) {
-    const globalPath = path.join(HOME_CLAUDE, 'settings.json');
-    const raw = await fs.readJSON(globalPath).catch(() => ({})) as Record<string, unknown>;
-    const existingEnv = raw.env as Record<string, string> | undefined;
-
-    const newConfig = replaceEnvModel({ env: existingEnv ?? {} }, apiConfig);
-
-    const maskedPreview = maskApiKeyInConfig(newConfig);
-    const diffLines = generateUnifiedDiff({ env: existingEnv ?? {} }, maskedPreview);
-    console.log();
-    console.log(colors.accent('配置变更预览：'));
-    console.log(colors.muted(`项目: ${project.name}`));
-    console.log(colors.muted(`配置: ${configName}`));
-    console.log();
-    renderDiff(diffLines);
-
-    console.log();
-    const confirmed = await confirmAction('确认应用以上变更？', false);
-    if (!confirmed) {
-      console.log(colors.warning('操作已取消，未修改配置'));
-      return;
-    }
-
-    await fs.writeJSON(globalPath, { ...raw, env: newConfig.env, model: newConfig.model }, { spaces: 2 });
-    await svc.projectIndex.update(project.id, { activeConfig: configName });
-
-    console.log(formatters.success(`已切换: ${project.name} → ${configName}`));
-    await waitForEnter();
-    return;
-  }
 
   const existingConfig = await configService.readProjectConfig(projectPath);
   const newConfig = replaceEnvModel(existingConfig ?? {}, apiConfig);
@@ -463,19 +432,36 @@ async function handleConfigs(svc: ReturnType<typeof createServices>): Promise<vo
       case 'edit': {
         try {
           const allConfigs = await svc.apiService.getAllConfigs();
-          const name = await selectApiConfig(allConfigs, '选择要编辑的配置');
-          if (!name) break;
+          const oldName = await selectApiConfig(allConfigs, '选择要编辑的配置');
+          if (!oldName) break;
           const config = await inputFullApiConfig();
           if (!config) break;
-          await svc.apiService.updateConfig(name, {
-            name: config.name,
-            apiKey: config.apiKey,
-            baseUrl: config.baseUrl,
-            mode: config.mode,
-            modelName: config.mode === 'unified' ? config.modelName : undefined,
-            env: config.mode === 'granular' ? config.env : undefined,
-          });
-          console.log(formatters.success(`配置 "${name}" 已更新`));
+          // Handle rename: create with new name first, then delete old entry
+          // (creating first prevents data loss if creation fails)
+          if (config.name !== oldName) {
+            await svc.apiService.createConfig(config.name, {
+              name: config.name,
+              apiKey: config.apiKey,
+              baseUrl: config.baseUrl,
+              mode: config.mode,
+              modelName: config.mode === 'unified' ? config.modelName : undefined,
+              env: config.mode === 'granular' ? config.env : undefined,
+            });
+            await svc.apiService.deleteConfig(oldName);
+          } else {
+            await svc.apiService.createConfig(config.name, {
+              name: config.name,
+              apiKey: config.apiKey,
+              baseUrl: config.baseUrl,
+              mode: config.mode,
+              modelName: config.mode === 'unified' ? config.modelName : undefined,
+              env: config.mode === 'granular' ? config.env : undefined,
+            });
+          }
+          const action = config.name !== oldName
+            ? `配置 "${oldName}" 已重命名为 "${config.name}"`
+            : `配置 "${config.name}" 已更新`;
+          console.log(formatters.success(action));
           await waitForEnter();
         } catch (err) {
           console.log(formatters.error(`更新失败: ${err instanceof Error ? err.message : String(err)}`));
@@ -601,8 +587,15 @@ async function handleScan(svc: ReturnType<typeof createServices>): Promise<void>
   if (!directory) return;
 
   const spinner = createSpinner('扫描中...');
-  const results = await svc.projectService.scanProjects(undefined, [directory]);
-  spinner.stop();
+  let results;
+  try {
+    results = await svc.projectService.scanProjects(undefined, [directory]);
+    spinner.succeed(`扫描完成: ${results.length} 个项目`);
+  } catch {
+    spinner.fail('扫描失败');
+    await waitForEnter();
+    return;
+  }
 
   const newProjects = results.filter(r => r.isNew);
   console.log(colors.muted(`发现 ${results.length} 个项目 (${newProjects.length} 新, ${results.length - newProjects.length} 已注册)`));
@@ -713,9 +706,7 @@ async function findMatchingConfig(
   projectPath: string,
   configs: Record<string, ApiConfig>
 ): Promise<MatchResult> {
-  const configPath = projectPath === HOME_CLAUDE
-    ? path.join(HOME_CLAUDE, 'settings.json')
-    : path.join(projectPath, '.claude', 'settings.local.json');
+  const configPath = getProjectConfigPath(projectPath);
   const raw = await fs.readJSON(configPath).catch(() => null);
   const env: Record<string, string> | undefined = raw?.env;
 
@@ -759,11 +750,9 @@ async function waitForEnter(): Promise<void> {
     process.stdin.resume();
   }
   await new Promise<void>((resolve) => {
-    const onData = () => {
+    process.stdin.once('data', () => {
       process.stdin.pause();
-      process.stdin.removeListener('data', onData);
       resolve();
-    };
-    process.stdin.once('data', onData);
+    });
   });
 }

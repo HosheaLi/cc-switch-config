@@ -49,17 +49,22 @@ export interface ScanResult {
 export class ProjectService {
   /** Default maximum depth for directory scanning */
   private defaultMaxDepth: number = 3;
+  private logger: { error: (msg: string) => void };
 
   /**
    * Create ProjectService instance.
    *
    * @param projectIndex - ProjectIndex instance for project persistence
    * @param appState - AppState instance for scan directories configuration
+   * @param logger - Optional custom error logger (defaults to console.error)
    */
   constructor(
     private projectIndex: ProjectIndex,
-    private appState: AppState
-  ) {}
+    private appState: AppState,
+    logger?: { error: (msg: string) => void }
+  ) {
+    this.logger = logger ?? console;
+  }
 
   /**
    * Get merged skip directories list.
@@ -111,7 +116,7 @@ export class ProjectService {
 
     // 记录无效目录（非关键错误，继续扫描有效目录）
     if (invalidDirs.length > 0) {
-      console.error(`跳过无效目录: ${invalidDirs.join(', ')}`);
+      this.logger.error(`跳过无效目录: ${invalidDirs.join(', ')}`);
     }
 
     for (const rootDir of validDirs) {
@@ -178,7 +183,7 @@ export class ProjectService {
           } catch (err) {
             // D-07: console.error log, continue others
             if (err instanceof Error) {
-              console.error(`Scan skipped directory ${subdir}: ${err.message}`);
+              this.logger.error(`Scan skipped directory ${subdir}: ${err.message}`);
             }
           }
         })
@@ -186,7 +191,7 @@ export class ProjectService {
     } catch (err) {
       // Permission errors at this level - skip
       if (err instanceof Error) {
-        console.error(`Scan skipped directory ${dir}: ${err.message}`);
+        this.logger.error(`Scan skipped directory ${dir}: ${err.message}`);
       }
     }
   }

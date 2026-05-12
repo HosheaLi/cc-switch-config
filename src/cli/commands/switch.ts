@@ -15,6 +15,7 @@
  * 8. Apply config on confirmation
  */
 
+import path from 'path';
 import type { Command } from 'commander';
 import type { ProjectIndex } from '../../lib/store/project.js';
 import { colors, formatters } from '../theme/index.js';
@@ -28,6 +29,7 @@ import { handleCLIError, ExitCodes } from '../output/error.js';
 import { createServices } from '../utils/service-factory.js';
 import { maskApiKeyInConfig } from '../utils/mask-config.js';
 import { replaceEnvModel } from '../../lib/types/replacement.js';
+import { getProjectConfigPath } from '../../lib/paths/claude.js';
 import type { ApiConfig } from '../../lib/types/api-config.js';
 
 /**
@@ -95,7 +97,9 @@ export function registerSwitchCommand(program: Command): void {
         console.log(colors.muted(`项目: ${projectEntry.name}`));
         console.log(colors.muted(`配置: ${configName}`));
         console.log();
-        renderDiff(diffLines, '.claude/settings.local.json');
+        const configFileName = path.basename(getProjectConfigPath(projectEntry.path));
+        const configDirName = path.basename(path.dirname(getProjectConfigPath(projectEntry.path)));
+        renderDiff(diffLines, `${configDirName}/${configFileName}`);
 
         // D-07/D-08: Confirmation with safe default (false)
         console.log();

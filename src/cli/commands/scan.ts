@@ -77,7 +77,7 @@ export async function scanProjectsCLI(options: ScanOptions): Promise<void> {
 
   // Parse depth option
   let depth = options.depth !== undefined ? parseInt(options.depth, 10) : 3;
-  if (isNaN(depth) || depth < 1) {
+  if (Number.isNaN(depth) || depth < 1) {
     console.error(colors.danger('Invalid depth value. Using default depth of 3.'));
     depth = 3;
   }

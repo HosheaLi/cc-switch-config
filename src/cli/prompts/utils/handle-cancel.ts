@@ -39,7 +39,7 @@ export async function promptWithCancel<T>(
   const key = promptConfig.name as string;
 
   const result = await prompts(promptConfig, {
-    onCancel: onCancel ?? createReturnOnCancel,
+    onCancel: onCancel ?? createReturnOnCancel(),
   });
 
   const value = result[key];

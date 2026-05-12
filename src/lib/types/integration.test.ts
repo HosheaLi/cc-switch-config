@@ -42,11 +42,12 @@ describe('Types Module Integration', () => {
 
   it('DEFAULT_CONFIG has all ClaudeSettings fields', () => {
     expect(DEFAULT_CONFIG.env).toBeDefined();
-    expect(DEFAULT_CONFIG.mcpServers).toBeDefined();
     expect(DEFAULT_CONFIG.permissions).toBeDefined();
     expect(DEFAULT_CONFIG.hooks).toBeDefined();
+    // mcpServers is optional — not set by default to avoid accidental override
     // model is optional and undefined by default
     expect(DEFAULT_CONFIG.model).toBeUndefined();
+    expect(DEFAULT_CONFIG.mcpServers).toBeUndefined();
   });
 
   it('validateConfig catches errors in DEFAULT_CONFIG modifications', () => {

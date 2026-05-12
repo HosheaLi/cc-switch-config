@@ -1,6 +1,6 @@
 {
   "name": "cc-config-switch",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "type": "module",
   "description": "CLI/TUI tool for managing Claude Code project-level API provider configurations",
   "author": "HosheaLi",
@@ -33,7 +33,6 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
-    "lint": "tsc --noEmit",
     "typecheck": "tsc --noEmit",
     "bench": "vitest bench scripts/",
     "docs": "typedoc",

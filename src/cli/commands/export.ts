@@ -63,34 +63,34 @@ export function registerExportCommand(program: Command): void {
  * @param projectId - Project UUID, name, or path (optional, defaults to active project)
  * @param options - Export options (output, stdout)
  */
-async function exportConfig(projectId: string | undefined, options: ExportOptions): Promise<void> {
+async function exportConfig(projectIdArg: string | undefined, options: ExportOptions): Promise<void> {
   const { projectIndex, apiConfigStore, appState } = createServices();
   const configService = new ConfigService(readConfig, writeConfig);
 
   // Get project ID (use active if not specified)
-  let targetId: string | undefined = projectId;
-  if (!targetId) {
+  let projectId: string | undefined = projectIdArg;
+  if (!projectId) {
     const activeProject = appState.getActiveProject();
     if (!activeProject) {
       console.error(colors.warning('No active project. Specify a project ID, name, or path.'));
       process.exit(ExitCodes.NOT_FOUND);
     }
-    targetId = activeProject;
+    projectId = activeProject;
   } else {
     // Resolve identifier (UUID, name, or path) to actual project
-    const project = await projectIndex.resolve(targetId);
+    const project = await projectIndex.resolve(projectId);
     if (!project) {
-      console.error(colors.warning(`Project not found: ${targetId}`));
+      console.error(colors.warning(`Project not found: ${projectId}`));
       process.exit(ExitCodes.NOT_FOUND);
     }
-    targetId = project.id;
+    projectId = project.id;
   }
 
   // Create export service
   const service = new ExportService(projectIndex, apiConfigStore, configService);
 
   // Export project
-  const payload = await service.exportProject(targetId);
+  const payload = await service.exportProject(projectId);
 
   // Output
   if (options.stdout) {
@@ -98,7 +98,9 @@ async function exportConfig(projectId: string | undefined, options: ExportOption
     console.log(JSON.stringify(payload, null, 2));
   } else {
     // Output to file
-    const outputPath = options.output ?? `${payload.project.name}-config.json`;
+    const rawName = payload.project.name ?? 'project';
+    const safeName = rawName.replace(/[^a-zA-Z0-9\p{Script=Han}\-_]/gu, '_');
+    const outputPath = options.output ?? `${safeName}-config.json`;
     await fs.writeJSON(outputPath, payload, { spaces: 2 });
     console.log(colors.success(`Exported ${payload.project.name} config to ${outputPath}`));
   }

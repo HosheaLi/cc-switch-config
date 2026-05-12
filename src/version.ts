@@ -1,5 +1,5 @@
 /**
- * 共享版本号 - 从 package.json 读取，构建时由 tsup 内联
+ * 共享版本号 - 运行时通过 createRequire 从 package.json 读取
  */
 import { createRequire } from 'module';
 

@@ -16,7 +16,6 @@
  * - ConfigService for config read/write
  */
 
-import path from 'path';
 import { VERSION } from '../../version.js';
 import { ServiceError } from './types.js';
 import { ExportPayloadSchema } from '../types/export-schema.js';
@@ -277,17 +276,6 @@ export class ExportService {
   }
 
   /**
-   * Derive project name from path.
-   * Uses basename of path as display name.
-   *
-   * @param projectPath - Full path to project
-   * @returns Project name (basename)
-   */
-  private deriveProjectName(projectPath: string): string {
-    return path.basename(projectPath);
-  }
-
-  /**
    * Compare two MCP server configs for equality.
    * Treats undefined and empty array/object as equivalent.
    *
@@ -331,7 +319,18 @@ export class ExportService {
    */
   private static arraysEqual(a: unknown[], b: unknown[]): boolean {
     if (a.length !== b.length) return false;
-    return JSON.stringify(a) === JSON.stringify(b);
+    // Sort by serialized form for stable order-independent comparison
+    // (default .sort() converts objects to "[object Object]" string, which is a no-op)
+    const serialize = (item: unknown): string => {
+      if (typeof item === 'object' && item !== null) {
+        // Stable key-ordered serialization
+        return JSON.stringify(item, Object.keys(item as Record<string, unknown>).sort());
+      }
+      return JSON.stringify(item);
+    };
+    const sortedA = [...a].map(serialize).sort();
+    const sortedB = [...b].map(serialize).sort();
+    return JSON.stringify(sortedA) === JSON.stringify(sortedB);
   }
 }
 

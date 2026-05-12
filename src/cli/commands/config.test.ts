@@ -588,9 +588,14 @@ describe('config command', () => {
       }
 
       // Verify prompts was called with confirm type
-      expect(promptsMod.default).toHaveBeenCalledWith(expect.objectContaining({
-        type: 'confirm',
-      }));
+      expect(promptsMod.default).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'confirm',
+        }),
+        expect.objectContaining({
+          onCancel: expect.any(Function),
+        })
+      );
 
       freshConsole.mockRestore();
       freshConsoleError.mockRestore();

@@ -105,13 +105,14 @@ async function importConfig(file: string, options: ImportOptions): Promise<void>
   let strategy: ImportStrategy | undefined;
   const VALID_STRATEGIES: ImportStrategy[] = ['merge', 'overwrite', 'skip'];
 
-  if (options.strategy) {
+  if (typeof options.strategy === 'string' && options.strategy.length > 0) {
     // Non-interactive mode: use specified strategy
-    if (!VALID_STRATEGIES.includes(options.strategy)) {
+    const trimmed = options.strategy.trim() as ImportStrategy;
+    if (!VALID_STRATEGIES.includes(trimmed)) {
       console.error(colors.danger(`Invalid strategy: "${options.strategy}". Valid values: merge, overwrite, skip`));
       process.exit(ExitCodes.MISUSE);
     }
-    strategy = options.strategy;
+    strategy = trimmed;
   } else {
     // Interactive mode: detect conflicts and decide
     const importedSettings = payload.settings ?? {};

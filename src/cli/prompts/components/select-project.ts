@@ -14,9 +14,6 @@ import { formatProjectChoice } from '../utils/format-choices.js';
 
 /**
  * Select a single project from a list.
-
-/**
- * Select a single project from a list.
  *
  * @param projects - List of projects to select from
  * @param message - Optional custom message

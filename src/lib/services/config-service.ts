@@ -15,7 +15,6 @@
  * - writeConfig function (from ConfigRepository)
  */
 
-import path from 'path';
 import type { ClaudeSettings } from '../types/config.js';
 import type { ApiConfig } from '../types/api-config.js';
 import { replaceEnvModel } from '../types/replacement.js';

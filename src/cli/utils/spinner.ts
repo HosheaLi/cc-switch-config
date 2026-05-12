@@ -24,11 +24,15 @@ export function createSpinner(message: string): Spinner {
 
   const clear = () => {
     if (!cleared) {
-      clearInterval(interval);
-      process.stdout.write('\r' + ' '.repeat(60) + '\r');
       cleared = true;
+      clearInterval(interval);
+      process.removeListener('exit', clear);
+      process.stdout.write('\r' + ' '.repeat(60) + '\r');
     }
   };
+
+  // Clean up on unexpected exit to avoid terminal artifacts
+  process.on('exit', clear);
 
   return {
     succeed: (msg: string) => {

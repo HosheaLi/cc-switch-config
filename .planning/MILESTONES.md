@@ -50,3 +50,23 @@
 - Performance benchmarks for N1-N4 targets using vitest bench mode, complete documentation with README and USAGE.md, TypeDoc configuration for API docs
 
 ---
+
+## v2.0 Terminal-Native (Shipped: 2026-05-12)
+
+**Phases completed:** 7 phases, 23 plans, 90+ tasks
+
+**Key accomplishments:**
+
+- Ink React TUI 完全移除，替换为 prompts 原生终端交互（j/k + Enter/Esc 导航）
+- 配置管理简化为三元组 (name/apiKey/baseUrl/modelName)，删除 TemplateConfig/TemplateStore
+- CLI config 命令（add/list/remove）支持统一/独立两种配置模式
+- 首次运行引导流程（API 配置 → 目录扫描 → 选择 → 主界面）
+- Switch 流程重构：项目选择 → 配置选取 → diff 预览 → 确认应用
+- OpenCode Terminal Aesthetic 设计系统（picocolors 替代 chalk）
+- Dashboard 仪表盘 + quick-switch 快捷切换
+- 主题系统：#201d1d/#fdfcfc 主色调、Apple HIG 语义色、NO_COLOR 支持
+- 版本号统一管理（src/version.ts）
+- 代码审查修复：类型安全、错误处理边界、~ 路径展开、spinner 保护
+- 全部 15 阶段完成，测试覆盖核心模块 >=80%
+
+---

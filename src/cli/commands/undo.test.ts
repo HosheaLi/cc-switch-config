@@ -231,6 +231,41 @@ describe('executeUndoCommand', () => {
     expect(output).toContain('2 minutes ago');
   });
 
+  it('falls back to createServices when only partial params provided (consistency guard)', async () => {
+    // When only appState is provided but not projectIndex, the function should
+    // detect inconsistency and fall back to createServices() internally via recursion.
+    const mockAppState = {
+      getActiveProject: vi.fn().mockReturnValue('project-uuid-123'),
+    };
+    const mockProjectIndex = {
+      getById: vi.fn().mockResolvedValue({
+        id: 'project-uuid-123',
+        path: '/path/to/project',
+        activeConfig: 'template-name',
+        lastModified: '2026-04-15T10:00:00Z',
+      }),
+    };
+    const mockUndoService = {
+      undo: vi.fn().mockResolvedValue({
+        backupTime: new Date('2026-04-15T10:30:00Z'),
+        backupFilename: 'settings.json.2026-04-15T10-30-00-123Z',
+        restored: true,
+      }),
+    };
+
+    vi.mocked(AppState).mockImplementation(() => mockAppState as unknown as AppState);
+    vi.mocked(ProjectIndex).mockImplementation(() => mockProjectIndex as unknown as ProjectIndex);
+    vi.mocked(UndoService).mockImplementation(() => mockUndoService as unknown as UndoService);
+
+    // Provide only appState — inconsistent params should trigger recursive fallback
+    await executeUndoCommand(mockAppState as unknown as AppState);
+
+    // Should succeed (fallback creates complete services internally)
+    expect(mockConsoleLog).toHaveBeenCalled();
+    const output = mockConsoleLog.mock.calls.map(call => call.join(' ')).join('\n');
+    expect(output).toContain('Restored settings.json from backup');
+  });
+
   it('handles no active project gracefully', async () => {
     // Mock AppState returns no active project
     const mockAppState = {

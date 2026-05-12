@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.3] - 2026-05-12
+
+### Changed
+
+- **版本号同步更新**：package.json → src/version.ts 统一管理
+- **GSD 里程碑归档**：v2.0 Terminal-Native 里程碑标记完成，STATE.md/MILESTONES.md 状态同步
+- **文档整理核对**：README/USAGE/TEST 确认与当前实现一致
+
+### Fixed
+
+- 杂项代码审查修复（类型安全、错误处理边界）
+
 ## [0.3.0] - 2026-05-10
 
 ### Added

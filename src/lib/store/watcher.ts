@@ -29,7 +29,7 @@
 import chokidar, { type FSWatcher } from 'chokidar';
 import path from 'path';
 import os from 'os';
-import { getClaudeSettingsFilePath } from '../paths/claude.js';
+import { getClaudeSettingsFilePath, getProjectConfigPath as getPathFromClaude } from '../paths/claude.js';
 
 /**
  * Event types emitted by the watcher.
@@ -139,11 +139,7 @@ export class FileWatcher {
    * @returns Absolute path to project's settings file
    */
   static getProjectConfigPath(projectPath: string): string {
-    const homeClaude = path.join(os.homedir(), '.claude');
-    if (path.resolve(projectPath) === homeClaude) {
-      return path.join(homeClaude, 'settings.json');
-    }
-    return path.join(projectPath, '.claude', 'settings.local.json');
+    return getPathFromClaude(projectPath);
   }
 
   /**
@@ -254,20 +250,15 @@ export class FileWatcher {
         return;
       }
 
-      this.watcher.on('ready', () => {
-        // Track watched paths
-        normalizedPaths.forEach(p => this.watchedPaths.add(p));
-        resolve();
-      });
-
       // Timeout for safety (watcher should be ready quickly)
       const timeout = setTimeout(() => {
         reject(new Error('Watcher ready timeout'));
       }, 5000);
 
-      // Clear timeout when ready
       this.watcher.on('ready', () => {
         clearTimeout(timeout);
+        normalizedPaths.forEach(p => this.watchedPaths.add(p));
+        resolve();
       });
 
       // Reject on error during initialization to prevent 5-second hang

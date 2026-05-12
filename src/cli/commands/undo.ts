@@ -17,6 +17,7 @@ import { UndoService } from '../../lib/services/undo-service.js';
 import { ServiceError } from '../../lib/services/types.js';
 import { handleCLIError } from '../output/error.js';
 import { createServices } from '../utils/service-factory.js';
+import { getProjectConfigPath } from '../../lib/paths/claude.js';
 
 /**
  * Execute the undo command logic.
@@ -31,16 +32,24 @@ export async function executeUndoCommand(
   projectIndex?: ProjectIndex,
   undoService?: UndoService
 ): Promise<void> {
-  // Create instances if not provided (both or neither, mutually exclusive)
-  const defaultSvc = (appState === undefined && projectIndex === undefined)
-    ? createServices() : null;
-  const state = appState ?? defaultSvc?.appState ?? new AppState();
-  const index = projectIndex ?? defaultSvc?.projectIndex ?? new ProjectIndex();
+  // All three params must be provided together or not at all
+  // Inconsistent state (e.g., projectIndex without appState) would produce wrong results
+  const allProvided = appState !== undefined && projectIndex !== undefined;
+  const noneProvided = appState === undefined && projectIndex === undefined;
+  if (!allProvided && !noneProvided) {
+    const defaultSvc = createServices();
+    const state = defaultSvc.appState;
+    const index = defaultSvc.projectIndex;
+    const service = undoService ?? new UndoService(getProjectConfigPath);
+    await executeUndoCommand(state, index, service);
+    return;
+  }
+  const defaultSvc = noneProvided ? createServices() : null;
+  const state = appState ?? defaultSvc!.appState;
+  const index = projectIndex ?? defaultSvc!.projectIndex;
 
-  // Create UndoService with default config path resolver
-  const service = undoService ?? new UndoService((projectPath) =>
-    `${projectPath}/.claude/settings.local.json`
-  );
+  // Create UndoService with shared path resolver (handles global vs project paths)
+  const service = undoService ?? new UndoService(getProjectConfigPath);
 
   // Get active project from AppState
   const activeProjectId = state.getActiveProject();
@@ -58,6 +67,7 @@ export async function executeUndoCommand(
     console.log(colors.warning(`Active project ID ${activeProjectId} not found in index.`));
     console.log(colors.muted('The project may have been removed.'));
     process.exit(0);
+    // process.exit mocked in tests — guard against fallthrough
     return;
   }
 

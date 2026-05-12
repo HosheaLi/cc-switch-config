@@ -59,8 +59,10 @@ export const ApiConfigSchema = z.object({
   createdAt: z.string().datetime().optional(),
   updatedAt: z.string().datetime().optional(),
 }).strict().refine(
-  data => data.mode === 'unified' ? data.modelName !== undefined : data.env !== undefined,
-  "unified mode requires modelName, granular mode requires env"
+  data => data.mode === 'unified'
+    ? (data.modelName !== undefined && data.modelName.length > 0)
+    : data.env !== undefined,
+  "unified mode requires non-empty modelName, granular mode requires env"
 );
 
 /**

@@ -236,14 +236,9 @@ export class ApiConfigStore {
     const now = new Date().toISOString();
     const data = await this.load();
 
-    // Single backup before batch operation
-    const fileExists = await exists(this.filePath);
-    if (fileExists) {
-      await createBackup(this.filePath);
-    }
-
+    // First pass: validate ALL configs before touching cache
+    const validated: Array<{ name: string; config: ApiConfig }> = [];
     for (const [name, config] of Object.entries(configs)) {
-      // Validate each config
       const result = ApiConfigSchema.safeParse(config);
       if (!result.success) {
         const issues = result.error.issues;
@@ -254,7 +249,6 @@ export class ApiConfigStore {
       const validatedConfig = result.data;
       const isUpdate = data.configs[name] !== undefined;
 
-      // Manage timestamps
       if (isUpdate) {
         validatedConfig.createdAt = data.configs[name]?.createdAt ?? now;
         validatedConfig.updatedAt = now;
@@ -263,7 +257,18 @@ export class ApiConfigStore {
         validatedConfig.updatedAt = now;
       }
 
-      data.configs[name] = validatedConfig;
+      validated.push({ name, config: validatedConfig });
+    }
+
+    // Create backup before mutating cache (captures disk state in case of subsequent failure)
+    const fileExists = await exists(this.filePath);
+    if (fileExists) {
+      await createBackup(this.filePath);
+    }
+
+    // Second pass: mutate cache only after backup is secured
+    for (const { name, config } of validated) {
+      data.configs[name] = config;
     }
 
     // Single atomic save

@@ -23,4 +23,6 @@ runCLI().catch((error: unknown) => {
     process.exit(0);
   }
   handleCLIError(error);
+  // handleCLIError calls process.exit internally, but guard against unexpected fallthrough
+  process.exit(1);
 });

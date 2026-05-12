@@ -13,6 +13,7 @@
 
 import fs from 'fs-extra';
 import path from 'path';
+import { getPositionContext } from './json-error.js';
 
 /**
  * Atomically write JSON data to a file.
@@ -98,33 +99,6 @@ export class JSONParseError extends Error {
 }
 
 /**
- * Get line and column from position in content.
- */
-function getPositionContext(content: string, position: number): { line: number; column: number; context: string } {
-  const lines = content.split('\n');
-  let currentPos = 0;
-
-  for (let i = 0; i < lines.length; i++) {
-    const lineLength = lines[i].length;
-    if (currentPos + lineLength >= position) {
-      const column = position - currentPos + 1;
-      const lineNum = i + 1;
-
-      // Show the problematic line with pointer
-      const contextLine = lines[i];
-      const pointer = ' '.repeat(Math.min(column - 1, contextLine.length)) + '^';
-      const context = `  ${contextLine}\n  ${pointer}`;
-
-      return { line: lineNum, column, context };
-    }
-    currentPos += lineLength + 1; // +1 for newline
-  }
-
-  // Fallback if position exceeds content length
-  return { line: lines.length, column: 1, context: '' };
-}
-
-/**
  * Read JSON from file with graceful error handling.
  *
  * - Returns null if file doesn't exist (ENOENT)
@@ -137,8 +111,9 @@ function getPositionContext(content: string, position: number): { line: number; 
  * @throws Error for other file errors
  */
 export async function readJSON<T = unknown>(filepath: string): Promise<T | null> {
+  let content: string | undefined;
   try {
-    const content = await fs.readFile(filepath, 'utf8');
+    content = await fs.readFile(filepath, 'utf8');
     return JSON.parse(content) as T;
   } catch (error) {
     if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
@@ -147,14 +122,19 @@ export async function readJSON<T = unknown>(filepath: string): Promise<T | null>
 
     // Enhance JSON parse errors with line/column info
     if (error instanceof SyntaxError) {
-      const content = await fs.readFile(filepath, 'utf8').catch(() => '');
+      // content is already available from the successful readFile (only JSON.parse threw)
+      if (content === undefined) {
+        content = await fs.readFile(filepath, 'utf8').catch(() => '');
+      }
 
       // Try to extract position from error message
       // Node.js errors often include "at position N"
       const posMatch = error.message.match(/position (\d+)/);
       if (posMatch) {
         const position = parseInt(posMatch[1], 10);
-        const { line, column, context } = getPositionContext(content, position);
+        const { line, column, lineContent } = getPositionContext(content, position);
+        const pointer = ' '.repeat(Math.min(column - 1, lineContent.length)) + '^';
+        const context = `  ${lineContent}\n  ${pointer}`;
         throw new JSONParseError(filepath, error, line, column, context);
       }
 
@@ -174,7 +154,9 @@ export async function readJSON<T = unknown>(filepath: string): Promise<T | null>
         const token = tokenMatch[1];
         const tokenIndex = content.indexOf(token);
         if (tokenIndex !== -1) {
-          const { line, column, context } = getPositionContext(content, tokenIndex);
+          const { line, column, lineContent } = getPositionContext(content, tokenIndex);
+          const pointer = ' '.repeat(Math.min(column - 1, lineContent.length)) + '^';
+          const context = `  ${lineContent}\n  ${pointer}`;
           throw new JSONParseError(filepath, error, line, column, context);
         }
       }
@@ -190,12 +172,10 @@ export async function readJSON<T = unknown>(filepath: string): Promise<T | null>
 /**
  * Strip JSON comments from content.
  *
- * Handles:
- * - Single-line comments: // ...
- * - Multi-line comments: /* ... * /
+ * Handles single-line (//) and multi-line (/*) comments.
  *
- * Note: This is a simple regex-based approach. For more robust
- * handling, consider using strip-json-comments package.
+ * LIMITATION: Regex-based approach — does not handle // inside string literals.
+ * For production use on untrusted input, prefer strip-json-comments package.
  */
 function stripComments(content: string): string {
   // Remove single-line comments

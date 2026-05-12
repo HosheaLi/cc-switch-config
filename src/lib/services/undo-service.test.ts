@@ -7,6 +7,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import path from 'path';
 import { UndoService } from './undo-service.js';
 import { ServiceError } from './types.js';
 import * as backupModule from '../file-system/backup.js';
@@ -16,6 +17,11 @@ vi.mock('../file-system/backup.js', () => ({
   getLatestBackup: vi.fn(),
   restoreBackup: vi.fn(),
   listBackups: vi.fn(),
+  extractTimestamp: vi.fn((backupPath: string) => {
+    const basename = path.basename(backupPath);
+    const match = basename.match(/\.(\d{4}-\d{2}-\d{2}T\d{2}-\d{2}-\d{2}-\d{3}Z)$/);
+    return match ? match[1] : '';
+  }),
 }));
 
 describe('UndoService', () => {

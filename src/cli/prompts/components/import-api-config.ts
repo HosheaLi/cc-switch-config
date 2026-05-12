@@ -121,12 +121,13 @@ export async function inputImportApiConfig(
   console.log();
   const { createInterface } = await import('readline');
   const lines: string[] = [];
+  const wasPaused = process.stdin.isPaused();
   const rl = createInterface({
     input: process.stdin,
     output: process.stdout,
     terminal: false,
   });
-  if (process.stdin.isPaused()) process.stdin.resume();
+  if (wasPaused) process.stdin.resume();
   for await (const line of rl) {
     if (line.trim() === '' && lines.length > 0) {
       rl.close();
@@ -134,6 +135,8 @@ export async function inputImportApiConfig(
     }
     lines.push(line);
   }
+  // Restore stdin state for subsequent prompts calls
+  if (wasPaused) process.stdin.pause();
   const jsonStr = lines.join('\n').trim();
   if (!jsonStr) {
     console.log(formatters.error('输入为空'));

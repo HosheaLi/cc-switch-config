@@ -16,7 +16,7 @@
 
 import path from 'path';
 import { ServiceError } from './types.js';
-import { getLatestBackup, restoreBackup } from '../file-system/backup.js';
+import { getLatestBackup, restoreBackup, extractTimestamp } from '../file-system/backup.js';
 
 /**
  * Result of an undo operation.
@@ -98,34 +98,23 @@ export class UndoService {
 
   /**
    * Extract timestamp from backup filename.
+   * Delegates to shared extractTimestamp from backup module.
    *
    * Backup format: settings.json.YYYY-MM-DDTHH-mm-ss-msZ
-   * (ISO format with special chars replaced by dashes)
    *
    * @param backupPath - Full path to backup file
    * @returns Date object parsed from filename timestamp
    */
   private extractTimestamp(backupPath: string): Date {
-    const basename = path.basename(backupPath);
-
-    // Pattern: settings.json.YYYY-MM-DDTHH-mm-ss-msZ
-    // Match: YYYY-MM-DDTHH-mm-ss-msZ
-    const match = basename.match(/\.(\d{4}-\d{2}-\d{2}T\d{2}-\d{2}-\d{2}-\d{3}Z)$/);
-
-    if (!match) {
-      // Fallback to current time if pattern doesn't match
+    const timestampStr = extractTimestamp(backupPath);
+    if (!timestampStr) {
       return new Date();
     }
 
-    const timestampStr = match[1];
-
     // Convert from backup format to ISO format
-    // Backup: YYYY-MM-DDTHH-mm-ss-msZ
-    // ISO: YYYY-MM-DDTHH:mm:ss.msZ
-    // Replace dashes with colons for time part
     const isoStr = timestampStr
-      .replace(/T(\d{2})-(\d{2})-(\d{2})/, 'T$1:$2:$3') // Replace time dashes
-      .replace(/-(\d{3})Z$/, '.$1Z'); // Replace milliseconds dash
+      .replace(/T(\d{2})-(\d{2})-(\d{2})/, 'T$1:$2:$3')
+      .replace(/-(\d{3})Z$/, '.$1Z');
 
     return new Date(isoStr);
   }

@@ -110,6 +110,13 @@ export async function restoreBackup(filepath: string, backupPath: string): Promi
     // Copy backup to temp file
     await fs.copy(backupPath, tempPath);
 
+    // Verify copy integrity before rename
+    const backupStat = await fs.stat(backupPath);
+    const tempStat = await fs.stat(tempPath);
+    if (backupStat.size !== tempStat.size) {
+      throw new Error(`Backup restore integrity check failed: size mismatch (${backupStat.size} vs ${tempStat.size})`);
+    }
+
     // Atomic rename (on POSIX systems)
     await fs.rename(tempPath, filepath);
   } catch (error) {
@@ -145,7 +152,7 @@ function escapeRegex(str: string): string {
  * Extract timestamp from backup filename.
  * Format: {basename}.{YYYY-MM-DDTHH-mm-ss-msZ} (ISO format with special chars replaced)
  */
-function extractTimestamp(backupPath: string): string {
+export function extractTimestamp(backupPath: string): string {
   const basename = path.basename(backupPath);
   // Find the timestamp pattern at the end (including milliseconds and Z)
   const match = basename.match(/\.(\d{4}-\d{2}-\d{2}T\d{2}-\d{2}-\d{2}-\d{3}Z)$/);

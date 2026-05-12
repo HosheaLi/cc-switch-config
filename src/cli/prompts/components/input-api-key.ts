@@ -115,7 +115,7 @@ export async function inputConfigName(
         return `名称 "${trimmed}" 已存在`;
       }
       // 放宽验证：允许中文、字母、数字、下划线、连字符、空格
-      if (!/^[\w一-鿿\-\s]+$/.test(trimmed)) {
+      if (!/^[\w\p{Script=Han}\-\s]+$/u.test(trimmed)) {
         return '名称包含无效字符';
       }
       if (trimmed.length > 50) {

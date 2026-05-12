@@ -123,7 +123,24 @@ describe('ApiConfigSchema', () => {
       expect(result.success).toBe(false);
       if (!result.success) {
         expect(result.error.issues.some(issue =>
-          issue.message.includes('unified mode requires modelName')
+          issue.message.includes('unified mode requires non-empty modelName')
+        )).toBe(true);
+      }
+    });
+
+    it('rejects unified config with empty modelName string', () => {
+      const config = {
+        name: 'test-config',
+        apiKey: 'sk-test-key-123',
+        baseUrl: 'https://api.test.com',
+        mode: 'unified',
+        modelName: '', // empty string should fail length > 0 check
+      };
+      const result = ApiConfigSchema.safeParse(config);
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error.issues.some(issue =>
+          issue.message.includes('unified mode requires non-empty modelName')
         )).toBe(true);
       }
     });
