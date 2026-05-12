@@ -14,6 +14,7 @@ import type { ConfigService } from './config-service.js';
 import type { ExportPayload, ConflictField } from '../types/export-schema.js';
 import { migrateExportPayload } from '../types/export-schema.js';
 import type { ClaudeSettings, ApiConfig } from '../types/index.js';
+import { VERSION } from '../../version.js';
 
 // Mock implementations
 const createMockProjectIndex = (): ProjectIndex => ({
@@ -74,7 +75,7 @@ describe('ExportService', () => {
       const payload = await service.exportProject(project.id);
 
       expect(payload.metadata.version).toBe('1.0');
-      expect(payload.metadata.toolVersion).toBe('0.2.2');
+      expect(payload.metadata.toolVersion).toBe(VERSION);
       expect(payload.project.id).toBe(project.id);
       expect(payload.project.path).toBe(project.path);
       expect(payload.project.name).toBe('project');

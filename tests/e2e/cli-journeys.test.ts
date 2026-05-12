@@ -25,6 +25,7 @@ import {
   runCLIWithInput,
   type E2EContext,
 } from './helpers.js';
+import { VERSION } from '../../src/version.js';
 
 let ctx: E2EContext;
 let testProjectDir: string;
@@ -227,7 +228,7 @@ describe('帮助和版本', () => {
   it('--version 显示版本号', async () => {
     const result = await runCLIAndGet(ctx, ['--version']);
     expect(result.exitCode).toBe(0);
-    expect(result.stdout).toContain('0.2.3');
+    expect(result.stdout).toContain(VERSION);
   });
 });
 

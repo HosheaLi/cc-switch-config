@@ -5,7 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.2.3] - 2026-05-12
+## [0.4.0] - 2026-05-12
+
+### Added
+
+- **E2E 集成测试套件**：CLI 用户旅程全覆盖，包括命令执行、配置切换、撤销等场景
+- **项目 CLAUDE.md**：架构描述、命令参考、关键约定和代码风格文档
+
+### Changed
+
+- **测试版本号硬编码修复**：export-service.test.ts 中 toolVersion 改为动态读取 VERSION 常量
+
+### Documentation
+
+- **文档优化**：README 重构为通用格式，新增 DEVELOPMENT.md 开发指南，文档结构更加规范
+
+## [0.2.3] - 2026-05-10
 
 ### Changed
 
@@ -17,7 +32,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - 杂项代码审查修复（类型安全、错误处理边界）
 
-## [0.3.0] - 2026-05-10
+## [0.3.0] - 2026-05-12
 
 ### Added
 

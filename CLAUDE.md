@@ -3,7 +3,7 @@
 ## 项目概述
 
 CLI/TUI 工具，管理 Claude Code 项目级 API 提供商配置。
-- 版本: 0.2.3
+- 版本: 0.4.0
 - 里程碑: v2.0 Terminal-Native ✅ (2026-05-12)
 - 语言: TypeScript (ESM, NodeNext)
 - 构建: tsup → ESM, `dist/index.js`
@@ -46,7 +46,18 @@ npm run build         # tsup 构建
 npm test              # vitest run
 npm run test:coverage # vitest run --coverage
 npm run test:watch    # vitest 监听模式
+npm run typecheck     # tsc --noEmit 类型检查
+npm run bench         # 性能基准测试
+npm run docs          # TypeDoc API 文档生成
 ```
+
+## 文档
+
+- [DEVELOPMENT.md](./DEVELOPMENT.md) — 开发指南（架构、测试、贡献）
+- [RELEASE.md](./RELEASE.md) — 发布清单
+- [USAGE.md](./USAGE.md) — 使用参考
+- [README.md](./README.md) — 项目主页（英文）
+- [README_CN.md](./README_CN.md) — 项目主页（中文）
 
 ## GSD 项目信息
 
