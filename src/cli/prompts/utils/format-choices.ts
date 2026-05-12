@@ -5,9 +5,12 @@
  * Per UI-01~06: 使用统一主题模块 (picocolors) 替代 chalk。
  */
 
+import os from 'os';
 import type { Choice } from 'prompts';
 import { colors } from '../../theme/index.js';
 import path from 'path';
+
+const HOME_CLAUDE = path.join(os.homedir(), '.claude');
 
 /**
  * Format a project choice with name and config status.
@@ -17,14 +20,19 @@ import path from 'path';
  */
 export function formatProjectChoice(project: { name: string; path: string; activeConfig?: string | null }): Choice {
   const displayName = project.name || path.basename(project.path);
+  const isGlobal = project.path === HOME_CLAUDE;
+  const nameLabel = isGlobal
+    ? `${displayName} (全局)`
+    : displayName;
   const configStatus = project.activeConfig
     ? colors.success(`[${project.activeConfig}]`)
     : colors.muted('[未配置]');
+  const descPath = isGlobal ? '~/.claude' : project.path;
 
   return {
-    title: `${displayName} ${configStatus}`,
+    title: `${nameLabel} ${configStatus}`,
     value: project.path,
-    description: project.path,
+    description: descPath,
   };
 }
 
