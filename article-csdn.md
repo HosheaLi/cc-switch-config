@@ -36,7 +36,7 @@ cd ~/personal-project && cc-config openrouter-proxy
 
 **精确替换**：只修改 `.claude/settings.local.json` 中的 `env` 和 `model` 字段，`permissions`、`hooks`、`mcpServers` 等其他配置完全保留。这样可以隔离 API 配置变更与其他项目配置的副作用。
 
-> 注：cc-switch-config 对项目级配置写入的是 `settings.local.json`。这是 Claude Code 的项目级覆盖文件，读取优先级高于 `settings.json`。唯一例外是当目标为全局 `~/.claude` 目录时，才会直接写入 `settings.json`。这项设计保证了项目级 API 配置变更不会干扰 Claude Code 的全局配置。
+> 注：cc-switch-config 始终写入 `settings.local.json`，包括目标为 `~/.claude` 目录时。这是 Claude Code 的项目级覆盖文件，读取优先级高于 `settings.json`。这样可以隔离 API 配置变更与 hooks、permissions 等其他配置。
 
 **原子写入**：通过 write-rename 模式保证配置文件不会处于中间状态。每次操作前自动备份，支持 `cc-config undo` 回滚。
 

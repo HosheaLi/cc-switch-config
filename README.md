@@ -200,7 +200,7 @@ Target File (<project>/.claude/settings.local.json)
     ↑ cc-config precisely edits ONLY these two fields
 ```
 
-cc-switch-config writes to `settings.local.json` for all project-level configurations. This is the project-level override file — Claude Code reads it with higher priority than `settings.json`, making it the correct target for per-project API configuration. The only exception is when targeting the global `~/.claude` directory itself, in which case `settings.json` is written directly.
+cc-switch-config writes to `settings.local.json` for all projects, including when targeting `~/.claude` itself. This is the project-level override file — Claude Code reads it with higher priority than `settings.json`, making it the correct target for per-project API configuration. This ensures API config changes don't interfere with hooks, permissions, `mcpServers`, and other settings in `settings.json`.
 
 ### What Gets Modified
 

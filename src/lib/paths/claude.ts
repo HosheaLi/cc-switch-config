@@ -32,18 +32,15 @@ export function getClaudeLocalSettingsFilePath(): string {
 }
 
 /**
- * Get the path to a project's Claude Code settings file.
+ * Get the path to a project's Claude Code settings.local.json file.
  *
- * 全局项目 (~/.claude) 读写 settings.json
- * 其他项目读写 settings.local.json
+ * 始终写入 settings.local.json（项目级覆盖文件），CLAUDE CODE 读取时
+ * settings.local.json 优先级高于 settings.json。
+ * 这样可以隔离 API 配置变更与 hooks、permissions 等其他配置。
  *
  * @param projectPath - Root path of the project
- * @returns Path to the appropriate settings file
+ * @returns Path to settings.local.json
  */
 export function getProjectConfigPath(projectPath: string): string {
-  const homeClaude = path.join(os.homedir(), '.claude');
-  if (path.resolve(projectPath) === homeClaude) {
-    return path.join(homeClaude, 'settings.json');
-  }
   return path.join(projectPath, '.claude', 'settings.local.json');
 }

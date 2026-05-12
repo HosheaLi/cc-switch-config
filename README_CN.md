@@ -239,7 +239,7 @@ cc-switch-config 维护两个数据存储——**全局配置模板**和**项目
     ↑ cc-config 精确修改 ONLY 这两个字段
 ```
 
-cc-switch-config 对项目级配置写入的是 `settings.local.json` 文件，这是项目级覆盖文件——Claude Code 读取时其优先级高于 `settings.json`，因此是项目级 API 配置的正确写入目标。唯一例外是当目标为全局 `~/.claude` 目录本身时，会直接写入 `settings.json`。
+cc-switch-config 始终写入 `settings.local.json`，即使目标为 `~/.claude` 目录本身也是如此。这是项目级覆盖文件——Claude Code 读取时其优先级高于 `settings.json`，因此是项目级 API 配置的正确写入目标。这样可以确保 API 配置变更不会影响 `settings.json` 中的 hooks、permissions、mcpServers 等其他配置。
 
 ### 设计原则：最小修改
 
