@@ -29,9 +29,18 @@ npm-debug.log*
 # Backup directory (never commit backups)
 .backups/
 
+# Planning directory (internal dev docs, not for release)
+.planning/
+
+# Generated docs
+docs/
+
 # E2E test artifacts
 my-app-config.json
 *-config.json
+
+# Non-release artifacts
+article-csdn.md
 
 # Claude Code local settings (tokens!)
 .claude/
