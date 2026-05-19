@@ -28,7 +28,7 @@ import { generateUnifiedDiff } from '../utils/diff.js';
 import { renderDiff } from '../utils/diff-render.js';
 import { formatProjectTable } from '../output/table.js';
 import { colors, formatters } from '../theme/index.js';
-import { getProjectConfigPath } from '../../lib/paths/claude.js';
+import { getProjectConfigPath, getClaudeSettingsFilePath } from '../../lib/paths/claude.js';
 import type { ApiConfig } from '../../lib/types/api-config.js';
 import type { ProjectEntry } from '../../lib/store/project.js';
 
@@ -707,7 +707,10 @@ async function findMatchingConfig(
   projectPath: string,
   configs: Record<string, ApiConfig>
 ): Promise<MatchResult> {
-  const configPath = getProjectConfigPath(projectPath);
+  // 全局项目 (~/.claude) 的配置在 settings.json 中，而非 settings.local.json
+  const configPath = projectPath === HOME_CLAUDE
+    ? getClaudeSettingsFilePath()
+    : getProjectConfigPath(projectPath);
   const raw = await fs.readJSON(configPath).catch(() => null);
   const env: Record<string, string> | undefined = raw?.env;
 

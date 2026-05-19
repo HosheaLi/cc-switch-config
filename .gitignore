@@ -44,3 +44,5 @@ article-csdn.md
 
 # Claude Code local settings (tokens!)
 .claude/
+# MCP config (local, not for repo)
+.mcp.json

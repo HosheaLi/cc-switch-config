@@ -42,5 +42,10 @@ export function getClaudeLocalSettingsFilePath(): string {
  * @returns Path to settings.local.json
  */
 export function getProjectConfigPath(projectPath: string): string {
+  // 如果项目路径本身已经是 .claude 目录（如 ~/.claude/.claude），
+  // settings.local.json 直接在该目录下，不再嵌套 .claude/
+  if (path.basename(projectPath) === '.claude') {
+    return path.join(projectPath, 'settings.local.json');
+  }
   return path.join(projectPath, '.claude', 'settings.local.json');
 }
