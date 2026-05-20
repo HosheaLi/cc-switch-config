@@ -190,9 +190,11 @@ export class ExportService {
       }
     }
 
-    // Check permissions (deep compare arrays)
+    // Check permissions (supports both array and object formats)
     if (imported.permissions && existing.permissions) {
-      if (!ExportService.arraysEqual(imported.permissions, existing.permissions)) {
+      const importedJson = JSON.stringify(imported.permissions);
+      const existingJson = JSON.stringify(existing.permissions);
+      if (importedJson !== existingJson) {
         conflicts.push({
           key: 'permissions',
           imported: imported.permissions,

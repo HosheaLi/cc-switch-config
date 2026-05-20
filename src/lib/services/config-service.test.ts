@@ -93,7 +93,7 @@ describe('ConfigService', () => {
 
     it('should throw ValidationError on invalid config', async () => {
       const invalidConfig = {
-        modle: 'claude-3', // typo - should be 'model'
+        permissions: [{}], // missing allow/deny
       } as unknown as ClaudeSettings;
 
       try {

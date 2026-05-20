@@ -49,9 +49,9 @@ describe('ConfigRepository', () => {
     });
 
     it('should validate loaded config and throw ValidationError on invalid', async () => {
-      // Create file with invalid config (unknown field 'modle')
+      // Create file with invalid config (permission rule without allow/deny)
       const invalidConfig = {
-        modle: 'claude-3-5-sonnet', // typo - should be 'model'
+        permissions: [{}],
       };
       await fs.writeJson(testFile, invalidConfig);
 
@@ -64,14 +64,17 @@ describe('ConfigRepository', () => {
       }
     });
 
-    it('should validate config with strict mode rejecting unknown keys', async () => {
+    it('should validate config with passthrough allowing unknown keys', async () => {
       const configWithUnknown = {
         version: 1,
-        unknownField: 'should be rejected',
+        skipWebFetchPreflight: true, // official field, accepted via passthrough
       };
       await fs.writeJson(testFile, configWithUnknown);
 
-      await expect(readConfig(testFile)).rejects.toThrow();
+      // Now succeeds because schema uses passthrough
+      const result = await readConfig(testFile);
+      expect(result).not.toBeNull();
+      expect(result?.version).toBe(1);
     });
 
     it('should return config with all optional fields missing', async () => {
@@ -139,7 +142,7 @@ describe('ConfigRepository', () => {
   describe('writeConfig', () => {
     it('should validate input before write and throw ValidationError on invalid', async () => {
       const invalidConfig = {
-        modle: 'claude-3', // typo
+        permissions: [{}], // missing allow/deny
       } as unknown as ClaudeSettings;
 
       try {

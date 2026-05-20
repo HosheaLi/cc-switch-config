@@ -73,24 +73,27 @@ describe('validateConfig', () => {
   });
 
   it('rejects config with unrecognized keys (catches typos)', () => {
+    // McpServerConfigSchema still uses strict(), test through a nested config
     const config = {
-      modle: 'claude-3', // typo - unrecognized key
+      mcpServers: {
+        bad: { args: [] } // missing required 'command'
+      }
     };
     const result = validateConfig(config);
     expect(result.success).toBe(false);
     if (!result.success) {
-      // Should have unrecognized_keys error
-      const hasUnrecognizedKey = result.error.issues.some(
-        issue => issue.code === 'unrecognized_keys'
+      // Should have invalid_type error for command
+      const hasInvalidType = result.error.issues.some(
+        issue => issue.code === 'invalid_type'
       );
-      expect(hasUnrecognizedKey).toBe(true);
+      expect(hasInvalidType).toBe(true);
     }
   });
 
   it('collects ALL errors, not just first (D-05)', () => {
     // Config with multiple invalid fields
     const config = {
-      modle: 'claude-3', // typo - unrecognized key
+      env: { ANTHROPIC_MODEL: 123 }, // invalid type (should be string)
       mcpServers: {
         'bad': { args: [] } // missing required 'command'
       },
@@ -105,12 +108,12 @@ describe('validateConfig', () => {
   });
 
   it('returns ValidationError with formatted message', () => {
-    const config = { modle: 'claude-3' };
+    const config = { permissions: [{}] }; // missing allow/deny
     const result = validateConfig(config);
     expect(result.success).toBe(false);
     if (!result.success) {
       expect(result.error).toBeInstanceOf(ValidationError);
-      expect(result.error.message).toContain('modle');
+      expect(result.error.message).toContain('permissions');
     }
   });
 });
@@ -129,7 +132,7 @@ describe('ValidationResult discriminated union', () => {
   });
 
   it('narrows to error branch correctly', () => {
-    const result = validateConfig({ modle: 'test' });
+    const result = validateConfig({ permissions: [{}] }); // missing allow/deny
     if (!result.success) {
       // TypeScript should narrow here
       expect(result.error).toBeInstanceOf(ValidationError);

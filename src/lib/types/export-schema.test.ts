@@ -200,11 +200,9 @@ describe('ExportPayloadSchema', () => {
         id: '550e8400-e29b-41d4-a716-446655440000',
         path: '/Users/test/project',
       },
-      settings: {
-        model: 'claude-3-opus',
-        unknownSettingsField: 'value', // Unknown field
-      },
+      settings: {},
       config: null,
+      unknownPayloadField: 'value', // Unknown field at payload level
     };
     const result = ExportPayloadSchema.safeParse(invalidPayload);
     expect(result.success).toBe(false);

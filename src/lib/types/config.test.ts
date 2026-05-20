@@ -78,16 +78,13 @@ describe('ClaudeSettingsSchema', () => {
     });
   });
 
-  describe('strict validation (reject unknown keys)', () => {
-    it('rejects unknown keys like typo "modle"', () => {
-      const result = ClaudeSettingsSchema.safeParse({ modle: 'claude-3' });
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error.issues.some(i => i.code === 'unrecognized_keys')).toBe(true);
-      }
+  describe('passthrough behavior (allow unknown keys)', () => {
+    it('accepts unknown keys like official field "skipWebFetchPreflight"', () => {
+      const result = ClaudeSettingsSchema.safeParse({ skipWebFetchPreflight: true });
+      expect(result.success).toBe(true);
     });
 
-    it('rejects unknown nested keys', () => {
+    it('rejects unknown nested keys inside mcpServers (still strict)', () => {
       const config = {
         mcpServers: {
           'my-server': {

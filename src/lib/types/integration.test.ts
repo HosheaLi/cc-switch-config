@@ -51,7 +51,7 @@ describe('Types Module Integration', () => {
   });
 
   it('validateConfig catches errors in DEFAULT_CONFIG modifications', () => {
-    const invalidConfig = { ...DEFAULT_CONFIG, modle: 'typo' };
+    const invalidConfig = { ...DEFAULT_CONFIG, permissions: [{}] }; // missing allow/deny
     const result = validateConfig(invalidConfig);
     expect(result.success).toBe(false);
     if (!result.success) {

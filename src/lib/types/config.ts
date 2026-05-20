@@ -75,16 +75,22 @@ export const HookConfigSchema = z.object({
  * - permissions: Permission rules for tool access
  * - hooks: Lifecycle event hooks
  *
- * Uses strict mode to catch typos like 'modle' instead of 'model'.
+ * Uses passthrough to allow official Claude Code fields not defined here
+ * (e.g., skipWebFetchPreflight, enabledMcpjsonServers).
+ * permissions accepts both array and object formats used by different
+ * Claude Code versions.
  */
 export const ClaudeSettingsSchema = z.object({
   version: z.number().int().optional(),
   env: z.record(z.string(), z.string()).optional(),
   model: z.string().optional(),
   mcpServers: z.record(z.string(), McpServerConfigSchema).optional(),
-  permissions: z.array(PermissionRuleSchema).optional(),
+  permissions: z.union([
+    z.array(PermissionRuleSchema),
+    z.record(z.string(), z.unknown())
+  ]).optional(),
   hooks: z.array(HookConfigSchema).optional(),
-}).strict(); // Reject unknown keys - catches typos
+}).passthrough(); // Allow official fields not explicitly defined
 
 /**
  * TypeScript types inferred from Zod schemas.
