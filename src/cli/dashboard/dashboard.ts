@@ -73,6 +73,7 @@ export async function runDashboard(): Promise<void> {
       { title: '管理 API 配置', value: 'configs', description: '添加/删除/导入 API 配置模板' },
       { title: '项目管理', value: 'projects', description: '查看/编辑/删除已注册项目' },
       { title: '扫描并注册项目', value: 'scan', description: '扫描目录发现 Claude Code 项目' },
+      { title: '在新目录创建配置', value: 'init', description: '在任意目录创建项目级 Claude Code 配置' },
       { title: '导出/导入配置', value: 'export', description: '导出或导入项目配置' },
     ];
     if (totalPages > 1) {
@@ -112,6 +113,9 @@ export async function runDashboard(): Promise<void> {
         break;
       case 'scan':
         await handleScan(svc);
+        break;
+      case 'init':
+        await handleInit(svc, configs);
         break;
       case 'export':
         await handleExport(svc, matchedConfigs);
@@ -635,6 +639,143 @@ async function handleList(projectService: ReturnType<typeof createServices>['pro
     console.log(formatProjectTable(projects));
   }
   console.log();
+  await waitForEnter();
+}
+
+async function handleInit(
+  svc: ReturnType<typeof createServices>,
+  configs: Record<string, ApiConfig>
+): Promise<void> {
+  const configNames = Object.keys(configs);
+  if (configNames.length === 0) {
+    console.log(formatters.warning('没有可用的 API 配置。请先创建配置。'));
+    await waitForEnter();
+    return;
+  }
+
+  // 1. 输入目标目录路径（允许不存在的目录）
+  const dirResult = await promptWithCancel<string>({
+    type: 'text',
+    name: 'directory',
+    message: '输入目标目录路径（不存在则自动创建）',
+    initial: process.cwd(),
+    validate: (value: string) => {
+      if (!value || value.trim().length === 0) {
+        return '路径不能为空';
+      }
+      return true;
+    },
+  });
+
+  if (dirResult.cancelled || !dirResult.value) return;
+
+  let targetPath = dirResult.value.trim();
+  // 展开 ~/ 或 ~
+  if (targetPath === '~' || targetPath.startsWith('~/')) {
+    targetPath = path.join(os.homedir(), targetPath.slice(targetPath === '~' ? 0 : 1));
+  }
+  targetPath = path.resolve(targetPath);
+
+  // 不允许在全局 ~/.claude 目录创建
+  if (targetPath === HOME_CLAUDE) {
+    console.log(formatters.warning('不能在此操作中修改全局 ~/.claude 配置。请使用"切换项目配置"操作。'));
+    await waitForEnter();
+    return;
+  }
+
+  // 2. 选择 API 配置
+  const configName = await selectApiConfig(configs, '选择要应用的配置');
+  if (!configName) return;
+
+  const apiConfig = configs[configName];
+  if (!apiConfig) return;
+
+  // 3. 复用 ConfigService 实例（读取和写入共用，避免重复创建）
+  const configService = new ConfigService(readConfig, writeConfig);
+
+  const configPath = getProjectConfigPath(targetPath);
+  const existingConfig = await fs.pathExists(configPath)
+    ? await configService.readProjectConfig(targetPath)
+    : null;
+
+  if (existingConfig) {
+    // 已有配置：展示 diff 预览
+    const newConfig = replaceEnvModel(existingConfig, apiConfig);
+    const maskedPreview = maskApiKeyInConfig(newConfig);
+    const diffLines = generateUnifiedDiff(existingConfig, maskedPreview);
+    console.log();
+    console.log(colors.warning('目标目录已存在配置文件，将覆盖现有配置：'));
+    console.log(colors.muted(`路径: ${targetPath}`));
+    console.log(colors.muted(`配置: ${configName}`));
+    console.log();
+    renderDiff(diffLines);
+    console.log();
+    const confirmed = await confirmAction('确认覆盖现有配置？', false);
+    if (!confirmed) {
+      console.log(colors.warning('操作已取消，未修改配置'));
+      return;
+    }
+  } else {
+    // 新配置：显示摘要
+    const newConfig = replaceEnvModel({}, apiConfig);
+    const maskedPreview = maskApiKeyInConfig(newConfig);
+    console.log();
+    console.log(colors.accent('即将创建项目配置：'));
+    console.log(colors.muted(`目标路径: ${targetPath}`));
+    console.log(colors.muted(`配置模板: ${configName}`));
+    if (apiConfig.mode === 'unified') {
+      console.log(colors.muted(`模型:      ${apiConfig.modelName}`));
+    } else {
+      console.log(colors.muted(`模式:      独立 (granular)`));
+    }
+    console.log(colors.muted(`API URL:   ${apiConfig.baseUrl}`));
+    if (maskedPreview.model) {
+      console.log(colors.muted(`模型字段:  ${maskedPreview.model}`));
+    }
+    // granular 模式展示 env 变量摘要
+    if (apiConfig.mode === 'granular' && apiConfig.env) {
+      const modelKeys = Object.keys(apiConfig.env).filter(k => !['ANTHROPIC_AUTH_TOKEN', 'ANTHROPIC_BASE_URL'].includes(k));
+      if (modelKeys.length > 0) {
+        console.log(colors.muted(`环境变量:  ${modelKeys.length} 个模型变量`));
+        for (const k of modelKeys.slice(0, 3)) {
+          console.log(colors.muted(`           ${k}=${apiConfig.env[k]}`));
+        }
+        if (modelKeys.length > 3) {
+          console.log(colors.muted(`           ...等 ${modelKeys.length} 个`));
+        }
+      }
+    }
+    console.log();
+    const confirmed = await confirmAction('确认创建项目配置？', true);
+    if (!confirmed) {
+      console.log(colors.warning('操作已取消'));
+      return;
+    }
+  }
+
+  // 4. 创建目录和配置
+  try {
+    await configService.applyApiConfig(targetPath, apiConfig);
+    console.log(formatters.success(`已创建配置: ${configPath}`));
+  } catch (err) {
+    console.log(formatters.error(`创建配置失败: ${err instanceof Error ? err.message : String(err)}`));
+    await waitForEnter();
+    return;
+  }
+
+  // 5. 可选：注册项目
+  const shouldRegister = await confirmAction('是否将该目录注册为项目（方便后续管理）？', true);
+  if (shouldRegister) {
+    try {
+      // register() 是幂等的：已注册直接返回已有条目，不抛异常
+      await svc.projectIndex.register(targetPath);
+      const basename = path.basename(targetPath);
+      console.log(formatters.success(`已注册项目: ${basename}`));
+    } catch (err) {
+      console.log(formatters.error(`注册失败: ${err instanceof Error ? err.message : String(err)}`));
+    }
+  }
+
   await waitForEnter();
 }
 
