@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.2] - 2026-06-18
+
+### Added
+
+- **仪表盘新目录创建配置**：TUI 仪表盘支持在未注册目录中直接创建配置操作
+- **技术文章**：新增 dsv4-cc-proxy v2.0 Codex 协议转换配置指南
+
+### Fixed
+
+- **ClaudeSettingsSchema 验证放宽**：兼容 object 格式 permissions 和官方未定义字段，避免配置写入失败
+- **getProjectConfigPath 嵌套处理**：正确处理 .claude 目录嵌套和 findMatchingConfig 读取全局配置
+
+### Changed
+
+- **开发目录管理**：更新 .gitignore 排除开发专用目录，从版本控制中移除开发目录
+
 ## [0.4.0] - 2026-05-12
 
 ### Added
